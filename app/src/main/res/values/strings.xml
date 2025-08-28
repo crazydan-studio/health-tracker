@@ -1,0 +1,40 @@
+<resources>
+    <string name="app_name">Health Tracker</string>
+
+    <string name="add_health_type">添加健康类型</string>
+    <string name="back">返回</string>
+    <string name="save">保存</string>
+    <string name="add_new_health_type">添加新的健康类型</string>
+    <string name="health_type_form_description">请填写以下信息来创建新的健康数据类型</string>
+    <string name="type_name">类型名称</string>
+    <string name="enter_type_name">输入类型名称</string>
+    <string name="this_field_is_required">此字段为必填项</string>
+    <string name="type_name_examples">例如：血压、血糖、体重、身高等</string>
+    <string name="unit">单位</string>
+    <string name="enter_unit">输入单位</string>
+    <string name="unit_examples">例如：mmHg、mmol/L、kg、cm等</string>
+    <string name="lower_limit">下限值</string>
+    <string name="enter_lower_limit">输入下限值</string>
+    <string name="upper_limit">上限值</string>
+    <string name="enter_upper_limit">输入上限值</string>
+    <string name="normal_value">正常值</string>
+    <string name="enter_normal_value">输入正常值</string>
+    <string name="enter_valid_number">请输入有效的数字</string>
+    <string name="normal_value_description">正常值应该在上下限范围内</string>
+    <string name="example">示例</string>
+    <string name="blood_pressure_example">血压：名称=血压，单位=mmHg，下限=90，上限=140，正常值=120</string>
+    <string name="blood_sugar_example">血糖：名称=血糖，单位=mmol/L，下限=3.9，上限=6.1，正常值=5.0</string>
+    <string name="please_check_your_input">请检查您的输入</string>
+    <string name="upper_limit_must_be_greater_than_lower">上限值必须大于下限值</string>
+    <string name="normal_value_must_be_within_range">正常值必须在上下限范围内</string>
+    <string name="error_saving_health_type">保存健康类型时出错</string>
+    <string name="range_name">范围名称</string>
+    <string name="enter_range_name">输入范围名称</string>
+    <string name="add_range">添加范围</string>
+    <string name="added_ranges">已添加的范围</string>
+    <string name="delete">删除</string>
+    <string name="filter_person">筛选人员</string>
+    <string name="filter_range">筛选范围</string>
+    <string name="all">全部</string>
+    <string name="time_range">时间范围</string>
+</resources>
