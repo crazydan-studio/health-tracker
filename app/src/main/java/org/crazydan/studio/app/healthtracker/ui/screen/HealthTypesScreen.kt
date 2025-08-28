@@ -1,4 +1,3 @@
-// HealthTypesScreen.kt
 package org.crazydan.studio.app.healthtracker.ui.screen
 
 import androidx.compose.foundation.clickable
@@ -30,6 +29,11 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.StateFlow
 import org.crazydan.studio.app.healthtracker.model.HealthType
 
+/**
+ *
+ * @author <a href="mailto:flytreeleft@crazydan.org">flytreeleft</a>
+ * @date 2025-08-28
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HealthTypesScreen(

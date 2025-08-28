@@ -1,10 +1,14 @@
-// HealthRepository.kt
-package org.crazydan.studio.app.healthtracker.data
+package org.crazydan.studio.app.healthtracker.model.dao
 
 import kotlinx.coroutines.flow.Flow
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
 
+/**
+ *
+ * @author <a href="mailto:flytreeleft@crazydan.org">flytreeleft</a>
+ * @date 2025-08-28
+ */
 class HealthRepository(
     private val healthTypeDao: HealthTypeDao,
     private val healthRecordDao: HealthRecordDao

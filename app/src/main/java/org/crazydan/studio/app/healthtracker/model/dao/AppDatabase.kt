@@ -1,5 +1,4 @@
-// AppDatabase.kt
-package org.crazydan.studio.app.healthtracker.data
+package org.crazydan.studio.app.healthtracker.model.dao
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
@@ -7,12 +6,17 @@ import androidx.room.TypeConverters
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
 
+/**
+ *
+ * @author <a href="mailto:flytreeleft@crazydan.org">flytreeleft</a>
+ * @date 2025-08-28
+ */
 @Database(
     entities = [HealthType::class, HealthRecord::class],
     version = 1,
     exportSchema = false
 )
-@TypeConverters(RangeListConverter::class)
+@TypeConverters(NormalRangeListConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun healthTypeDao(): HealthTypeDao
     abstract fun healthRecordDao(): HealthRecordDao

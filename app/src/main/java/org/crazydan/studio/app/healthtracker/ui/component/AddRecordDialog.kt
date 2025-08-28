@@ -1,4 +1,3 @@
-// AddRecordDialog.kt
 package org.crazydan.studio.app.healthtracker.ui.component
 
 import androidx.compose.foundation.layout.Column
@@ -22,12 +21,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.crazydan.studio.app.healthtracker.model.HealthType
 
+/**
+ *
+ * @author <a href="mailto:flytreeleft@crazydan.org">flytreeleft</a>
+ * @date 2025-08-28
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddRecordDialog(
     healthType: HealthType?,
     persons: List<String>,
-    ranges: List<String>,
     onDismiss: () -> Unit,
     onConfirm: (Float, Long, String, String, String) -> Unit
 ) {
@@ -37,6 +40,8 @@ fun AddRecordDialog(
     var rangeName by remember { mutableStateOf("") }
     var personExpanded by remember { mutableStateOf(false) }
     var rangeExpanded by remember { mutableStateOf(false) }
+
+    val ranges = healthType?.ranges?.map { it.name } ?: emptyList()
     val currentTime = System.currentTimeMillis()
 
     AlertDialog(

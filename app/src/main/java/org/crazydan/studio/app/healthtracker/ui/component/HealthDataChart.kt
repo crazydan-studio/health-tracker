@@ -42,10 +42,15 @@ enum class TimeFilter {
     DAY, WEEK, MONTH, YEAR
 }
 
+/**
+ *
+ * @author <a href="mailto:flytreeleft@crazydan.org">flytreeleft</a>
+ * @date 2025-08-28
+ */
 @Composable
 fun HealthDataChart(
     healthType: HealthType,
-    records: List<HealthRecord>,
+    healthRecords: List<HealthRecord>,
     modifier: Modifier = Modifier
 ) {
     val recordsSample = listOf(
@@ -193,6 +198,12 @@ private fun createSplineChartModelOptions(
         .touchEventEnabled(true)
         .yAxisTitle("${healthType.name} (${healthType.unit})")
         .yAxisMin(0)
+        .colorsTheme(arrayOf(
+            "rgba(4, 214, 159, 1)",
+            "rgba(30, 143, 255, 1)",
+            "rgba(239, 71, 110, 1)",
+            "rgba(255, 209, 102, 1)",
+        ))
         .series(series)
         .aa_toAAOptions()
 

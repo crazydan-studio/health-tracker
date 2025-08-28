@@ -1,10 +1,16 @@
-// HealthType.kt
 package org.crazydan.studio.app.healthtracker.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "health_types")
+const val HEALTH_TYPE_TABLE_NAME = "health_type"
+
+/**
+ *
+ * @author <a href="mailto:flytreeleft@crazydan.org">flytreeleft</a>
+ * @date 2025-08-28
+ */
+@Entity(tableName = HEALTH_TYPE_TABLE_NAME)
 data class HealthType(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

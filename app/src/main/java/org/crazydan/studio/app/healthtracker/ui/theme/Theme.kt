@@ -1,4 +1,3 @@
-// Theme.kt
 package org.crazydan.studio.app.healthtracker.ui.theme
 
 import android.app.Activity
@@ -28,6 +27,11 @@ private val LightColorScheme = lightColorScheme(
     tertiary = Pink40
 )
 
+/**
+ *
+ * @author <a href="mailto:flytreeleft@crazydan.org">flytreeleft</a>
+ * @date 2025-08-28
+ */
 @Composable
 fun HealthTrackerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),

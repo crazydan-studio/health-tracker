@@ -1,4 +1,3 @@
-// HealthDataScreen.kt
 package org.crazydan.studio.app.healthtracker.ui.screen
 
 import androidx.compose.foundation.layout.Arrangement
@@ -6,12 +5,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -23,7 +21,6 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -34,7 +31,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.StateFlow
@@ -43,18 +39,23 @@ import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.ui.component.AddRecordDialog
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataChart
 
+/**
+ *
+ * @author <a href="mailto:flytreeleft@crazydan.org">flytreeleft</a>
+ * @date 2025-08-28
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HealthDataScreen(
+fun HealthRecordsScreen(
     healthType: StateFlow<HealthType?>,
-    records: StateFlow<List<HealthRecord>>,
+    healthRecords: StateFlow<List<HealthRecord>>,
     persons: StateFlow<List<String>>,
     onAddRecord: (Float, Long, String, String, String) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     // 使用 collectAsState() 将 StateFlow 转换为 Compose 状态
     val currentHealthType by healthType.collectAsState()
-    val recordList by records.collectAsState()
+    val recordList by healthRecords.collectAsState()
     val personList by persons.collectAsState()
 
     var showAddDialog by remember { mutableStateOf(false) }
@@ -82,42 +83,14 @@ fun HealthDataScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(500.dp)
+                        .fillMaxHeight()
                         .padding(16.dp)
                 ) {
                     HealthDataChart(
                         healthType = type,
-                        records = recordList,
+                        healthRecords = recordList,
                         modifier = Modifier.fillMaxSize()
                     )
-                }
-            }
-
-            // 显示数据列表
-            Text(
-                text = "历史记录",
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.padding(16.dp)
-            )
-
-            if (recordList.isEmpty()) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .weight(1f),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text("暂无数据记录")
-                }
-            } else {
-                LazyColumn(modifier = Modifier.weight(1f)) {
-                    items(recordList) { record ->
-                        HealthRecordItem(
-                            record = record,
-                            unit = currentHealthType?.unit ?: ""
-                        )
-                    }
                 }
             }
         }
@@ -128,7 +101,6 @@ fun HealthDataScreen(
         AddRecordDialog(
             healthType = currentHealthType,
             persons = personList,
-            ranges = currentHealthType?.ranges?.map { it.name } ?: emptyList(),
             onDismiss = { showAddDialog = false },
             onConfirm = { value, timestamp, notes, person, rangeName ->
                 onAddRecord(value, timestamp, notes, person, rangeName)

@@ -1,13 +1,18 @@
-// HealthTypeDao.kt
-package org.crazydan.studio.app.healthtracker.data
+package org.crazydan.studio.app.healthtracker.model.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
+import org.crazydan.studio.app.healthtracker.model.HEALTH_TYPE_TABLE_NAME
 import org.crazydan.studio.app.healthtracker.model.HealthType
 
+/**
+ *
+ * @author <a href="mailto:flytreeleft@crazydan.org">flytreeleft</a>
+ * @date 2025-08-28
+ */
 @Dao
 interface HealthTypeDao {
     @Insert
@@ -16,12 +21,12 @@ interface HealthTypeDao {
     @Update
     suspend fun update(healthType: HealthType)
 
-    @Query("DELETE FROM health_types WHERE id = :id")
+    @Query("DELETE FROM $HEALTH_TYPE_TABLE_NAME WHERE id = :id")
     suspend fun delete(id: Long)
 
-    @Query("SELECT * FROM health_types ORDER BY name")
+    @Query("SELECT * FROM $HEALTH_TYPE_TABLE_NAME ORDER BY name")
     fun getAll(): Flow<List<HealthType>>
 
-    @Query("SELECT * FROM health_types WHERE id = :id")
+    @Query("SELECT * FROM $HEALTH_TYPE_TABLE_NAME WHERE id = :id")
     fun getById(id: Long): Flow<HealthType?>
 }

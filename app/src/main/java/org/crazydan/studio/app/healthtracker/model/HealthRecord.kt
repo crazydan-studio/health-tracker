@@ -1,13 +1,18 @@
-// HealthRecord.kt
 package org.crazydan.studio.app.healthtracker.model
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
+const val HEALTH_RECORD_TABLE_NAME = "health_record"
 
+/**
+ *
+ * @author <a href="mailto:flytreeleft@crazydan.org">flytreeleft</a>
+ * @date 2025-08-28
+ */
 @Entity(
-    tableName = "health_records",
+    tableName = HEALTH_RECORD_TABLE_NAME,
     foreignKeys = [
         ForeignKey(
             entity = HealthType::class,

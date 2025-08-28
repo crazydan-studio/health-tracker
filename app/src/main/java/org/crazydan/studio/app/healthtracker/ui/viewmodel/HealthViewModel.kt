@@ -1,4 +1,3 @@
-// HealthViewModel.kt
 package org.crazydan.studio.app.healthtracker.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
@@ -9,11 +8,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.crazydan.studio.app.healthtracker.data.HealthRepository
+import org.crazydan.studio.app.healthtracker.model.dao.HealthRepository
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import javax.inject.Inject
 
+/**
+ *
+ * @author <a href="mailto:flytreeleft@crazydan.org">flytreeleft</a>
+ * @date 2025-08-28
+ */
 @HiltViewModel
 class HealthViewModel @Inject constructor(
     private val repository: HealthRepository

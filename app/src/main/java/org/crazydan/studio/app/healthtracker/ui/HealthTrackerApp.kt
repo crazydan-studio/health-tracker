@@ -1,4 +1,3 @@
-// HealthTrackerApp.kt
 package org.crazydan.studio.app.healthtracker.ui
 
 import androidx.compose.runtime.Composable
@@ -10,10 +9,15 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.ui.screen.AddHealthTypeScreen
-import org.crazydan.studio.app.healthtracker.ui.screen.HealthDataScreen
+import org.crazydan.studio.app.healthtracker.ui.screen.HealthRecordsScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.HealthTypesScreen
 import org.crazydan.studio.app.healthtracker.ui.viewmodel.HealthViewModel
 
+/**
+ *
+ * @author <a href="mailto:flytreeleft@crazydan.org">flytreeleft</a>
+ * @date 2025-08-28
+ */
 @Composable
 fun HealthTrackerApp() {
     val navController = rememberNavController()
@@ -28,7 +32,7 @@ fun HealthTrackerApp() {
                 onSelectType = { type ->
                     coroutineScope.launch {
                         viewModel.selectHealthType(type)
-                        navController.navigate("healthData/${type.id}")
+                        navController.navigate("healthRecord/${type.id}")
                     }
                 }
             )
@@ -44,11 +48,11 @@ fun HealthTrackerApp() {
                 onCancel = { navController.popBackStack() }
             )
         }
-        composable("healthData/{typeId}") { backStackEntry ->
+        composable("healthRecord/{typeId}") { backStackEntry ->
             val typeId = backStackEntry.arguments?.getString("typeId")?.toLongOrNull()
-            HealthDataScreen(
+            HealthRecordsScreen(
                 healthType = viewModel.selectedHealthType,
-                records = viewModel.healthRecords,
+                healthRecords = viewModel.healthRecords,
                 persons = viewModel.persons,
                 onAddRecord = { value, timestamp, notes, person, rangeName ->
                     coroutineScope.launch {

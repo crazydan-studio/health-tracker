@@ -1,4 +1,3 @@
-// AddHealthTypeScreen.kt
 package org.crazydan.studio.app.healthtracker.ui.screen
 
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +35,11 @@ import androidx.compose.ui.unit.dp
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.NormalRange
 
+/**
+ *
+ * @author <a href="mailto:flytreeleft@crazydan.org">flytreeleft</a>
+ * @date 2025-08-28
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddHealthTypeScreen(

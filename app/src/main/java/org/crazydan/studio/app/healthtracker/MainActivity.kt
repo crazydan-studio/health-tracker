@@ -1,4 +1,3 @@
-// MainActivity.kt
 package org.crazydan.studio.app.healthtracker
 
 import android.os.Bundle
@@ -13,6 +12,11 @@ import dagger.hilt.android.AndroidEntryPoint
 import org.crazydan.studio.app.healthtracker.ui.HealthTrackerApp
 import org.crazydan.studio.app.healthtracker.ui.theme.HealthTrackerTheme
 
+/**
+ *
+ * @author <a href="mailto:flytreeleft@crazydan.org">flytreeleft</a>
+ * @date 2025-08-28
+ */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

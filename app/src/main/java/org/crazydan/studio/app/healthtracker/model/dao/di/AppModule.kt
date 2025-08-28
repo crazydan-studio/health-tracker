@@ -1,4 +1,4 @@
-package org.crazydan.studio.app.healthtracker.di
+package org.crazydan.studio.app.healthtracker.model.dao.di
 
 import android.content.Context
 import androidx.room.Room
@@ -7,12 +7,17 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import org.crazydan.studio.app.healthtracker.data.AppDatabase
-import org.crazydan.studio.app.healthtracker.data.HealthRecordDao
-import org.crazydan.studio.app.healthtracker.data.HealthRepository
-import org.crazydan.studio.app.healthtracker.data.HealthTypeDao
+import org.crazydan.studio.app.healthtracker.model.dao.AppDatabase
+import org.crazydan.studio.app.healthtracker.model.dao.HealthRecordDao
+import org.crazydan.studio.app.healthtracker.model.dao.HealthRepository
+import org.crazydan.studio.app.healthtracker.model.dao.HealthTypeDao
 import javax.inject.Singleton
 
+/**
+ *
+ * @author <a href="mailto:flytreeleft@crazydan.org">flytreeleft</a>
+ * @date 2025-08-28
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
