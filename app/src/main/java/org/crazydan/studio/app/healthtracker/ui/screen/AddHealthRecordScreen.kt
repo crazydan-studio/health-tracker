@@ -38,7 +38,7 @@ import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.ui.component.DateInputPicker
 import org.crazydan.studio.app.healthtracker.ui.component.TimeInputPicker
-import org.crazydan.studio.app.healthtracker.util.toEpochMilli
+import org.crazydan.studio.app.healthtracker.util.toEpochMillis
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -87,7 +87,7 @@ fun AddHealthRecordScreen(
                             onSave(
                                 HealthRecord(
                                     value = it,
-                                    timestamp = toEpochMilli(timestampDate, timestampTime),
+                                    timestamp = toEpochMillis(timestampDate, timestampTime),
                                     typeId = currentHealthType!!.id,
                                     personId = currentHealthPerson!!.id,
                                     rangeName = rangeName,

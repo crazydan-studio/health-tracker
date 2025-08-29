@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.ui.component.DateInputPicker
 import org.crazydan.studio.app.healthtracker.ui.component.TimeInputPicker
-import org.crazydan.studio.app.healthtracker.util.toEpochMilli
+import org.crazydan.studio.app.healthtracker.util.toEpochMillis
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -71,7 +71,7 @@ fun AddHealthPersonScreen(
                             HealthPerson(
                                 label = label,
                                 familyName = familyName, givenName = givenName,
-                                birthday = toEpochMilli(birthDate!!, birthTime!!)
+                                birthday = toEpochMillis(birthDate!!, birthTime!!)
                             )
                         )
                     }

@@ -11,6 +11,7 @@ import org.crazydan.studio.app.healthtracker.ui.screen.AddHealthPersonScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.AddHealthRecordScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.AddHealthTypeScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.HealthPersonsScreen
+import org.crazydan.studio.app.healthtracker.ui.screen.HealthRecordDetailsScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.HealthRecordsScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.HealthTypesScreen
 import org.crazydan.studio.app.healthtracker.ui.viewmodel.HealthViewModel
@@ -95,6 +96,9 @@ fun HealthTrackerApp() {
                 onAddRecord = {
                     navController.navigate("addHealthRecord")
                 },
+                onGotoRecordDetails = {
+                    navController.navigate("healthRecordDetails")
+                },
                 onNavigateBack = { navController.popBackStack() }
             )
         }
@@ -109,6 +113,14 @@ fun HealthTrackerApp() {
                     }
                 },
                 onCancel = { navController.popBackStack() }
+            )
+        }
+        composable("healthRecordDetails") { backStackEntry ->
+            HealthRecordDetailsScreen(
+                healthPerson = viewModel.selectedHealthPerson,
+                healthType = viewModel.selectedHealthType,
+                healthRecords = viewModel.healthRecords,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }

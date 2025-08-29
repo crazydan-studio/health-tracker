@@ -1,10 +1,6 @@
 package org.crazydan.studio.app.healthtracker.ui.component
 
 import android.widget.FrameLayout
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -16,9 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartModel
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartType
@@ -48,7 +42,7 @@ enum class TimeFilter {
  * @date 2025-08-28
  */
 @Composable
-fun HealthDataChart(
+fun HealthRecordsChart(
     healthType: HealthType,
     healthRecords: List<HealthRecord>,
     modifier: Modifier = Modifier
@@ -126,49 +120,8 @@ fun HealthDataChart(
         ),
     ).sortedBy { it.timestamp }
 
-//    var selectedFilter by remember { mutableStateOf(TimeFilter.YEAR) }
-    val filteredRecords =
-        healthRecords.sortedBy { it.timestamp }
-    // recordsSample // filterRecordsByTime(recordsSample, selectedFilter).sortedBy { it.timestamp }
-
-    Column(modifier = modifier) {
-//        // 时间过滤器
-//        TimeFilterSelector(
-//            selectedFilter = selectedFilter,
-//            onFilterSelected = { selectedFilter = it }
-//        )
-
-        // 图表
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .weight(1f)
-                .padding(8.dp)
-        ) {
-            if (filteredRecords.isEmpty()) {
-                Text(
-                    text = "暂无数据",
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            } else {
-                LineChart(
-                    healthType = healthType,
-                    records = filteredRecords,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun LineChart(
-    healthType: HealthType,
-    records: List<HealthRecord>,
-    modifier: Modifier = Modifier
-) {
-    val chartModelOptions = remember(records) {
-        createSplineChartModelOptions(healthType, records)
+    val chartModelOptions = remember(healthRecords) {
+        createSplineChartModelOptions(healthType, healthRecords)
     }
 
     AndroidView(
@@ -187,7 +140,7 @@ fun LineChart(
                 chartModelOptions
             )
             view.aa_onlyRefreshTheChartDataWithChartOptionsSeriesArray(
-                createSeries(healthType, records).toTypedArray(), true
+                createSeries(healthType, healthRecords).toTypedArray(), true
             )
         },
         modifier = modifier
@@ -234,6 +187,7 @@ private fun createSplineChartModelOptions(
         AAPlotBandsElement().label(
             AALabel().text("${range.name} (${range.lowerLimit}~${range.upperLimit} ${healthType.unit})")
         )
+            .index(2)
             .color(color)
             .from(range.lowerLimit)
             .to(range.upperLimit)

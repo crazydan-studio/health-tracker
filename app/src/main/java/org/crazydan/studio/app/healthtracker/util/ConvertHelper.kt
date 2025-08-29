@@ -1,11 +1,14 @@
 package org.crazydan.studio.app.healthtracker.util
 
+import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.Period
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.util.Date
+import java.util.Locale
 
 /**
  *
@@ -32,9 +35,15 @@ fun getFullName(familyName: String, givenName: String): String {
     return "${familyName}${nameSeparator}${givenName}"
 }
 
-fun toEpochMilli(date: LocalDate, time: LocalTime): Long {
+fun toEpochMillis(date: LocalDate, time: LocalTime): Long {
     val zoneId = ZoneId.systemDefault()
     val zonedDateTime = ZonedDateTime.of(date, time, zoneId)
 
     return zonedDateTime.toInstant().toEpochMilli()
+}
+
+fun formatEpochMillis(millis: Long, format: String): String {
+    val dateFormat = SimpleDateFormat(format, Locale.getDefault())
+
+    return dateFormat.format(Date(millis))
 }

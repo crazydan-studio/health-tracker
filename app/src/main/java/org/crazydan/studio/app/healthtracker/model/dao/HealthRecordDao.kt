@@ -17,6 +17,6 @@ interface HealthRecordDao {
     @Insert
     suspend fun insert(healthRecord: HealthRecord): Long
 
-    @Query("SELECT * FROM $HEALTH_RECORD_TABLE_NAME WHERE typeId = :typeId ORDER BY createdAt DESC")
+    @Query("SELECT * FROM $HEALTH_RECORD_TABLE_NAME WHERE typeId = :typeId ORDER BY timestamp DESC")
     fun getByType(typeId: Long): Flow<List<HealthRecord>>
 }

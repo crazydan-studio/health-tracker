@@ -18,6 +18,7 @@ interface HealthTypeDao {
     @Insert
     suspend fun insert(healthType: HealthType): Long
 
+    // TODO 更新 HealthRecord#rangeName
     @Update
     suspend fun update(healthType: HealthType)
 
