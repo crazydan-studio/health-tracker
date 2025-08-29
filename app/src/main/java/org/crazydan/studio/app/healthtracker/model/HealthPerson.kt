@@ -2,6 +2,7 @@ package org.crazydan.studio.app.healthtracker.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import org.crazydan.studio.app.healthtracker.util.getFullName
 
 const val HEALTH_PERSON_TABLE_NAME = "health_person"
 
@@ -25,3 +26,9 @@ data class HealthPerson(
     /** 出生日期，精确到小时 */
     val birthday: Long,
 )
+
+fun getPersonLabel(prefix: String?, person: HealthPerson?): String {
+    val label = person?.let { it.label ?: getFullName(it.familyName, it.givenName) }
+
+    return prefix?.let { "$it (${label ?: "未知"})" } ?: ""
+}

@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.StateFlow
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthType
-import org.crazydan.studio.app.healthtracker.util.getFullName
+import org.crazydan.studio.app.healthtracker.model.getPersonLabel
 
 /**
  *
@@ -51,12 +51,14 @@ fun HealthTypesScreen(
     val person by healthPerson.collectAsState()
     val types by healthTypes.collectAsState()
 
-    val label = person?.let { it.label ?: getFullName(it.familyName, it.givenName) }
-
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("健康数据 (${label ?: "未知"})") },
+                title = {
+                    Text(
+                        getPersonLabel("健康数据", person)
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")

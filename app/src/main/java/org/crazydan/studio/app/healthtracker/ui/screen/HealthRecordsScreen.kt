@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.StateFlow
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
+import org.crazydan.studio.app.healthtracker.model.getPersonLabel
 import org.crazydan.studio.app.healthtracker.ui.component.AddHealthRecordDialog
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataChart
 
@@ -55,7 +56,11 @@ fun HealthRecordsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(currentHealthType?.name ?: "健康数据") },
+                title = {
+                    Text(
+                        getPersonLabel(currentHealthType?.name, currentHealthPerson)
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")

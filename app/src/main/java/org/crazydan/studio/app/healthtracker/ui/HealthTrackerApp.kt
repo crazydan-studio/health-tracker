@@ -63,7 +63,9 @@ fun HealthTrackerApp() {
                         navController.navigate("healthRecords")
                     }
                 },
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = {
+                    navController.navigate("healthPersons")
+                }
             )
         }
         composable("addHealthType") { backStackEntry ->

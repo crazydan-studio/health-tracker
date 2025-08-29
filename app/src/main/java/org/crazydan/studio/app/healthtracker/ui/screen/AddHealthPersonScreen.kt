@@ -28,7 +28,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
-import org.crazydan.studio.app.healthtracker.ui.component.DateTimePicker
+import org.crazydan.studio.app.healthtracker.ui.component.DateInputPicker
+import org.crazydan.studio.app.healthtracker.ui.component.TimeInputPicker
 import org.crazydan.studio.app.healthtracker.util.toEpochMilli
 import java.time.LocalDate
 import java.time.LocalTime
@@ -115,9 +116,15 @@ fun AddHealthPersonScreen(
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
-                DateTimePicker(
-                    onDateChange = { birthDate = it },
-                    onTimeChange = { birthTime = it },
+                DateInputPicker(
+                    label = { Text("出生日期") },
+                    onValueChange = { birthDate = it },
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+                TimeInputPicker(
+                    label = { Text("出生时间") },
+                    onValueChange = { birthTime = it },
                 )
             }
         }

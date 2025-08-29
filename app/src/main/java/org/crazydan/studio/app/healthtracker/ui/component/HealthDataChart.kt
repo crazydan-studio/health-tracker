@@ -127,7 +127,9 @@ fun HealthDataChart(
     ).sortedBy { it.timestamp }
 
 //    var selectedFilter by remember { mutableStateOf(TimeFilter.YEAR) }
-    val filteredRecords = recordsSample // filterRecordsByTime(recordsSample, selectedFilter).sortedBy { it.timestamp }
+    val filteredRecords =
+        healthRecords.sortedBy { it.timestamp }
+    // recordsSample // filterRecordsByTime(recordsSample, selectedFilter).sortedBy { it.timestamp }
 
     Column(modifier = modifier) {
 //        // 时间过滤器
@@ -353,7 +355,7 @@ private fun createSeries(
     return healthType.ranges.map { range ->
         val data: Array<Any> = records.map { record ->
             if (record.rangeName == range.name) {
-                AADataElement().x(record.createdAt).y(record.value)
+                AADataElement().x(record.timestamp).y(record.value)
             } else {
                 "null"
             }
