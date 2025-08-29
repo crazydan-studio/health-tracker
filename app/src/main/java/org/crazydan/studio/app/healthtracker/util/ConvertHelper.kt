@@ -18,8 +18,8 @@ fun calculateAge(birthday: Long): String {
     val period = Period.between(birthDate, currentDate)
 
     return listOf(
-        if (period.years > 0) "${period.years} 年" else null,
-        if (period.months > 0) "${period.months} 月" else null,
+        if (period.years > 0) "${period.years} 岁" else null,
+        if (period.months > 0) "${period.months} 个月" else null,
         if (period.days > 0) "${period.days} 天" else null,
     )
         .filter { it != null }

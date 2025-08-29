@@ -75,7 +75,8 @@ fun AddHealthPersonScreen(
                             )
                         )
                     }
-                }
+                },
+                enabled = familyName.isNotBlank() && givenName.isNotEmpty() && birthDate != null && birthTime != null
             ) {
                 Icon(Icons.Default.Save, contentDescription = "保存")
                 Spacer(modifier = Modifier.padding(4.dp))

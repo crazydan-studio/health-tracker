@@ -19,9 +19,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.StateFlow
@@ -29,7 +26,6 @@ import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.getPersonLabel
-import org.crazydan.studio.app.healthtracker.ui.component.AddHealthRecordDialog
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataChart
 
 /**
@@ -43,15 +39,13 @@ fun HealthRecordsScreen(
     healthPerson: StateFlow<HealthPerson?>,
     healthType: StateFlow<HealthType?>,
     healthRecords: StateFlow<List<HealthRecord>>,
-    onAddRecord: (HealthRecord) -> Unit,
+    onAddRecord: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
     // 使用 collectAsState() 将 StateFlow 转换为 Compose 状态
     val currentHealthPerson by healthPerson.collectAsState()
     val currentHealthType by healthType.collectAsState()
     val recordList by healthRecords.collectAsState()
-
-    var showAddDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -69,7 +63,7 @@ fun HealthRecordsScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showAddDialog = true }) {
+            FloatingActionButton(onClick = onAddRecord) {
                 Icon(Icons.Default.Add, contentDescription = "添加记录")
             }
         }
@@ -91,18 +85,5 @@ fun HealthRecordsScreen(
                 }
             }
         }
-    }
-
-    // 添加记录对话框
-    if (showAddDialog) {
-        AddHealthRecordDialog(
-            healthPerson = currentHealthPerson,
-            healthType = currentHealthType,
-            onDismiss = { showAddDialog = false },
-            onConfirm = { record ->
-                onAddRecord(record)
-                showAddDialog = false
-            }
-        )
     }
 }

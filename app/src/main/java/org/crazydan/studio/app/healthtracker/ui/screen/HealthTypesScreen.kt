@@ -113,10 +113,12 @@ fun HealthTypeItem(type: HealthType, onClick: () -> Unit) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = "单位: ${type.unit}")
 
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "正常范围:", style = MaterialTheme.typography.labelMedium)
-            type.ranges.forEach { range ->
-                Text(text = "  ${range.name}: ${range.lowerLimit} - ${range.upperLimit} ${type.unit}")
+            if (!type.ranges.isEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "正常范围:", style = MaterialTheme.typography.labelMedium)
+                type.ranges.forEach { range ->
+                    Text(text = "  ${range.name}: ${range.lowerLimit} - ${range.upperLimit} ${type.unit}")
+                }
             }
         }
     }

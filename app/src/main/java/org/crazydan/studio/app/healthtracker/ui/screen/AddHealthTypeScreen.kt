@@ -50,7 +50,7 @@ fun AddHealthTypeScreen(
     onSave: (HealthType) -> Unit,
     onCancel: () -> Unit
 ) {
-    val person by healthPerson.collectAsState()
+    val currentHealthPerson by healthPerson.collectAsState()
 
     var name by remember { mutableStateOf("") }
     var unit by remember { mutableStateOf("") }
@@ -74,8 +74,8 @@ fun AddHealthTypeScreen(
         floatingActionButton = {
             Button(
                 onClick = {
-                    if (name.isNotBlank() && unit.isNotBlank() && ranges.isNotEmpty()) {
-                        person?.let { p ->
+                    if (name.isNotBlank() && unit.isNotBlank()) {
+                        currentHealthPerson?.let { p ->
                             onSave(
                                 HealthType(
                                     personId = p.id,
@@ -85,7 +85,8 @@ fun AddHealthTypeScreen(
                             )
                         }
                     }
-                }
+                },
+                enabled = name.isNotBlank() && unit.isNotBlank()
             ) {
                 Icon(Icons.Default.Save, contentDescription = "保存")
                 Spacer(modifier = Modifier.padding(4.dp))

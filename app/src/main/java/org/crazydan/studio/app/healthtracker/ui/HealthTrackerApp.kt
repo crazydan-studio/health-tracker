@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import org.crazydan.studio.app.healthtracker.ui.screen.AddHealthPersonScreen
+import org.crazydan.studio.app.healthtracker.ui.screen.AddHealthRecordScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.AddHealthTypeScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.HealthPersonsScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.HealthRecordsScreen
@@ -25,11 +26,16 @@ fun HealthTrackerApp() {
     val viewModel: HealthViewModel = hiltViewModel()
     val coroutineScope = rememberCoroutineScope()
 
-    NavHost(navController = navController, startDestination = "healthPersons") {
+    NavHost(
+        navController = navController,
+        startDestination = "healthPersons",
+    ) {
         composable("healthPersons") {
             HealthPersonsScreen(
                 healthPersons = viewModel.healthPersons,
-                onAddPerson = { navController.navigate("addHealthPerson") },
+                onAddPerson = {
+                    navController.navigate("addHealthPerson")
+                },
                 onSelectPerson = { person ->
                     coroutineScope.launch {
                         viewModel.selectHealthPerson(person)
@@ -40,9 +46,9 @@ fun HealthTrackerApp() {
         }
         composable("addHealthPerson") {
             AddHealthPersonScreen(
-                onSave = { healthPerson ->
+                onSave = { person ->
                     coroutineScope.launch {
-                        viewModel.addHealthPerson(healthPerson)
+                        viewModel.addHealthPerson(person)
                         navController.popBackStack()
                     }
                 },
@@ -71,9 +77,9 @@ fun HealthTrackerApp() {
         composable("addHealthType") { backStackEntry ->
             AddHealthTypeScreen(
                 healthPerson = viewModel.selectedHealthPerson,
-                onSave = { healthType ->
+                onSave = { type ->
                     coroutineScope.launch {
-                        viewModel.addHealthType(healthType)
+                        viewModel.addHealthType(type)
                         navController.popBackStack()
                     }
                 },
@@ -86,12 +92,23 @@ fun HealthTrackerApp() {
                 healthPerson = viewModel.selectedHealthPerson,
                 healthType = viewModel.selectedHealthType,
                 healthRecords = viewModel.healthRecords,
-                onAddRecord = { healthRecord ->
-                    coroutineScope.launch {
-                        viewModel.addHealthRecord(healthRecord)
-                    }
+                onAddRecord = {
+                    navController.navigate("addHealthRecord")
                 },
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable("addHealthRecord") { backStackEntry ->
+            AddHealthRecordScreen(
+                healthPerson = viewModel.selectedHealthPerson,
+                healthType = viewModel.selectedHealthType,
+                onSave = { record ->
+                    coroutineScope.launch {
+                        viewModel.addHealthRecord(record)
+                        navController.popBackStack()
+                    }
+                },
+                onCancel = { navController.popBackStack() }
             )
         }
     }
