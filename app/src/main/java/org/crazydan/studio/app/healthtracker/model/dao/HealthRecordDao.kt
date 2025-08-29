@@ -17,18 +17,6 @@ interface HealthRecordDao {
     @Insert
     suspend fun insert(healthRecord: HealthRecord): Long
 
-    @Query("SELECT * FROM $HEALTH_RECORD_TABLE_NAME WHERE typeId = :typeId ORDER BY timestamp DESC")
+    @Query("SELECT * FROM $HEALTH_RECORD_TABLE_NAME WHERE typeId = :typeId ORDER BY createdAt DESC")
     fun getByType(typeId: Long): Flow<List<HealthRecord>>
-
-    @Query("SELECT * FROM $HEALTH_RECORD_TABLE_NAME WHERE typeId = :typeId AND person = :person ORDER BY timestamp DESC")
-    fun getByTypeAndPerson(typeId: Long, person: String): Flow<List<HealthRecord>>
-
-    @Query("SELECT * FROM $HEALTH_RECORD_TABLE_NAME WHERE typeId = :typeId AND rangeName = :rangeName ORDER BY timestamp DESC")
-    fun getByTypeAndRange(typeId: Long, rangeName: String): Flow<List<HealthRecord>>
-
-    @Query("SELECT DISTINCT person FROM $HEALTH_RECORD_TABLE_NAME WHERE typeId = :typeId")
-    fun getPersonsByType(typeId: Long): Flow<List<String>>
-
-    @Query("SELECT DISTINCT rangeName FROM $HEALTH_RECORD_TABLE_NAME WHERE typeId = :typeId")
-    fun getRangesByType(typeId: Long): Flow<List<String>>
 }

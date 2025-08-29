@@ -7,8 +7,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
-import org.crazydan.studio.app.healthtracker.model.HealthRecord
+import org.crazydan.studio.app.healthtracker.ui.screen.AddHealthPersonScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.AddHealthTypeScreen
+import org.crazydan.studio.app.healthtracker.ui.screen.HealthPersonsScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.HealthRecordsScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.HealthTypesScreen
 import org.crazydan.studio.app.healthtracker.ui.viewmodel.HealthViewModel
@@ -24,21 +25,50 @@ fun HealthTrackerApp() {
     val viewModel: HealthViewModel = hiltViewModel()
     val coroutineScope = rememberCoroutineScope()
 
-    NavHost(navController = navController, startDestination = "healthTypes") {
-        composable("healthTypes") {
-            HealthTypesScreen(
-                healthTypes = viewModel.healthTypes,
-                onAddType = { navController.navigate("addType") },
-                onSelectType = { type ->
+    NavHost(navController = navController, startDestination = "healthPersons") {
+        composable("healthPersons") {
+            HealthPersonsScreen(
+                healthPersons = viewModel.healthPersons,
+                onAddPerson = { navController.navigate("addHealthPerson") },
+                onSelectPerson = { person ->
                     coroutineScope.launch {
-                        viewModel.selectHealthType(type)
-                        navController.navigate("healthRecord/${type.id}")
+                        viewModel.selectHealthPerson(person)
+                        navController.navigate("healthTypes")
                     }
                 }
             )
         }
-        composable("addType") {
+        composable("addHealthPerson") {
+            AddHealthPersonScreen(
+                onSave = { healthPerson ->
+                    coroutineScope.launch {
+                        viewModel.addHealthPerson(healthPerson)
+                        navController.popBackStack()
+                    }
+                },
+                onCancel = { navController.popBackStack() }
+            )
+        }
+        //
+        composable("healthTypes") { backStackEntry ->
+            HealthTypesScreen(
+                healthPerson = viewModel.selectedHealthPerson,
+                healthTypes = viewModel.healthTypes,
+                onAddType = {
+                    navController.navigate("addHealthType")
+                },
+                onSelectType = { type ->
+                    coroutineScope.launch {
+                        viewModel.selectHealthType(type)
+                        navController.navigate("healthRecords")
+                    }
+                },
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable("addHealthType") { backStackEntry ->
             AddHealthTypeScreen(
+                healthPerson = viewModel.selectedHealthPerson,
                 onSave = { healthType ->
                     coroutineScope.launch {
                         viewModel.addHealthType(healthType)
@@ -48,26 +78,15 @@ fun HealthTrackerApp() {
                 onCancel = { navController.popBackStack() }
             )
         }
-        composable("healthRecord/{typeId}") { backStackEntry ->
-            val typeId = backStackEntry.arguments?.getString("typeId")?.toLongOrNull()
+        //
+        composable("healthRecords") { backStackEntry ->
             HealthRecordsScreen(
+                healthPerson = viewModel.selectedHealthPerson,
                 healthType = viewModel.selectedHealthType,
                 healthRecords = viewModel.healthRecords,
-                persons = viewModel.persons,
-                onAddRecord = { value, timestamp, notes, person, rangeName ->
+                onAddRecord = { healthRecord ->
                     coroutineScope.launch {
-                        typeId?.let {
-                            viewModel.addHealthRecord(
-                                HealthRecord(
-                                    typeId = it,
-                                    value = value,
-                                    timestamp = timestamp,
-                                    notes = notes,
-                                    person = person,
-                                    rangeName = rangeName
-                                )
-                            )
-                        }
+                        viewModel.addHealthRecord(healthRecord)
                     }
                 },
                 onNavigateBack = { navController.popBackStack() }

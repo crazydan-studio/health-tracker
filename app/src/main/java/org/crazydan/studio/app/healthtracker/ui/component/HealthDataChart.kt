@@ -55,66 +55,76 @@ fun HealthDataChart(
 ) {
     val recordsSample = listOf(
         HealthRecord(
-            id = 0, typeId = 0,
+            id = 0, typeId = 0, personId = 0,
             value = 10.2f,
+            createdAt = Timestamp.valueOf("2025-08-10 08:10:00.000").time,
             timestamp = Timestamp.valueOf("2025-08-10 08:10:00.000").time,
-            rangeName = "空腹",
+            rangeName = "空腹 8h",
         ),
         HealthRecord(
-            id = 0, typeId = 0,
+            id = 0, typeId = 0, personId = 0,
             value = 8.2f,
+            createdAt = Timestamp.valueOf("2025-08-10 14:23:00.000").time,
             timestamp = Timestamp.valueOf("2025-08-10 14:23:00.000").time,
             rangeName = "餐后 2h",
         ),
         HealthRecord(
-            id = 0, typeId = 0,
+            id = 0, typeId = 0, personId = 0,
             value = 15.2f,
+            createdAt = Timestamp.valueOf("2025-08-11 08:10:00.000").time,
             timestamp = Timestamp.valueOf("2025-08-11 08:10:00.000").time,
-            rangeName = "空腹",
+            rangeName = "空腹 8h",
         ),
         HealthRecord(
-            id = 0, typeId = 0,
+            id = 0, typeId = 0, personId = 0,
             value = 11.2f,
+            createdAt = Timestamp.valueOf("2025-08-11 14:23:00.000").time,
             timestamp = Timestamp.valueOf("2025-08-11 14:23:00.000").time,
             rangeName = "餐后 2h",
         ),
         HealthRecord(
-            id = 0, typeId = 0,
+            id = 0, typeId = 0, personId = 0,
             value = 11.2f,
+            createdAt = Timestamp.valueOf("2025-08-12 08:10:00.000").time,
             timestamp = Timestamp.valueOf("2025-08-12 08:10:00.000").time,
-            rangeName = "空腹",
+            rangeName = "空腹 8h",
         ),
         HealthRecord(
-            id = 0, typeId = 0,
+            id = 0, typeId = 0, personId = 0,
             value = 10.2f,
+            createdAt = Timestamp.valueOf("2025-08-12 14:23:00.000").time,
             timestamp = Timestamp.valueOf("2025-08-12 14:23:00.000").time,
             rangeName = "餐后 2h",
         ),
         HealthRecord(
-            id = 0, typeId = 0,
+            id = 0, typeId = 0, personId = 0,
             value = 14.2f,
+            createdAt = Timestamp.valueOf("2025-08-13 08:10:00.000").time,
             timestamp = Timestamp.valueOf("2025-08-13 08:10:00.000").time,
-            rangeName = "空腹",
+            rangeName = "空腹 8h",
         ),
         HealthRecord(
-            id = 0, typeId = 0,
+            id = 0, typeId = 0, personId = 0,
             value = 6.2f,
+            createdAt = Timestamp.valueOf("2025-08-13 14:23:00.000").time,
             timestamp = Timestamp.valueOf("2025-08-13 14:23:00.000").time,
             rangeName = "餐后 2h",
         ),
         HealthRecord(
-            id = 0, typeId = 0,
+            id = 0, typeId = 0, personId = 0,
             value = 8.2f,
+            createdAt = Timestamp.valueOf("2025-08-14 08:10:00.000").time,
             timestamp = Timestamp.valueOf("2025-08-14 08:10:00.000").time,
-            rangeName = "空腹",
+            rangeName = "空腹 8h",
         ),
         HealthRecord(
-            id = 0, typeId = 0,
+            id = 0, typeId = 0, personId = 0,
             value = 11.2f,
+            createdAt = Timestamp.valueOf("2025-08-14 14:23:00.000").time,
             timestamp = Timestamp.valueOf("2025-08-14 14:23:00.000").time,
             rangeName = "餐后 2h",
         ),
-    )
+    ).sortedBy { it.timestamp }
 
 //    var selectedFilter by remember { mutableStateOf(TimeFilter.YEAR) }
     val filteredRecords = recordsSample // filterRecordsByTime(recordsSample, selectedFilter).sortedBy { it.timestamp }
@@ -198,12 +208,14 @@ private fun createSplineChartModelOptions(
         .touchEventEnabled(true)
         .yAxisTitle("${healthType.name} (${healthType.unit})")
         .yAxisMin(0)
-        .colorsTheme(arrayOf(
-            "rgba(4, 214, 159, 1)",
-            "rgba(30, 143, 255, 1)",
-            "rgba(239, 71, 110, 1)",
-            "rgba(255, 209, 102, 1)",
-        ))
+        .colorsTheme(
+            arrayOf(
+                "rgba(4, 214, 159, 1)",
+                "rgba(30, 143, 255, 1)",
+                "rgba(239, 71, 110, 1)",
+                "rgba(255, 209, 102, 1)",
+            )
+        )
         .series(series)
         .aa_toAAOptions()
 
@@ -341,7 +353,7 @@ private fun createSeries(
     return healthType.ranges.map { range ->
         val data: Array<Any> = records.map { record ->
             if (record.rangeName == range.name) {
-                AADataElement().x(record.timestamp).y(record.value)
+                AADataElement().x(record.createdAt).y(record.value)
             } else {
                 "null"
             }
@@ -411,7 +423,7 @@ fun filterRecordsByTime(records: List<HealthRecord>, filter: TimeFilter): List<H
             calendar.add(Calendar.DAY_OF_YEAR, -1)
             val startOfDay = calendar.timeInMillis
 
-            records.filter { it.timestamp >= startOfDay }
+            records.filter { it.createdAt >= startOfDay }
         }
 
         TimeFilter.WEEK -> {
@@ -419,7 +431,7 @@ fun filterRecordsByTime(records: List<HealthRecord>, filter: TimeFilter): List<H
             calendar.add(Calendar.WEEK_OF_YEAR, -1)
             val startOfWeek = calendar.timeInMillis
 
-            records.filter { it.timestamp >= startOfWeek }
+            records.filter { it.createdAt >= startOfWeek }
         }
 
         TimeFilter.MONTH -> {
@@ -427,7 +439,7 @@ fun filterRecordsByTime(records: List<HealthRecord>, filter: TimeFilter): List<H
             calendar.add(Calendar.MONTH, -1)
             val startOfMonth = calendar.timeInMillis
 
-            records.filter { it.timestamp >= startOfMonth }
+            records.filter { it.createdAt >= startOfMonth }
         }
 
         TimeFilter.YEAR -> {
@@ -435,7 +447,7 @@ fun filterRecordsByTime(records: List<HealthRecord>, filter: TimeFilter): List<H
             calendar.add(Calendar.YEAR, -1)
             val startOfYear = calendar.timeInMillis
 
-            records.filter { it.timestamp >= startOfYear }
+            records.filter { it.createdAt >= startOfYear }
         }
     }
 }

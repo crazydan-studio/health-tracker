@@ -27,6 +27,9 @@ interface HealthTypeDao {
     @Query("SELECT * FROM $HEALTH_TYPE_TABLE_NAME ORDER BY name")
     fun getAll(): Flow<List<HealthType>>
 
+    @Query("SELECT * FROM $HEALTH_TYPE_TABLE_NAME where personId = :personId ORDER BY name")
+    fun getByPersonId(personId: Long): Flow<List<HealthType>>
+
     @Query("SELECT * FROM $HEALTH_TYPE_TABLE_NAME WHERE id = :id")
     fun getById(id: Long): Flow<HealthType?>
 }

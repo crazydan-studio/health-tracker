@@ -11,13 +11,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -30,7 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.StateFlow
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
-import org.crazydan.studio.app.healthtracker.model.HealthType
+import org.crazydan.studio.app.healthtracker.util.calculateAge
 import org.crazydan.studio.app.healthtracker.util.getFullName
 
 /**
@@ -40,37 +38,25 @@ import org.crazydan.studio.app.healthtracker.util.getFullName
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HealthTypesScreen(
-    healthPerson: StateFlow<HealthPerson?>,
-    healthTypes: StateFlow<List<HealthType>>,
-    onAddType: () -> Unit,
-    onSelectType: (HealthType) -> Unit,
-    onNavigateBack: () -> Unit
+fun HealthPersonsScreen(
+    healthPersons: StateFlow<List<HealthPerson>>,
+    onAddPerson: () -> Unit,
+    onSelectPerson: (HealthPerson) -> Unit
 ) {
     // 使用 collectAsState() 将 StateFlow 转换为 Compose 状态
-    val person by healthPerson.collectAsState()
-    val types by healthTypes.collectAsState()
-
-    val label = person?.let { it.label ?: getFullName(it.familyName, it.givenName) }
+    val persons by healthPersons.collectAsState()
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("健康数据 (${label ?: "未知"})") },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
-                    }
-                }
-            )
+            TopAppBar(title = { Text("健康跟踪") })
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddType) {
-                Icon(Icons.Default.Add, contentDescription = "添加类型")
+            FloatingActionButton(onClick = onAddPerson) {
+                Icon(Icons.Default.Add, contentDescription = "添加人员")
             }
         }
     ) { padding ->
-        if (types.isEmpty()) {
+        if (persons.isEmpty()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -78,7 +64,7 @@ fun HealthTypesScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("暂无健康数据类型，请点击右下角按钮添加")
+                Text("暂无人员信息，请点击右下角按钮添加")
             }
         } else {
             LazyColumn(
@@ -86,10 +72,10 @@ fun HealthTypesScreen(
                     .padding(padding)
                     .fillMaxSize()
             ) {
-                items(types) { type ->
-                    HealthTypeItem(
-                        type = type,
-                        onClick = { onSelectType(type) },
+                items(persons) { person ->
+                    HealthPersonItem(
+                        person = person,
+                        onClick = { onSelectPerson(person) }
                     )
                 }
             }
@@ -98,24 +84,21 @@ fun HealthTypesScreen(
 }
 
 @Composable
-fun HealthTypeItem(type: HealthType, onClick: () -> Unit) {
+fun HealthPersonItem(person: HealthPerson, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
             .clickable(onClick = onClick)
     ) {
+        val fullName = getFullName(person.familyName, person.givenName)
+        val label = person.label?.let { "$it (${fullName})" } ?: fullName
+
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = type.name, style = MaterialTheme.typography.headlineSmall)
+            Text(text = label, style = MaterialTheme.typography.headlineSmall)
 
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "单位: ${type.unit}")
-
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "正常范围:", style = MaterialTheme.typography.labelMedium)
-            type.ranges.forEach { range ->
-                Text(text = "  ${range.name}: ${range.lowerLimit} - ${range.upperLimit} ${type.unit}")
-            }
+            Text(text = "年龄: ${calculateAge(person.birthday)}")
         }
     }
 }

@@ -8,6 +8,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import org.crazydan.studio.app.healthtracker.model.dao.AppDatabase
+import org.crazydan.studio.app.healthtracker.model.dao.HealthPersonDao
 import org.crazydan.studio.app.healthtracker.model.dao.HealthRecordDao
 import org.crazydan.studio.app.healthtracker.model.dao.HealthRepository
 import org.crazydan.studio.app.healthtracker.model.dao.HealthTypeDao
@@ -35,6 +36,11 @@ object AppModule {
     }
 
     @Provides
+    fun provideHealthPersonDao(database: AppDatabase): HealthPersonDao {
+        return database.healthPersonDao()
+    }
+
+    @Provides
     fun provideHealthTypeDao(database: AppDatabase): HealthTypeDao {
         return database.healthTypeDao()
     }
@@ -47,9 +53,10 @@ object AppModule {
     @Provides
     @Singleton
     fun provideHealthRepository(
+        healthPersonDao: HealthPersonDao,
         healthTypeDao: HealthTypeDao,
-        healthRecordDao: HealthRecordDao
+        healthRecordDao: HealthRecordDao,
     ): HealthRepository {
-        return HealthRepository(healthTypeDao, healthRecordDao)
+        return HealthRepository(healthPersonDao, healthTypeDao, healthRecordDao)
     }
 }

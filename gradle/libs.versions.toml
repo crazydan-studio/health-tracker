@@ -1,6 +1,7 @@
 [versions]
 aachartcoreKotlin = "7.4.0"
 agp = "8.12.1"
+composeMaterial3DatetimePickers = "0.7.2"
 hiltAndroid = "2.57.1"
 hiltNavigationCompose = "1.2.0"
 kotlin = "2.2.10"
@@ -24,6 +25,7 @@ androidx-material-icons-extended = { module = "androidx.compose.material:materia
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+compose-material3-datetime-pickers = { module = "com.marosseleng.android:compose-material3-datetime-pickers", version.ref = "composeMaterial3DatetimePickers" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }

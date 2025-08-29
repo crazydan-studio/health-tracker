@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -24,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +33,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.StateFlow
+import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.NormalRange
 
@@ -43,9 +46,12 @@ import org.crazydan.studio.app.healthtracker.model.NormalRange
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddHealthTypeScreen(
+    healthPerson: StateFlow<HealthPerson?>,
     onSave: (HealthType) -> Unit,
     onCancel: () -> Unit
 ) {
+    val person by healthPerson.collectAsState()
+
     var name by remember { mutableStateOf("") }
     var unit by remember { mutableStateOf("") }
     val ranges = remember { mutableStateListOf<NormalRange>() }
@@ -60,7 +66,7 @@ fun AddHealthTypeScreen(
                 title = { Text("添加健康类型") },
                 navigationIcon = {
                     IconButton(onClick = onCancel) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "返回")
+                        Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
                     }
                 }
             )
@@ -69,7 +75,15 @@ fun AddHealthTypeScreen(
             Button(
                 onClick = {
                     if (name.isNotBlank() && unit.isNotBlank() && ranges.isNotEmpty()) {
-                        onSave(HealthType(name = name, unit = unit, ranges = ranges.toList()))
+                        person?.let { p ->
+                            onSave(
+                                HealthType(
+                                    personId = p.id,
+                                    name = name, unit = unit,
+                                    ranges = ranges.toList()
+                                )
+                            )
+                        }
                     }
                 }
             ) {
@@ -91,6 +105,7 @@ fun AddHealthTypeScreen(
             Card {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("基本信息", style = MaterialTheme.typography.headlineSmall)
+
                     Spacer(modifier = Modifier.height(16.dp))
                     OutlinedTextField(
                         value = name,
@@ -98,6 +113,7 @@ fun AddHealthTypeScreen(
                         label = { Text("类型名称") },
                         modifier = Modifier.fillMaxWidth()
                     )
+
                     Spacer(modifier = Modifier.height(16.dp))
                     OutlinedTextField(
                         value = unit,
@@ -112,6 +128,7 @@ fun AddHealthTypeScreen(
             Card {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("添加正常范围", style = MaterialTheme.typography.headlineSmall)
+
                     Spacer(modifier = Modifier.height(16.dp))
                     OutlinedTextField(
                         value = rangeName,
@@ -119,6 +136,7 @@ fun AddHealthTypeScreen(
                         label = { Text("范围名称") },
                         modifier = Modifier.fillMaxWidth()
                     )
+
                     Spacer(modifier = Modifier.height(16.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -137,6 +155,7 @@ fun AddHealthTypeScreen(
                             modifier = Modifier.weight(1f)
                         )
                     }
+
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
                         onClick = {
@@ -171,6 +190,7 @@ fun AddHealthTypeScreen(
                 Card {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text("已添加的范围", style = MaterialTheme.typography.headlineSmall)
+
                         Spacer(modifier = Modifier.height(16.dp))
                         ranges.forEachIndexed { index, range ->
                             Row(

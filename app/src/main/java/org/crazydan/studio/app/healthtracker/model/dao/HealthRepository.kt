@@ -1,6 +1,7 @@
 package org.crazydan.studio.app.healthtracker.model.dao
 
 import kotlinx.coroutines.flow.Flow
+import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
 
@@ -10,9 +11,21 @@ import org.crazydan.studio.app.healthtracker.model.HealthType
  * @date 2025-08-28
  */
 class HealthRepository(
+    private val healthPersonDao: HealthPersonDao,
     private val healthTypeDao: HealthTypeDao,
-    private val healthRecordDao: HealthRecordDao
+    private val healthRecordDao: HealthRecordDao,
 ) {
+    // HealthPerson operations
+    suspend fun insertHealthPerson(healthPerson: HealthPerson): Long = healthPersonDao.insert(healthPerson)
+
+    suspend fun updateHealthPerson(healthPerson: HealthPerson) = healthPersonDao.update(healthPerson)
+
+    suspend fun deleteHealthPerson(id: Long) = healthPersonDao.delete(id)
+
+    fun getAllHealthPersons(): Flow<List<HealthPerson>> = healthPersonDao.getAll()
+
+    fun getHealthPersonById(id: Long): Flow<HealthPerson?> = healthPersonDao.getById(id)
+
     // HealthType operations
     suspend fun insertHealthType(healthType: HealthType): Long = healthTypeDao.insert(healthType)
 
@@ -24,18 +37,10 @@ class HealthRepository(
 
     fun getHealthTypeById(id: Long): Flow<HealthType?> = healthTypeDao.getById(id)
 
+    fun getHealthTypesByPersonId(personId: Long): Flow<List<HealthType>> = healthTypeDao.getByPersonId(personId)
+
     // HealthRecord operations
     suspend fun insertHealthRecord(healthRecord: HealthRecord): Long = healthRecordDao.insert(healthRecord)
 
     fun getHealthRecordsByType(typeId: Long): Flow<List<HealthRecord>> = healthRecordDao.getByType(typeId)
-
-    fun getHealthRecordsByTypeAndPerson(typeId: Long, person: String): Flow<List<HealthRecord>> =
-        healthRecordDao.getByTypeAndPerson(typeId, person)
-
-    fun getHealthRecordsByTypeAndRange(typeId: Long, rangeName: String): Flow<List<HealthRecord>> =
-        healthRecordDao.getByTypeAndRange(typeId, rangeName)
-
-    fun getPersonsByType(typeId: Long): Flow<List<String>> = healthRecordDao.getPersonsByType(typeId)
-
-    fun getRangesByType(typeId: Long): Flow<List<String>> = healthRecordDao.getRangesByType(typeId)
 }

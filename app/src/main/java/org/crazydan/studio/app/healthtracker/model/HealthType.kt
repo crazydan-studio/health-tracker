@@ -14,13 +14,23 @@ const val HEALTH_TYPE_TABLE_NAME = "health_type"
 data class HealthType(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val name: String,           // 类型名称，如"血糖"
-    val unit: String,           // 单位，如"mmol/L"
-    val ranges: List<NormalRange> // 正常范围列表
+    /** 关联的 [HealthPerson] id */
+    val personId: Long,
+
+    /** 类型名称，如，血糖 */
+    val name: String,
+    /** 数据单位，如，mmol/L */
+    val unit: String,
+    /** 正常范围列表 */
+    val ranges: List<NormalRange>,
 )
 
+/** 正常范围 */
 data class NormalRange(
-    val name: String,    // 范围名称，如"空腹8h"
-    val lowerLimit: Float, // 下限值
-    val upperLimit: Float, // 上限值
+    /** 范围名称，如，空腹 8h */
+    val name: String,
+    /** 上限值 */
+    val upperLimit: Float,
+    /** 下限值 */
+    val lowerLimit: Float,
 )

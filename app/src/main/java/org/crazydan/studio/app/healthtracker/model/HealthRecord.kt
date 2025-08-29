@@ -25,10 +25,21 @@ const val HEALTH_RECORD_TABLE_NAME = "health_record"
 data class HealthRecord(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val typeId: Long,           // 关联的健康类型ID
-    val value: Float,           // 记录的值
-    val timestamp: Long,        // 记录时间戳
-    val notes: String = "",     // 可选备注
-    val person: String = "",    // 记录人/目的
-    val rangeName: String = ""  // 关联的正常范围名称
+    /** 关联的 [HealthType] id */
+    val typeId: Long,
+    /** 关联的 [HealthPerson] id */
+    val personId: Long,
+
+    /** 数据值 */
+    val value: Float,
+    /** 数据时间戳，默认与 [createdAt] 相同 */
+    val timestamp: Long,
+
+    /** 关联的 [NormalRange] 名称 */
+    val rangeName: String = "",
+    /** 可选备注 */
+    val notes: String = "",
+
+    /** 创建时间 */
+    val createdAt: Long,
 )
