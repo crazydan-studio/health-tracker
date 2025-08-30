@@ -21,9 +21,15 @@ interface HealthRecordDao {
     @Update
     suspend fun update(healthRecord: HealthRecord)
 
-    @Query("DELETE FROM $HEALTH_RECORD_TABLE_NAME WHERE id = :id")
+    @Query("UPDATE $HEALTH_RECORD_TABLE_NAME SET deleted = 1 WHERE id = :id")
     suspend fun delete(id: Long)
 
-    @Query("SELECT * FROM $HEALTH_RECORD_TABLE_NAME WHERE typeId = :typeId ORDER BY timestamp DESC")
-    fun getByType(typeId: Long): Flow<List<HealthRecord>>
+    @Query("UPDATE $HEALTH_RECORD_TABLE_NAME SET deleted = 0 WHERE id = :id")
+    suspend fun undelete(id: Long)
+
+    @Query("DELETE FROM $HEALTH_RECORD_TABLE_NAME WHERE id = :id")
+    suspend fun forceDelete(id: Long)
+
+    @Query("SELECT * FROM $HEALTH_RECORD_TABLE_NAME WHERE typeId = :typeId AND deleted = 0 ORDER BY timestamp DESC")
+    fun getByTypeId(typeId: Long): Flow<List<HealthRecord>>
 }

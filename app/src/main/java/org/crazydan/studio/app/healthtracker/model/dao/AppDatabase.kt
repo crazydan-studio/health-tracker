@@ -14,7 +14,7 @@ import org.crazydan.studio.app.healthtracker.model.HealthType
  */
 @Database(
     entities = [HealthPerson::class, HealthType::class, HealthRecord::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(NormalRangeListConverter::class)

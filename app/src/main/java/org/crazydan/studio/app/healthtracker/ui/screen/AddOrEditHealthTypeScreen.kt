@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -88,7 +89,7 @@ fun AddOrEditHealthTypeScreen(
                                 HealthType(
                                     id = currentEditType?.id ?: 0,
                                     personId = p.id,
-                                    name = name, unit = unit,
+                                    name = name.trim(), unit = unit.trim(),
                                     ranges = ranges.toList()
                                 )
                             )
@@ -175,7 +176,7 @@ fun AddOrEditHealthTypeScreen(
                             ) {
                                 ranges.add(
                                     NormalRange(
-                                        name = rangeName,
+                                        name = rangeName.trim(),
                                         lowerLimit = lowerLimit.toFloat(),
                                         upperLimit = upperLimit.toFloat(),
                                     )
@@ -187,6 +188,9 @@ fun AddOrEditHealthTypeScreen(
                                 upperLimit = ""
                             }
                         },
+                        enabled = rangeName.isNotBlank() &&
+                                lowerLimit.toFloatOrNull() != null &&
+                                upperLimit.toFloatOrNull() != null,
                         modifier = Modifier.align(Alignment.End)
                     ) {
                         Text("添加范围")
@@ -200,21 +204,21 @@ fun AddOrEditHealthTypeScreen(
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text("已添加的范围", style = MaterialTheme.typography.headlineSmall)
 
-                        Spacer(modifier = Modifier.height(16.dp))
                         ranges.forEachIndexed { index, range ->
+                            Spacer(modifier = Modifier.height(8.dp))
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Text(range.name)
                                 Text("${range.lowerLimit} - ${range.upperLimit}")
-                                Button(
+                                TextButton(
                                     onClick = { ranges.removeAt(index) }
                                 ) {
                                     Text("删除")
                                 }
                             }
-                            Spacer(modifier = Modifier.height(8.dp))
                         }
                     }
                 }

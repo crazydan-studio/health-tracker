@@ -6,15 +6,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -26,6 +20,7 @@ import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.getPersonLabel
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCard
+import org.crazydan.studio.app.healthtracker.ui.component.HealthDataListScreen
 import org.crazydan.studio.app.healthtracker.util.formatEpochMillis
 
 /**
@@ -40,6 +35,7 @@ fun HealthRecordDetailsScreen(
     healthType: StateFlow<HealthType?>,
     healthRecords: StateFlow<List<HealthRecord>>,
     onDeleteRecord: (HealthRecord) -> Unit,
+    onUndeleteRecord: (HealthRecord) -> Unit,
     onEditRecord: (HealthRecord) -> Unit,
     onNavigateBack: () -> Unit,
 ) {
@@ -48,20 +44,16 @@ fun HealthRecordDetailsScreen(
     val currentHealthType by healthType.collectAsState()
     val currentHealthRecords by healthRecords.collectAsState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(getPersonLabel(currentHealthType?.name + "列表", currentHealthPerson))
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
-                    }
-                }
-            )
+    HealthDataListScreen(
+        title = {
+            Text(getPersonLabel(currentHealthType?.name + "记录", currentHealthPerson))
         },
-    ) { padding ->
+        deletedMessage = { record ->
+            "已删除记录【${record.value}${currentHealthType?.unit} @${formatTimestamp(record)}】"
+        },
+        onUndelete = onUndeleteRecord,
+        onNavigateBack = onNavigateBack,
+    ) { padding, afterDeleted ->
         LazyColumn(
             modifier = Modifier
                 .padding(padding)
@@ -71,7 +63,10 @@ fun HealthRecordDetailsScreen(
                 HealthRecordItem(
                     type = currentHealthType!!,
                     record = record,
-                    onDeleteRecord = { },
+                    onDeleteRecord = {
+                        onDeleteRecord(record)
+                        afterDeleted(record)
+                    },
                     onEditRecord = { onEditRecord(record) },
                 )
             }
@@ -80,7 +75,7 @@ fun HealthRecordDetailsScreen(
 }
 
 @Composable
-fun HealthRecordItem(
+private fun HealthRecordItem(
     type: HealthType,
     record: HealthRecord,
     onDeleteRecord: () -> Unit,
@@ -90,8 +85,8 @@ fun HealthRecordItem(
         onEdit = onEditRecord,
         onDelete = onDeleteRecord,
     ) {
-        val label = "${record.value} ${type.unit}"
-        val timestamp = formatEpochMillis(record.timestamp, "yyyy-MM-dd HH:mm")
+        val label = "${record.value}${type.unit}"
+        val timestamp = formatTimestamp(record)
 
         Text(text = label, style = MaterialTheme.typography.headlineSmall)
 
@@ -103,4 +98,8 @@ fun HealthRecordItem(
             Text(text = "数据范围: ${record.rangeName}")
         }
     }
+}
+
+private fun formatTimestamp(record: HealthRecord): String {
+    return formatEpochMillis(record.timestamp, "yyyy-MM-dd HH:mm")
 }

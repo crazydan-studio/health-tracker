@@ -14,9 +14,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -27,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.StateFlow
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCard
+import org.crazydan.studio.app.healthtracker.ui.component.HealthDataListScreen
 import org.crazydan.studio.app.healthtracker.util.calculateAge
 import org.crazydan.studio.app.healthtracker.util.getFullName
 import java.sql.Timestamp
@@ -42,22 +41,25 @@ fun HealthPersonsScreen(
     healthPersons: StateFlow<List<HealthPerson>>,
     onAddPerson: () -> Unit,
     onDeletePerson: (HealthPerson) -> Unit,
+    onUndeletePerson: (HealthPerson) -> Unit,
     onEditPerson: (HealthPerson) -> Unit,
     onViewTypes: (HealthPerson) -> Unit
 ) {
     // 使用 collectAsState() 将 StateFlow 转换为 Compose 状态
     val persons by healthPersons.collectAsState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("健康跟踪") })
-        },
+    HealthDataListScreen(
+        title = { Text("健康跟踪") },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddPerson) {
                 Icon(Icons.Default.Add, contentDescription = "添加人员")
             }
-        }
-    ) { padding ->
+        },
+        deletedMessage = { person ->
+            "已删除人员【${getPersonFullName(person)}】"
+        },
+        onUndelete = onUndeletePerson,
+    ) { padding, afterDeleted ->
         if (persons.isEmpty()) {
             Column(
                 modifier = Modifier
@@ -77,7 +79,10 @@ fun HealthPersonsScreen(
                 items(persons) { person ->
                     HealthPersonItem(
                         person = person,
-                        onDeletePerson = { },
+                        onDeletePerson = {
+                            onDeletePerson(person)
+                            afterDeleted(person)
+                        },
                         onEditPerson = { onEditPerson(person) },
                         onViewTypes = { onViewTypes(person) },
                     )
@@ -99,14 +104,20 @@ private fun HealthPersonItem(
         onDelete = onDeletePerson,
         onView = onViewTypes,
     ) {
-        val fullName = getFullName(person.familyName, person.givenName)
-        val label = person.label?.let { "$it (${fullName})" } ?: fullName
+        val fullName = getPersonFullName(person)
+        val label =
+            if (person.label.isNullOrBlank()) fullName
+            else "${person.label} (${fullName})"
 
         Text(text = label, style = MaterialTheme.typography.headlineSmall)
 
         Spacer(modifier = Modifier.height(8.dp))
         Text(text = "年龄: ${calculateAge(person.birthday)}")
     }
+}
+
+private fun getPersonFullName(person: HealthPerson): String {
+    return getFullName(person.familyName, person.givenName)
 }
 
 @Preview

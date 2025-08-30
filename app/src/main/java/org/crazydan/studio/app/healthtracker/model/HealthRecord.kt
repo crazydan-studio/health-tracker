@@ -25,6 +25,8 @@ const val HEALTH_RECORD_TABLE_NAME = "health_record"
 data class HealthRecord(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
+    val deleted: Boolean = false,
+
     /** 关联的 [HealthType] id */
     val typeId: Long,
     /** 关联的 [HealthPerson] id */

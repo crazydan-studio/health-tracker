@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 
 /**
@@ -55,7 +56,10 @@ fun HealthDataCard(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
         ) {
-            TextButton(onClick = onDelete) {
+            TextButton(
+                modifier = Modifier.alpha(0.4f),
+                onClick = onDelete
+            ) {
                 Icon(Icons.Default.Delete, contentDescription = "删除")
                 Text(text = "删除")
             }

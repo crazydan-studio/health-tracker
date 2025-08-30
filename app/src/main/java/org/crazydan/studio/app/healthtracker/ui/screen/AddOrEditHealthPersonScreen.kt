@@ -83,18 +83,18 @@ fun AddOrEditHealthPersonScreen(
         floatingActionButton = {
             Button(
                 onClick = {
-                    if (familyName.isNotBlank() && givenName.isNotEmpty() && birthDate != null && birthTime != null) {
+                    if (familyName.isNotBlank() && givenName.isNotBlank() && birthDate != null && birthTime != null) {
                         onSave(
                             HealthPerson(
                                 id = currentEditPerson?.id ?: 0,
-                                label = label,
-                                familyName = familyName, givenName = givenName,
+                                label = label.trim(),
+                                familyName = familyName.trim(), givenName = givenName.trim(),
                                 birthday = toEpochMillis(birthDate!!, birthTime!!)
                             )
                         )
                     }
                 },
-                enabled = familyName.isNotBlank() && givenName.isNotEmpty() && birthDate != null && birthTime != null
+                enabled = familyName.isNotBlank() && givenName.isNotBlank() && birthDate != null && birthTime != null
             ) {
                 Icon(Icons.Default.Save, contentDescription = "保存")
                 Spacer(modifier = Modifier.padding(4.dp))

@@ -21,10 +21,16 @@ interface HealthPersonDao {
     @Update
     suspend fun update(healthPerson: HealthPerson)
 
-    @Query("DELETE FROM $HEALTH_PERSON_TABLE_NAME WHERE id = :id")
+    @Query("UPDATE $HEALTH_PERSON_TABLE_NAME SET deleted = 1 WHERE id = :id")
     suspend fun delete(id: Long)
 
-    @Query("SELECT * FROM $HEALTH_PERSON_TABLE_NAME ORDER BY familyName, givenName")
+    @Query("UPDATE $HEALTH_PERSON_TABLE_NAME SET deleted = 0 WHERE id = :id")
+    suspend fun undelete(id: Long)
+
+    @Query("DELETE FROM $HEALTH_PERSON_TABLE_NAME WHERE id = :id")
+    suspend fun forceDelete(id: Long)
+
+    @Query("SELECT * FROM $HEALTH_PERSON_TABLE_NAME WHERE deleted = 0 ORDER BY familyName, givenName")
     fun getAll(): Flow<List<HealthPerson>>
 
     @Query("SELECT * FROM $HEALTH_PERSON_TABLE_NAME WHERE id = :id")

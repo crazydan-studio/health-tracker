@@ -65,7 +65,12 @@ fun AddOrEditHealthRecordScreen(
     var notes by remember { mutableStateOf(currentEditRecord?.notes ?: "") }
 
     val ranges = currentHealthType?.ranges?.map { it.name } ?: emptyList()
-    var rangeName by remember { mutableStateOf(currentEditRecord?.rangeName ?: "") }
+    var rangeName by remember {
+        mutableStateOf(
+            currentEditRecord?.rangeName
+                ?: ranges.firstOrNull() ?: ""
+        )
+    }
     var rangeExpanded by remember { mutableStateOf(false) }
 
     val timestamp =
@@ -113,7 +118,7 @@ fun AddOrEditHealthRecordScreen(
                         }
                     }
                 },
-                enabled = value.toFloatOrNull() != null && rangeName.isNotBlank()
+                enabled = value.toFloatOrNull() != null
             ) {
                 Icon(Icons.Default.Save, contentDescription = "保存")
                 Spacer(modifier = Modifier.padding(4.dp))

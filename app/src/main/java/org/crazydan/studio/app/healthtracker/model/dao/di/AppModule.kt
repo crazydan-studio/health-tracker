@@ -31,7 +31,7 @@ object AppModule {
             AppDatabase::class.java,
             "health_tracker.db"
         )
-            .fallbackToDestructiveMigration(false)
+            //.fallbackToDestructiveMigration(false)
             .build()
     }
 

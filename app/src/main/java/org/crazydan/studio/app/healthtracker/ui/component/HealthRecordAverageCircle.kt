@@ -25,28 +25,27 @@ import org.crazydan.studio.app.healthtracker.model.NormalRange
 /**
  * 计算特定 range 的健康记录平均值
  */
-private fun calculateRangeAverage(records: List<HealthRecord>, rangeName: String): Double {
-    val rangeRecords = records.filter { it.rangeName == rangeName }
+private fun calculateRangeAverage(records: List<HealthRecord>, rangeName: String?): Double {
+    val rangeRecords = rangeName?.let { range ->
+        records.filter { it.rangeName == range }
+    } ?: records
+
     if (rangeRecords.isEmpty()) return 0.0
 
     return rangeRecords.map { it.value.toDouble() }.average()
 }
 
 /**
- * 计算特定 range 的健康记录数量
- */
-private fun calculateRangeCount(records: List<HealthRecord>, rangeName: String): Int {
-    return records.count { it.rangeName == rangeName }
-}
-
-/**
  * 根据平均值与范围的关系确定背景颜色
  */
-private fun getRangeColor(range: NormalRange, averageValue: Double): Color {
+private fun getRangeColor(range: NormalRange?, averageValue: Double): Color {
     return when {
-        averageValue > range.upperLimit -> Color(0xFFFFC107) // 黄色 - 高于上限
-        averageValue < range.lowerLimit -> Color(0xFFF44336) // 红色 - 低于下限
-        else -> Color(0xFF4CAF50) // 绿色 - 在正常范围内
+        range != null && averageValue > range.upperLimit
+            -> Color(0xFFFFC107) // 黄色 - 高于上限
+        range != null && averageValue < range.lowerLimit
+            -> Color(0xFFF44336) // 红色 - 低于下限
+        else
+            -> Color(0xFF4CAF50) // 绿色 - 在正常范围内
     }
 }
 
@@ -56,13 +55,13 @@ private fun getRangeColor(range: NormalRange, averageValue: Double): Color {
 @Composable
 fun HealthRecordAverageCircle(
     label: String,
-    range: NormalRange,
     records: List<HealthRecord>,
     modifier: Modifier = Modifier,
+    range: NormalRange? = null,
     size: Dp = 120.dp,
     strokeWidth: Dp = 8.dp,
 ) {
-    val value = calculateRangeAverage(records, range.name)
+    val value = calculateRangeAverage(records, range?.name)
     // 根据平均值与范围的关系确定背景颜色
     val backgroundColor = getRangeColor(range, value)
 

@@ -15,6 +15,7 @@ const val HEALTH_PERSON_TABLE_NAME = "health_person"
 data class HealthPerson(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
+    val deleted: Boolean = false,
 
     /** 称呼 */
     val label: String?,
@@ -28,7 +29,13 @@ data class HealthPerson(
 )
 
 fun getPersonLabel(prefix: String?, person: HealthPerson?): String {
-    val label = person?.let { it.label ?: getFullName(it.familyName, it.givenName) }
+    val label = person?.let {
+        if (person.label.isNullOrBlank()) {
+            getFullName(it.familyName, it.givenName)
+        } else {
+            person.label
+        }
+    }
 
     return prefix?.let { "$it (${label ?: "未知"})" } ?: ""
 }

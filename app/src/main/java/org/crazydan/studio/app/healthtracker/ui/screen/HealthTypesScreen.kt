@@ -9,16 +9,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -32,6 +28,7 @@ import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.NormalRange
 import org.crazydan.studio.app.healthtracker.model.getPersonLabel
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCard
+import org.crazydan.studio.app.healthtracker.ui.component.HealthDataListScreen
 
 /**
  *
@@ -45,6 +42,7 @@ fun HealthTypesScreen(
     healthTypes: StateFlow<List<HealthType>>,
     onAddType: () -> Unit,
     onDeleteType: (HealthType) -> Unit,
+    onUndeleteType: (HealthType) -> Unit,
     onEditType: (HealthType) -> Unit,
     onViewRecords: (HealthType) -> Unit,
     onNavigateBack: () -> Unit
@@ -53,27 +51,23 @@ fun HealthTypesScreen(
     val person by healthPerson.collectAsState()
     val types by healthTypes.collectAsState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        getPersonLabel("健康数据", person)
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
-                    }
-                }
+    HealthDataListScreen(
+        title = {
+            Text(
+                getPersonLabel("健康数据", person)
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddType) {
                 Icon(Icons.Default.Add, contentDescription = "添加类型")
             }
-        }
-    ) { padding ->
+        },
+        deletedMessage = { type ->
+            "已删除类型【${type.name}】"
+        },
+        onUndelete = onUndeleteType,
+        onNavigateBack = onNavigateBack,
+    ) { padding, afterDeleted ->
         if (types.isEmpty()) {
             Column(
                 modifier = Modifier
@@ -93,7 +87,10 @@ fun HealthTypesScreen(
                 items(types) { type ->
                     HealthTypeItem(
                         type = type,
-                        onDeleteType = { },
+                        onDeleteType = {
+                            onDeleteType(type)
+                            afterDeleted(type)
+                        },
                         onEditType = { onEditType(type) },
                         onViewRecords = { onViewRecords(type) },
                     )
@@ -125,7 +122,7 @@ private fun HealthTypeItem(
             Text(text = "正常范围:", style = MaterialTheme.typography.labelMedium)
 
             type.ranges.forEach { range ->
-                Text(text = "  ${range.name}: ${range.lowerLimit} - ${range.upperLimit} ${type.unit}")
+                Text(text = "  ${range.name}: ${range.lowerLimit} ~ ${range.upperLimit} ${type.unit}")
             }
         }
     }

@@ -42,6 +42,11 @@ fun HealthTrackerApp() {
                         viewModel.deleteHealthPerson(person.id)
                     }
                 },
+                onUndeletePerson = { person ->
+                    coroutineScope.launch {
+                        viewModel.undeleteHealthPerson(person.id)
+                    }
+                },
                 onEditPerson = { person ->
                     coroutineScope.launch {
                         viewModel.selectHealthPerson(person)
@@ -90,6 +95,11 @@ fun HealthTrackerApp() {
                 onDeleteType = { type ->
                     coroutineScope.launch {
                         viewModel.deleteHealthType(type.id)
+                    }
+                },
+                onUndeleteType = { type ->
+                    coroutineScope.launch {
+                        viewModel.undeleteHealthType(type.id)
                     }
                 },
                 onEditType = { type ->
@@ -185,6 +195,11 @@ fun HealthTrackerApp() {
                 onDeleteRecord = { record ->
                     coroutineScope.launch {
                         viewModel.deleteHealthRecord(record.id)
+                    }
+                },
+                onUndeleteRecord = { record ->
+                    coroutineScope.launch {
+                        viewModel.undeleteHealthRecord(record.id)
                     }
                 },
                 onEditRecord = { record ->

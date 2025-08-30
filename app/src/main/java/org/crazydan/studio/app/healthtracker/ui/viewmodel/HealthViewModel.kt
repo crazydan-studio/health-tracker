@@ -88,7 +88,7 @@ class HealthViewModel @Inject constructor(
                 }
 
                 else -> {
-                    repository.getHealthRecordsByType(typeId).collectLatest { records ->
+                    repository.getHealthRecordsByTypeId(typeId).collectLatest { records ->
                         _healthRecords.value = records
                     }
                 }
@@ -112,6 +112,10 @@ class HealthViewModel @Inject constructor(
         repository.deleteHealthPerson(id)
     }
 
+    suspend fun undeleteHealthPerson(id: Long) {
+        repository.undeleteHealthPerson(id)
+    }
+
     suspend fun addHealthType(healthType: HealthType): Long {
         return repository.insertHealthType(healthType)
     }
@@ -124,6 +128,10 @@ class HealthViewModel @Inject constructor(
         repository.deleteHealthType(id)
     }
 
+    suspend fun undeleteHealthType(id: Long) {
+        repository.undeleteHealthType(id)
+    }
+
     suspend fun addHealthRecord(healthRecord: HealthRecord): Long {
         return repository.insertHealthRecord(healthRecord)
     }
@@ -134,5 +142,9 @@ class HealthViewModel @Inject constructor(
 
     suspend fun deleteHealthRecord(id: Long) {
         repository.deleteHealthRecord(id)
+    }
+
+    suspend fun undeleteHealthRecord(id: Long) {
+        repository.undeleteHealthRecord(id)
     }
 }

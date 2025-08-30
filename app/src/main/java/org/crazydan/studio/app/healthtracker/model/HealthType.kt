@@ -14,6 +14,8 @@ const val HEALTH_TYPE_TABLE_NAME = "health_type"
 data class HealthType(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
+    val deleted: Boolean = false,
+
     /** 关联的 [HealthPerson] id */
     val personId: Long,
 

@@ -22,6 +22,8 @@ class HealthRepository(
 
     suspend fun deleteHealthPerson(id: Long) = healthPersonDao.delete(id)
 
+    suspend fun undeleteHealthPerson(id: Long) = healthPersonDao.undelete(id)
+
     fun getAllHealthPersons(): Flow<List<HealthPerson>> = healthPersonDao.getAll()
 
     fun getHealthPersonById(id: Long): Flow<HealthPerson?> = healthPersonDao.getById(id)
@@ -32,6 +34,8 @@ class HealthRepository(
     suspend fun updateHealthType(healthType: HealthType) = healthTypeDao.update(healthType)
 
     suspend fun deleteHealthType(id: Long) = healthTypeDao.delete(id)
+
+    suspend fun undeleteHealthType(id: Long) = healthTypeDao.undelete(id)
 
     fun getAllHealthTypes(): Flow<List<HealthType>> = healthTypeDao.getAll()
 
@@ -46,5 +50,7 @@ class HealthRepository(
 
     suspend fun deleteHealthRecord(id: Long) = healthRecordDao.delete(id)
 
-    fun getHealthRecordsByType(typeId: Long): Flow<List<HealthRecord>> = healthRecordDao.getByType(typeId)
+    suspend fun undeleteHealthRecord(id: Long) = healthRecordDao.undelete(id)
+
+    fun getHealthRecordsByTypeId(typeId: Long): Flow<List<HealthRecord>> = healthRecordDao.getByTypeId(typeId)
 }

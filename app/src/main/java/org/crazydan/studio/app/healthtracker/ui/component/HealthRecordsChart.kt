@@ -27,6 +27,7 @@ import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAPlotBandsElement
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AASeriesEvents
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
+import org.crazydan.studio.app.healthtracker.model.NormalRange
 import java.sql.Timestamp
 import java.util.Calendar
 import java.util.Date
@@ -211,6 +212,7 @@ private fun createSplineChartModelOptions(
         ?.labels(
             AALabels()
                 .useHTML(true)
+                .rotation(-45)
                 // Note: 只能定义唯一一个匿名函数
                 .formatter(
                     """
@@ -274,7 +276,7 @@ private fun createSplineChartModelOptions(
             var series = this.chart.series;
             var mode = getVisibleMode(series, this.name);
             
-            var plots = this.chart.yAxis[0].plotLinesAndBands;
+            var plots = this.chart.yAxis[0].plotLinesAndBands || [];
             var plot = getPlot(plots, this.name);
             plots.forEach(function(p) { showPlot(p, true); });
             
@@ -307,9 +309,17 @@ private fun createSeries(
     healthType: HealthType,
     records: List<HealthRecord>
 ): List<AASeriesElement> {
-    return healthType.ranges.map { range ->
+    val nullRange = NormalRange(
+        name = healthType.name,
+        lowerLimit = 0f, upperLimit = 0f
+    )
+    val ranges = healthType.ranges.ifEmpty {
+        listOf(nullRange)
+    }
+
+    return ranges.map { range ->
         val data: Array<Any> = records.map { record ->
-            if (record.rangeName == range.name) {
+            if (record.rangeName == range.name || range == nullRange) {
                 AADataElement().x(record.timestamp).y(record.value)
             } else {
                 "null"
