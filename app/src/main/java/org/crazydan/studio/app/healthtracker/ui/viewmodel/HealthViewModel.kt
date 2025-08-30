@@ -41,6 +41,9 @@ class HealthViewModel @Inject constructor(
     private val _healthRecords = MutableStateFlow<List<HealthRecord>>(emptyList())
     val healthRecords: StateFlow<List<HealthRecord>> = _healthRecords.asStateFlow()
 
+    private val _selectedHealthRecord = MutableStateFlow<HealthRecord?>(null)
+    val selectedHealthRecord: StateFlow<HealthRecord?> = _selectedHealthRecord.asStateFlow()
+
     private val _selectedRange = MutableStateFlow("")
     val selectedRange: StateFlow<String> = _selectedRange.asStateFlow()
 
@@ -93,8 +96,20 @@ class HealthViewModel @Inject constructor(
         }
     }
 
+    fun selectHealthRecord(record: HealthRecord?) {
+        _selectedHealthRecord.value = record
+    }
+
     suspend fun addHealthPerson(healthPerson: HealthPerson): Long {
         return repository.insertHealthPerson(healthPerson)
+    }
+
+    suspend fun updateHealthPerson(healthPerson: HealthPerson) {
+        repository.updateHealthPerson(healthPerson)
+    }
+
+    suspend fun deleteHealthPerson(id: Long) {
+        repository.deleteHealthPerson(id)
     }
 
     suspend fun addHealthType(healthType: HealthType): Long {
@@ -111,5 +126,13 @@ class HealthViewModel @Inject constructor(
 
     suspend fun addHealthRecord(healthRecord: HealthRecord): Long {
         return repository.insertHealthRecord(healthRecord)
+    }
+
+    suspend fun updateHealthRecord(healthRecord: HealthRecord) {
+        repository.updateHealthRecord(healthRecord)
+    }
+
+    suspend fun deleteHealthRecord(id: Long) {
+        repository.deleteHealthRecord(id)
     }
 }

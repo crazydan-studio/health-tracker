@@ -45,16 +45,20 @@ import org.crazydan.studio.app.healthtracker.model.NormalRange
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddHealthTypeScreen(
+fun AddOrEditHealthTypeScreen(
+    editType: StateFlow<HealthType?>? = null,
     healthPerson: StateFlow<HealthPerson?>,
     onSave: (HealthType) -> Unit,
     onCancel: () -> Unit
 ) {
+    val currentEditType = editType?.collectAsState()?.value
     val currentHealthPerson by healthPerson.collectAsState()
 
-    var name by remember { mutableStateOf("") }
-    var unit by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf(currentEditType?.name ?: "") }
+    var unit by remember { mutableStateOf(currentEditType?.unit ?: "") }
+
     val ranges = remember { mutableStateListOf<NormalRange>() }
+    currentEditType?.ranges?.let { ranges.addAll(it) }
 
     var rangeName by remember { mutableStateOf("") }
     var lowerLimit by remember { mutableStateOf("") }
@@ -63,7 +67,11 @@ fun AddHealthTypeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("添加健康类型") },
+                title = {
+                    Text(
+                        (if (currentEditType == null) "添加" else "编辑") + "健康类型"
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onCancel) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
@@ -78,6 +86,7 @@ fun AddHealthTypeScreen(
                         currentHealthPerson?.let { p ->
                             onSave(
                                 HealthType(
+                                    id = currentEditType?.id ?: 0,
                                     personId = p.id,
                                     name = name, unit = unit,
                                     ranges = ranges.toList()
@@ -164,7 +173,6 @@ fun AddHealthTypeScreen(
                                 lowerLimit.toFloatOrNull() != null &&
                                 upperLimit.toFloatOrNull() != null
                             ) {
-
                                 ranges.add(
                                     NormalRange(
                                         name = rangeName,

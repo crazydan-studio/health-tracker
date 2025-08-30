@@ -37,6 +37,7 @@ enum class TimeFilter {
 }
 
 /**
+ * https://github.com/AAChartModel/AAChartCore-Kotlin
  *
  * @author <a href="mailto:flytreeleft@crazydan.org">flytreeleft</a>
  * @date 2025-08-28

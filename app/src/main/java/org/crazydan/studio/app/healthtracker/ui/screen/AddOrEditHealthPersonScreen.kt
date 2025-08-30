@@ -21,15 +21,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.StateFlow
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.ui.component.DateInputPicker
 import org.crazydan.studio.app.healthtracker.ui.component.TimeInputPicker
+import org.crazydan.studio.app.healthtracker.util.epochMillisToLocalDateTime
 import org.crazydan.studio.app.healthtracker.util.toEpochMillis
 import java.time.LocalDate
 import java.time.LocalTime
@@ -41,21 +44,35 @@ import java.time.LocalTime
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddHealthPersonScreen(
+fun AddOrEditHealthPersonScreen(
+    editPerson: StateFlow<HealthPerson?>? = null,
     onSave: (HealthPerson) -> Unit,
     onCancel: () -> Unit
 ) {
-    var label by remember { mutableStateOf("") }
-    var familyName by remember { mutableStateOf("") }
-    var givenName by remember { mutableStateOf("") }
+    val currentEditPerson = editPerson?.collectAsState()?.value
 
-    var birthDate: LocalDate? by remember { mutableStateOf(null) }
-    var birthTime: LocalTime? by remember { mutableStateOf(null) }
+    var label by remember { mutableStateOf(currentEditPerson?.label ?: "") }
+    var familyName by remember { mutableStateOf(currentEditPerson?.familyName ?: "") }
+    var givenName by remember { mutableStateOf(currentEditPerson?.givenName ?: "") }
+
+    val birthday =
+        if (currentEditPerson == null) null
+        else epochMillisToLocalDateTime(currentEditPerson.birthday)
+    var birthDate: LocalDate? by remember {
+        mutableStateOf(birthday?.toLocalDate())
+    }
+    var birthTime: LocalTime? by remember {
+        mutableStateOf(birthday?.toLocalTime())
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("添加人员信息") },
+                title = {
+                    Text(
+                        (if (editPerson == null) "添加" else "编辑") + "人员信息"
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onCancel) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
@@ -69,6 +86,7 @@ fun AddHealthPersonScreen(
                     if (familyName.isNotBlank() && givenName.isNotEmpty() && birthDate != null && birthTime != null) {
                         onSave(
                             HealthPerson(
+                                id = currentEditPerson?.id ?: 0,
                                 label = label,
                                 familyName = familyName, givenName = givenName,
                                 birthday = toEpochMillis(birthDate!!, birthTime!!)
@@ -118,12 +136,14 @@ fun AddHealthPersonScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
                 DateInputPicker(
+                    value = birthDate,
                     label = { Text("出生日期") },
                     onValueChange = { birthDate = it },
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
                 TimeInputPicker(
+                    value = birthTime,
                     label = { Text("出生时间") },
                     onValueChange = { birthTime = it },
                 )

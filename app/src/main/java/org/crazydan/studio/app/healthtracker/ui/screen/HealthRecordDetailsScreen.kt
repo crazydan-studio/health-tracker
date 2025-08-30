@@ -1,16 +1,13 @@
 package org.crazydan.studio.app.healthtracker.ui.screen
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,6 +25,7 @@ import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.getPersonLabel
+import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCard
 import org.crazydan.studio.app.healthtracker.util.formatEpochMillis
 
 /**
@@ -41,6 +39,8 @@ fun HealthRecordDetailsScreen(
     healthPerson: StateFlow<HealthPerson?>,
     healthType: StateFlow<HealthType?>,
     healthRecords: StateFlow<List<HealthRecord>>,
+    onDeleteRecord: (HealthRecord) -> Unit,
+    onEditRecord: (HealthRecord) -> Unit,
     onNavigateBack: () -> Unit,
 ) {
     // 使用 collectAsState() 将 StateFlow 转换为 Compose 状态
@@ -69,9 +69,10 @@ fun HealthRecordDetailsScreen(
         ) {
             items(currentHealthRecords) { record ->
                 HealthRecordItem(
-                    healthType = currentHealthType!!,
+                    type = currentHealthType!!,
                     record = record,
-                    onClick = { },
+                    onDeleteRecord = { },
+                    onEditRecord = { onEditRecord(record) },
                 )
             }
         }
@@ -80,28 +81,26 @@ fun HealthRecordDetailsScreen(
 
 @Composable
 fun HealthRecordItem(
-    healthType: HealthType,
+    type: HealthType,
     record: HealthRecord,
-    onClick: () -> Unit,
+    onDeleteRecord: () -> Unit,
+    onEditRecord: () -> Unit,
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
+    HealthDataCard(
+        onEdit = onEditRecord,
+        onDelete = onDeleteRecord,
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            val label = "${record.value} ${healthType.unit}"
-            val timestamp = formatEpochMillis(record.timestamp, "yyyy-MM-dd HH:mm")
+        val label = "${record.value} ${type.unit}"
+        val timestamp = formatEpochMillis(record.timestamp, "yyyy-MM-dd HH:mm")
 
-            Text(text = label, style = MaterialTheme.typography.headlineSmall)
+        Text(text = label, style = MaterialTheme.typography.headlineSmall)
 
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(text = "测量时间: $timestamp")
+
+        if (record.rangeName.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "测量时间: $timestamp")
-
-            if (record.rangeName.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "数据范围: ${record.rangeName}")
-            }
+            Text(text = "数据范围: ${record.rangeName}")
         }
     }
 }

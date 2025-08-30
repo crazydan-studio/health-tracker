@@ -42,6 +42,13 @@ fun toEpochMillis(date: LocalDate, time: LocalTime): Long {
     return zonedDateTime.toInstant().toEpochMilli()
 }
 
+fun epochMillisToLocalDateTime(millis: Long): ZonedDateTime {
+    val instant = Instant.ofEpochMilli(millis)
+    val zoneId = ZoneId.systemDefault()
+
+    return instant.atZone(zoneId)
+}
+
 fun formatEpochMillis(millis: Long, format: String): String {
     val dateFormat = SimpleDateFormat(format, Locale.getDefault())
 

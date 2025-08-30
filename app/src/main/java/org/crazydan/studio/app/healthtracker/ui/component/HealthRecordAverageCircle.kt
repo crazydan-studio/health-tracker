@@ -44,8 +44,8 @@ private fun calculateRangeCount(records: List<HealthRecord>, rangeName: String):
  */
 private fun getRangeColor(range: NormalRange, averageValue: Double): Color {
     return when {
-        averageValue > range.upperLimit -> Color(0xFFF44336) // 红色 - 高于上限
-        averageValue < range.lowerLimit -> Color(0xFFFFC107) // 黄色 - 低于下限
+        averageValue > range.upperLimit -> Color(0xFFFFC107) // 黄色 - 高于上限
+        averageValue < range.lowerLimit -> Color(0xFFF44336) // 红色 - 低于下限
         else -> Color(0xFF4CAF50) // 绿色 - 在正常范围内
     }
 }

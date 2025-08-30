@@ -1,11 +1,9 @@
 package org.crazydan.studio.app.healthtracker.ui.screen
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,7 +11,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -27,11 +24,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.StateFlow
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthType
+import org.crazydan.studio.app.healthtracker.model.NormalRange
 import org.crazydan.studio.app.healthtracker.model.getPersonLabel
+import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCard
 
 /**
  *
@@ -44,7 +44,9 @@ fun HealthTypesScreen(
     healthPerson: StateFlow<HealthPerson?>,
     healthTypes: StateFlow<List<HealthType>>,
     onAddType: () -> Unit,
-    onSelectType: (HealthType) -> Unit,
+    onDeleteType: (HealthType) -> Unit,
+    onEditType: (HealthType) -> Unit,
+    onViewRecords: (HealthType) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     // 使用 collectAsState() 将 StateFlow 转换为 Compose 状态
@@ -91,7 +93,9 @@ fun HealthTypesScreen(
                 items(types) { type ->
                     HealthTypeItem(
                         type = type,
-                        onClick = { onSelectType(type) },
+                        onDeleteType = { },
+                        onEditType = { onEditType(type) },
+                        onViewRecords = { onViewRecords(type) },
                     )
                 }
             }
@@ -100,26 +104,52 @@ fun HealthTypesScreen(
 }
 
 @Composable
-fun HealthTypeItem(type: HealthType, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .clickable(onClick = onClick)
+private fun HealthTypeItem(
+    type: HealthType,
+    onDeleteType: () -> Unit,
+    onEditType: () -> Unit,
+    onViewRecords: () -> Unit,
+) {
+    HealthDataCard(
+        onEdit = onEditType,
+        onDelete = onDeleteType,
+        onView = onViewRecords,
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = type.name, style = MaterialTheme.typography.headlineSmall)
+        Text(text = type.name, style = MaterialTheme.typography.headlineSmall)
 
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(text = "单位: ${type.unit}")
+
+        if (type.ranges.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "单位: ${type.unit}")
+            Text(text = "正常范围:", style = MaterialTheme.typography.labelMedium)
 
-            if (!type.ranges.isEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "正常范围:", style = MaterialTheme.typography.labelMedium)
-                type.ranges.forEach { range ->
-                    Text(text = "  ${range.name}: ${range.lowerLimit} - ${range.upperLimit} ${type.unit}")
-                }
+            type.ranges.forEach { range ->
+                Text(text = "  ${range.name}: ${range.lowerLimit} - ${range.upperLimit} ${type.unit}")
             }
         }
     }
+}
+
+@Preview
+@Composable
+private fun HealthTypeItemPreview() {
+    HealthTypeItem(
+        type = HealthType(
+            id = 0,
+            personId = 0,
+            name = "血糖",
+            unit = "mmol/L",
+            ranges = listOf(
+                NormalRange(
+                    name = "餐后 2h",
+                    lowerLimit = 3.2f,
+                    upperLimit = 10f,
+                ),
+            ),
+        ),
+        onDeleteType = {},
+        onEditType = {},
+        onViewRecords = {},
+    )
 }

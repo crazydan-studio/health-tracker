@@ -38,6 +38,7 @@ import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.ui.component.DateInputPicker
 import org.crazydan.studio.app.healthtracker.ui.component.TimeInputPicker
+import org.crazydan.studio.app.healthtracker.util.epochMillisToLocalDateTime
 import org.crazydan.studio.app.healthtracker.util.toEpochMillis
 import java.time.LocalDate
 import java.time.LocalTime
@@ -49,29 +50,42 @@ import java.time.LocalTime
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddHealthRecordScreen(
+fun AddOrEditHealthRecordScreen(
+    editRecord: StateFlow<HealthRecord?>? = null,
     healthPerson: StateFlow<HealthPerson?>,
     healthType: StateFlow<HealthType?>,
     onSave: (HealthRecord) -> Unit,
     onCancel: () -> Unit,
 ) {
+    val currentEditRecord = editRecord?.collectAsState()?.value
     val currentHealthPerson by healthPerson.collectAsState()
     val currentHealthType by healthType.collectAsState()
 
-    var value by remember { mutableStateOf("") }
-    var notes by remember { mutableStateOf("") }
+    var value by remember { mutableStateOf(currentEditRecord?.value?.toString() ?: "") }
+    var notes by remember { mutableStateOf(currentEditRecord?.notes ?: "") }
 
     val ranges = currentHealthType?.ranges?.map { it.name } ?: emptyList()
-    var rangeName by remember { mutableStateOf("") }
+    var rangeName by remember { mutableStateOf(currentEditRecord?.rangeName ?: "") }
     var rangeExpanded by remember { mutableStateOf(false) }
 
-    var timestampDate: LocalDate by remember { mutableStateOf(LocalDate.now()) }
-    var timestampTime: LocalTime by remember { mutableStateOf(LocalTime.now().noSeconds()) }
+    val timestamp =
+        if (currentEditRecord == null) null
+        else epochMillisToLocalDateTime(currentEditRecord.timestamp)
+    var timestampDate: LocalDate by remember {
+        mutableStateOf(timestamp?.toLocalDate() ?: LocalDate.now())
+    }
+    var timestampTime: LocalTime by remember {
+        mutableStateOf(timestamp?.toLocalTime() ?: LocalTime.now().noSeconds())
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("添加${currentHealthType?.name}记录") },
+                title = {
+                    Text(
+                        (if (currentEditRecord == null) "添加" else "编辑") + "${currentHealthType?.name}记录"
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onCancel) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
@@ -86,6 +100,7 @@ fun AddHealthRecordScreen(
                         if (currentHealthType != null && currentHealthPerson != null) {
                             onSave(
                                 HealthRecord(
+                                    id = currentEditRecord?.id ?: 0,
                                     value = it,
                                     timestamp = toEpochMillis(timestampDate, timestampTime),
                                     typeId = currentHealthType!!.id,
@@ -144,6 +159,7 @@ fun AddHealthRecordScreen(
                     ) {
                         OutlinedTextField(
                             value = rangeName,
+                            readOnly = true,
                             onValueChange = { rangeName = it },
                             label = { Text("数据范围") },
                             trailingIcon = {

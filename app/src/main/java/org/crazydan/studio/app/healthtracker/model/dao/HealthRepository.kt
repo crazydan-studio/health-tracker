@@ -42,5 +42,9 @@ class HealthRepository(
     // HealthRecord operations
     suspend fun insertHealthRecord(healthRecord: HealthRecord): Long = healthRecordDao.insert(healthRecord)
 
+    suspend fun updateHealthRecord(healthRecord: HealthRecord) = healthRecordDao.update(healthRecord)
+
+    suspend fun deleteHealthRecord(id: Long) = healthRecordDao.delete(id)
+
     fun getHealthRecordsByType(typeId: Long): Flow<List<HealthRecord>> = healthRecordDao.getByType(typeId)
 }
