@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Health Tracker</string>
+    <string name="app_name">健康跟踪</string>
 
     <string name="add_health_type">添加健康类型</string>
     <string name="back">返回</string>

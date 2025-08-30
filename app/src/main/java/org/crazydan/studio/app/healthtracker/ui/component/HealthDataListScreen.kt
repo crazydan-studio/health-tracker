@@ -30,7 +30,7 @@ fun <T> HealthDataListScreen(
     floatingActionButton: @Composable () -> Unit = {},
     deletedMessage: (T) -> String,
     onUndelete: (T) -> Unit,
-    onNavigateBack: () -> Unit = {},
+    onNavigateBack: (() -> Unit)? = null,
     content: @Composable (PaddingValues, afterDeleted: (T) -> Unit) -> Unit
 ) {
     val deletedDataChannel = remember { Channel<T>(Channel.UNLIMITED) }
@@ -61,8 +61,10 @@ fun <T> HealthDataListScreen(
             TopAppBar(
                 title = title,
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
+                    if (onNavigateBack != null) {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
+                        }
                     }
                 }
             )
