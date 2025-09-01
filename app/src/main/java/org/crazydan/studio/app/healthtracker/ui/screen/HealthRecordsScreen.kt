@@ -22,16 +22,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.StateFlow
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.getPersonLabel
+import org.crazydan.studio.app.healthtracker.ui.Event
+import org.crazydan.studio.app.healthtracker.ui.EventDispatch
 import org.crazydan.studio.app.healthtracker.ui.component.HealthRecordAverageCircle
 import org.crazydan.studio.app.healthtracker.ui.component.HealthRecordsChart
 
@@ -43,34 +42,40 @@ import org.crazydan.studio.app.healthtracker.ui.component.HealthRecordsChart
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HealthRecordsScreen(
-    healthPerson: StateFlow<HealthPerson?>,
-    healthType: StateFlow<HealthType?>,
-    healthRecords: StateFlow<List<HealthRecord>>,
-    onAddRecord: () -> Unit,
-    onGotoRecordDetails: () -> Unit,
-    onNavigateBack: () -> Unit,
+    healthType: HealthType?,
+    healthPerson: HealthPerson?,
+    healthRecords: List<HealthRecord>,
+    eventDispatch: EventDispatch,
 ) {
-    // 使用 collectAsState() 将 StateFlow 转换为 Compose 状态
-    val currentHealthPerson by healthPerson.collectAsState()
-    val currentHealthType by healthType.collectAsState()
-    val currentHealthRecords by healthRecords.collectAsState()
+    if (healthPerson == null || healthType == null) {
+        return
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        getPersonLabel(currentHealthType?.name, currentHealthPerson)
+                        getPersonLabel(healthType.name, healthPerson)
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = {
+                        eventDispatch(Event.NavBack())
+                    }) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
                     }
                 },
                 actions = {
-                    if (currentHealthRecords.isNotEmpty()) {
-                        IconButton(onClick = onGotoRecordDetails) {
+                    if (healthRecords.isNotEmpty()) {
+                        IconButton(onClick = {
+                            eventDispatch(
+                                Event.ViewHealthRecordDetailsOfType(
+                                    healthType.id,
+                                    healthType.personId
+                                )
+                            )
+                        }) {
                             Icon(Icons.Default.TableView, contentDescription = "查看详情")
                         }
                     }
@@ -78,12 +83,19 @@ fun HealthRecordsScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddRecord) {
+            FloatingActionButton(onClick = {
+                eventDispatch(
+                    Event.WillAddHealthRecordOfType(
+                        healthType.id,
+                        healthType.personId
+                    )
+                )
+            }) {
                 Icon(Icons.Default.Add, contentDescription = "添加记录")
             }
         }
     ) { padding ->
-        if (currentHealthRecords.isEmpty()) {
+        if (healthRecords.isEmpty()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -91,7 +103,7 @@ fun HealthRecordsScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("暂无${currentHealthType?.name}数据，请点击右下角按钮添加")
+                Text("暂无${healthType.name}数据，请点击右下角按钮添加")
             }
         } else {
             Column(
@@ -103,19 +115,19 @@ fun HealthRecordsScreen(
                         .fillMaxWidth()
                         .horizontalScroll(rememberScrollState()),
                 ) {
-                    if (currentHealthType!!.ranges.isNotEmpty()) {
-                        currentHealthType!!.ranges.forEach { range ->
+                    if (healthType.ranges.isNotEmpty()) {
+                        healthType.ranges.forEach { range ->
                             HealthRecordAverageCircle(
                                 label = "<${range.name}>均值",
                                 range = range,
-                                records = currentHealthRecords,
+                                records = healthRecords,
                                 modifier = Modifier.padding(16.dp)
                             )
                         }
                     } else {
                         HealthRecordAverageCircle(
-                            label = "<${currentHealthType?.name}>均值",
-                            records = currentHealthRecords,
+                            label = "<${healthType.name}>均值",
+                            records = healthRecords,
                             modifier = Modifier.padding(16.dp),
                         )
                     }
@@ -128,8 +140,8 @@ fun HealthRecordsScreen(
                         .padding(16.dp)
                 ) {
                     HealthRecordsChart(
-                        healthType = currentHealthType!!,
-                        healthRecords = currentHealthRecords,
+                        healthType = healthType,
+                        healthRecords = healthRecords,
                         modifier = Modifier.fillMaxSize()
                     )
                 }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -24,18 +25,19 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.marosseleng.compose.material3.datetimepickers.time.domain.noSeconds
-import kotlinx.coroutines.flow.StateFlow
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
+import org.crazydan.studio.app.healthtracker.ui.Event
+import org.crazydan.studio.app.healthtracker.ui.EventDispatch
 import org.crazydan.studio.app.healthtracker.ui.component.DateInputPicker
 import org.crazydan.studio.app.healthtracker.ui.component.TimeInputPicker
 import org.crazydan.studio.app.healthtracker.util.epochMillisToLocalDateTime
@@ -51,48 +53,49 @@ import java.time.LocalTime
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddOrEditHealthRecordScreen(
-    editRecord: StateFlow<HealthRecord?>? = null,
-    healthPerson: StateFlow<HealthPerson?>,
-    healthType: StateFlow<HealthType?>,
-    onSave: (HealthRecord) -> Unit,
-    onCancel: () -> Unit,
+    editRecord: HealthRecord? = null,
+    healthType: HealthType?,
+    healthPerson: HealthPerson?,
+    eventDispatch: EventDispatch,
 ) {
-    val currentEditRecord = editRecord?.collectAsState()?.value
-    val currentHealthPerson by healthPerson.collectAsState()
-    val currentHealthType by healthType.collectAsState()
-
-    var value by remember { mutableStateOf(currentEditRecord?.value?.toString() ?: "") }
-    var notes by remember { mutableStateOf(currentEditRecord?.notes ?: "") }
-
-    val ranges = currentHealthType?.ranges?.map { it.name } ?: emptyList()
-    var rangeName by remember {
-        mutableStateOf(
-            currentEditRecord?.rangeName
-                ?: ranges.firstOrNull() ?: ""
-        )
+    if (healthPerson == null || healthType == null) {
+        return
     }
+
+    var value by remember { mutableStateOf("") }
+    value = editRecord?.value?.toString() ?: ""
+
+    var notes by remember { mutableStateOf("") }
+    notes = editRecord?.notes ?: ""
+
+    val ranges = healthType.ranges.map { it.name }
+    var rangeName by remember { mutableStateOf("") }
+    rangeName = editRecord?.rangeName ?: ranges.firstOrNull() ?: ""
+
     var rangeExpanded by remember { mutableStateOf(false) }
 
     val timestamp =
-        if (currentEditRecord == null) null
-        else epochMillisToLocalDateTime(currentEditRecord.timestamp)
-    var timestampDate: LocalDate by remember {
-        mutableStateOf(timestamp?.toLocalDate() ?: LocalDate.now())
-    }
-    var timestampTime: LocalTime by remember {
-        mutableStateOf(timestamp?.toLocalTime() ?: LocalTime.now().noSeconds())
-    }
+        if (editRecord == null) null
+        else epochMillisToLocalDateTime(editRecord.timestamp)
+
+    var timestampDate by remember { mutableStateOf(LocalDate.now()) }
+    timestampDate = timestamp?.toLocalDate() ?: LocalDate.now()
+
+    var timestampTime by remember { mutableStateOf(LocalTime.now().noSeconds()) }
+    timestampTime = timestamp?.toLocalTime() ?: LocalTime.now().noSeconds()
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        (if (currentEditRecord == null) "添加" else "编辑") + "${currentHealthType?.name}记录"
+                        (if (editRecord == null) "添加" else "编辑") + "${healthType.name}记录"
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onCancel) {
+                    IconButton(onClick = {
+                        eventDispatch(Event.NavBack())
+                    }) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
                     }
                 }
@@ -102,19 +105,21 @@ fun AddOrEditHealthRecordScreen(
             Button(
                 onClick = {
                     value.toFloatOrNull()?.let {
-                        if (currentHealthType != null && currentHealthPerson != null) {
-                            onSave(
-                                HealthRecord(
-                                    id = currentEditRecord?.id ?: 0,
-                                    value = it,
-                                    timestamp = toEpochMillis(timestampDate, timestampTime),
-                                    typeId = currentHealthType!!.id,
-                                    personId = currentHealthPerson!!.id,
-                                    rangeName = rangeName,
-                                    notes = notes,
-                                    createdAt = System.currentTimeMillis(),
-                                )
-                            )
+                        val record = HealthRecord(
+                            id = editRecord?.id ?: 0,
+                            value = it,
+                            timestamp = toEpochMillis(timestampDate, timestampTime),
+                            typeId = healthType.id,
+                            personId = healthPerson.id,
+                            rangeName = rangeName,
+                            notes = notes,
+                            createdAt = System.currentTimeMillis(),
+                        )
+
+                        if (record.id == 0L) {
+                            eventDispatch(Event.SaveHealthRecord(record))
+                        } else {
+                            eventDispatch(Event.UpdateHealthRecord(record))
                         }
                     }
                 },
@@ -138,7 +143,8 @@ fun AddOrEditHealthRecordScreen(
                 OutlinedTextField(
                     value = value,
                     onValueChange = { value = it },
-                    label = { Text("测量值 (${currentHealthType?.unit})") },
+                    label = { Text("测量值 (${healthType.unit})") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth()
                 )
 

@@ -10,15 +10,14 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.StateFlow
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.getPersonLabel
+import org.crazydan.studio.app.healthtracker.ui.Event
+import org.crazydan.studio.app.healthtracker.ui.EventDispatch
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCard
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataListScreen
 import org.crazydan.studio.app.healthtracker.util.formatEpochMillis
@@ -31,43 +30,43 @@ import org.crazydan.studio.app.healthtracker.util.formatEpochMillis
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HealthRecordDetailsScreen(
-    healthPerson: StateFlow<HealthPerson?>,
-    healthType: StateFlow<HealthType?>,
-    healthRecords: StateFlow<List<HealthRecord>>,
-    onDeleteRecord: (HealthRecord) -> Unit,
-    onUndeleteRecord: (HealthRecord) -> Unit,
-    onEditRecord: (HealthRecord) -> Unit,
-    onNavigateBack: () -> Unit,
+    healthType: HealthType?,
+    healthPerson: HealthPerson?,
+    healthRecords: List<HealthRecord>,
+    deletedRecordAmount: Long,
+    eventDispatch: EventDispatch,
 ) {
-    // 使用 collectAsState() 将 StateFlow 转换为 Compose 状态
-    val currentHealthPerson by healthPerson.collectAsState()
-    val currentHealthType by healthType.collectAsState()
-    val currentHealthRecords by healthRecords.collectAsState()
+    if (healthPerson == null || healthType == null) {
+        return
+    }
 
     HealthDataListScreen(
+        deletedAmount = deletedRecordAmount,
         title = {
-            Text(getPersonLabel(currentHealthType?.name + "记录", currentHealthPerson))
+            Text(getPersonLabel(healthType.name + "记录", healthPerson))
         },
-        deletedMessage = { record ->
-            "已删除记录【${record.value}${currentHealthType?.unit} @${formatTimestamp(record)}】"
+        onViewDeleted = {
+            eventDispatch(
+                Event.ViewDeletedHealthRecordsOfType(
+                    healthType.id,
+                    healthType.personId
+                )
+            )
         },
-        onUndelete = onUndeleteRecord,
-        onNavigateBack = onNavigateBack,
-    ) { padding, afterDeleted ->
+        onNavigateBack = {
+            eventDispatch(Event.NavBack())
+        },
+    ) { padding ->
         LazyColumn(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
         ) {
-            items(currentHealthRecords) { record ->
+            items(healthRecords) { record ->
                 HealthRecordItem(
-                    type = currentHealthType!!,
+                    type = healthType,
                     record = record,
-                    onDeleteRecord = {
-                        onDeleteRecord(record)
-                        afterDeleted(record)
-                    },
-                    onEditRecord = { onEditRecord(record) },
+                    eventDispatch = eventDispatch,
                 )
             }
         }
@@ -78,12 +77,21 @@ fun HealthRecordDetailsScreen(
 private fun HealthRecordItem(
     type: HealthType,
     record: HealthRecord,
-    onDeleteRecord: () -> Unit,
-    onEditRecord: () -> Unit,
+    eventDispatch: EventDispatch,
 ) {
     HealthDataCard(
-        onEdit = onEditRecord,
-        onDelete = onDeleteRecord,
+        onEdit = {
+            eventDispatch(
+                Event.WillEditHealthRecord(
+                    record.id,
+                    record.typeId,
+                    record.personId
+                )
+            )
+        },
+        onDelete = {
+            eventDispatch(Event.DeleteHealthRecord(record.id))
+        },
     ) {
         val label = "${record.value}${type.unit}"
         val timestamp = formatTimestamp(record)

@@ -34,9 +34,8 @@ fun TimeInputPicker(
     format: String = "HH:mm",
     onValueChange: ((LocalTime) -> Unit)? = null,
 ) {
-    var selectedTime: LocalTime? by remember {
-        mutableStateOf(value)
-    }
+    var selectedTime by remember { mutableStateOf<LocalTime?>(null) }
+    selectedTime = value
 
     var showTimePicker by remember { mutableStateOf(false) }
     val timeFormatter = remember { DateTimeFormatter.ofPattern(format) }

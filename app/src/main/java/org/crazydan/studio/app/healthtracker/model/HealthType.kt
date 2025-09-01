@@ -29,6 +29,8 @@ data class HealthType(
 
 /** 正常范围 */
 data class NormalRange(
+//    /** 唯一标识，自动生成 */
+//    val code: String,
     /** 范围名称，如，空腹 8h */
     val name: String,
     /** 上限值 */

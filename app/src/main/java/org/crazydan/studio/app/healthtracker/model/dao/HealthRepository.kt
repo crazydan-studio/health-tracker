@@ -26,6 +26,10 @@ class HealthRepository(
 
     fun getAllHealthPersons(): Flow<List<HealthPerson>> = healthPersonDao.getAll()
 
+    fun getDeletedHealthPersons(): Flow<List<HealthPerson>> = healthPersonDao.getDeleted()
+
+    fun countDeletedHealthPersons(): Flow<Long> = healthPersonDao.countDeleted()
+
     fun getHealthPersonById(id: Long): Flow<HealthPerson?> = healthPersonDao.getById(id)
 
     // HealthType operations
@@ -37,11 +41,14 @@ class HealthRepository(
 
     suspend fun undeleteHealthType(id: Long) = healthTypeDao.undelete(id)
 
-    fun getAllHealthTypes(): Flow<List<HealthType>> = healthTypeDao.getAll()
-
     fun getHealthTypeById(id: Long): Flow<HealthType?> = healthTypeDao.getById(id)
 
     fun getHealthTypesByPersonId(personId: Long): Flow<List<HealthType>> = healthTypeDao.getByPersonId(personId)
+
+    fun getDeletedHealthTypesByPersonId(personId: Long): Flow<List<HealthType>> =
+        healthTypeDao.getDeletedByPersonId(personId)
+
+    fun countDeletedHealthTypesByPersonId(personId: Long): Flow<Long> = healthTypeDao.countDeletedByPersonId(personId)
 
     // HealthRecord operations
     suspend fun insertHealthRecord(healthRecord: HealthRecord): Long = healthRecordDao.insert(healthRecord)
@@ -52,5 +59,12 @@ class HealthRepository(
 
     suspend fun undeleteHealthRecord(id: Long) = healthRecordDao.undelete(id)
 
+    fun getHealthRecordById(id: Long): Flow<HealthRecord?> = healthRecordDao.getById(id)
+
     fun getHealthRecordsByTypeId(typeId: Long): Flow<List<HealthRecord>> = healthRecordDao.getByTypeId(typeId)
+
+    fun getDeletedHealthRecordsByTypeId(typeId: Long): Flow<List<HealthRecord>> =
+        healthRecordDao.getDeletedByTypeId(typeId)
+
+    fun countDeletedHealthRecordsByTypeId(typeId: Long): Flow<Long> = healthRecordDao.countDeletedByTypeId(typeId)
 }

@@ -16,17 +16,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.StateFlow
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.NormalRange
 import org.crazydan.studio.app.healthtracker.model.getPersonLabel
+import org.crazydan.studio.app.healthtracker.ui.Event
+import org.crazydan.studio.app.healthtracker.ui.EventDispatch
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCard
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataListScreen
 
@@ -38,37 +37,43 @@ import org.crazydan.studio.app.healthtracker.ui.component.HealthDataListScreen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HealthTypesScreen(
-    healthPerson: StateFlow<HealthPerson?>,
-    healthTypes: StateFlow<List<HealthType>>,
-    onAddType: () -> Unit,
-    onDeleteType: (HealthType) -> Unit,
-    onUndeleteType: (HealthType) -> Unit,
-    onEditType: (HealthType) -> Unit,
-    onViewRecords: (HealthType) -> Unit,
-    onNavigateBack: () -> Unit
+    healthPerson: HealthPerson?,
+    healthTypes: List<HealthType>,
+    deletedTypeAmount: Long,
+    eventDispatch: EventDispatch,
 ) {
-    // 使用 collectAsState() 将 StateFlow 转换为 Compose 状态
-    val person by healthPerson.collectAsState()
-    val types by healthTypes.collectAsState()
+    if (healthPerson == null) {
+        return
+    }
 
     HealthDataListScreen(
+        deletedAmount = deletedTypeAmount,
         title = {
             Text(
-                getPersonLabel("健康数据", person)
+                getPersonLabel("健康数据", healthPerson)
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddType) {
+            FloatingActionButton(onClick = {
+                eventDispatch(
+                    Event.WillAddHealthTypeOfPerson(healthPerson.id)
+                )
+            }) {
                 Icon(Icons.Default.Add, contentDescription = "添加类型")
             }
         },
-        deletedMessage = { type ->
-            "已删除类型【${type.name}】"
+        onViewDeleted = {
+            eventDispatch(
+                Event.ViewDeletedHealthTypesOfPerson(healthPerson.id)
+            )
         },
-        onUndelete = onUndeleteType,
-        onNavigateBack = onNavigateBack,
-    ) { padding, afterDeleted ->
-        if (types.isEmpty()) {
+        onNavigateBack = {
+            eventDispatch(
+                Event.NavBack()
+            )
+        },
+    ) { padding ->
+        if (healthTypes.isEmpty()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -84,15 +89,10 @@ fun HealthTypesScreen(
                     .padding(padding)
                     .fillMaxSize()
             ) {
-                items(types) { type ->
+                items(healthTypes) { type ->
                     HealthTypeItem(
                         type = type,
-                        onDeleteType = {
-                            onDeleteType(type)
-                            afterDeleted(type)
-                        },
-                        onEditType = { onEditType(type) },
-                        onViewRecords = { onViewRecords(type) },
+                        eventDispatch = eventDispatch,
                     )
                 }
             }
@@ -103,14 +103,28 @@ fun HealthTypesScreen(
 @Composable
 private fun HealthTypeItem(
     type: HealthType,
-    onDeleteType: () -> Unit,
-    onEditType: () -> Unit,
-    onViewRecords: () -> Unit,
+    eventDispatch: EventDispatch,
 ) {
     HealthDataCard(
-        onEdit = onEditType,
-        onDelete = onDeleteType,
-        onView = onViewRecords,
+        onEdit = {
+            eventDispatch(
+                Event.WillEditHealthType(
+                    type.id,
+                    type.personId
+                )
+            )
+        },
+        onDelete = {
+            eventDispatch(Event.DeleteHealthType(type.id))
+        },
+        onView = {
+            eventDispatch(
+                Event.ViewHealthRecordsOfType(
+                    type.id,
+                    type.personId
+                )
+            )
+        },
     ) {
         Text(text = type.name, style = MaterialTheme.typography.headlineSmall)
 
@@ -145,8 +159,6 @@ private fun HealthTypeItemPreview() {
                 ),
             ),
         ),
-        onDeleteType = {},
-        onEditType = {},
-        onViewRecords = {},
+        eventDispatch = {},
     )
 }

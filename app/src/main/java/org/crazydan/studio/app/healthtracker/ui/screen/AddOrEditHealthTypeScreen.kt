@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -25,7 +26,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -33,11 +33,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.StateFlow
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.NormalRange
+import org.crazydan.studio.app.healthtracker.ui.Event
+import org.crazydan.studio.app.healthtracker.ui.EventDispatch
 
 /**
  *
@@ -47,19 +49,22 @@ import org.crazydan.studio.app.healthtracker.model.NormalRange
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddOrEditHealthTypeScreen(
-    editType: StateFlow<HealthType?>? = null,
-    healthPerson: StateFlow<HealthPerson?>,
-    onSave: (HealthType) -> Unit,
-    onCancel: () -> Unit
+    editType: HealthType? = null,
+    healthPerson: HealthPerson?,
+    eventDispatch: EventDispatch,
 ) {
-    val currentEditType = editType?.collectAsState()?.value
-    val currentHealthPerson by healthPerson.collectAsState()
+    if (healthPerson == null) {
+        return
+    }
 
-    var name by remember { mutableStateOf(currentEditType?.name ?: "") }
-    var unit by remember { mutableStateOf(currentEditType?.unit ?: "") }
+    var name by remember { mutableStateOf("") }
+    name = editType?.name ?: ""
+
+    var unit by remember { mutableStateOf("") }
+    unit = editType?.unit ?: ""
 
     val ranges = remember { mutableStateListOf<NormalRange>() }
-    currentEditType?.ranges?.let { ranges.addAll(it) }
+    editType?.ranges?.let { ranges.addAll(it) }
 
     var rangeName by remember { mutableStateOf("") }
     var lowerLimit by remember { mutableStateOf("") }
@@ -70,11 +75,13 @@ fun AddOrEditHealthTypeScreen(
             TopAppBar(
                 title = {
                     Text(
-                        (if (currentEditType == null) "添加" else "编辑") + "健康类型"
+                        (if (editType == null) "添加" else "编辑") + "健康类型"
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onCancel) {
+                    IconButton(onClick = {
+                        eventDispatch(Event.NavBack())
+                    }) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
                     }
                 }
@@ -84,15 +91,17 @@ fun AddOrEditHealthTypeScreen(
             Button(
                 onClick = {
                     if (name.isNotBlank() && unit.isNotBlank()) {
-                        currentHealthPerson?.let { p ->
-                            onSave(
-                                HealthType(
-                                    id = currentEditType?.id ?: 0,
-                                    personId = p.id,
-                                    name = name.trim(), unit = unit.trim(),
-                                    ranges = ranges.toList()
-                                )
-                            )
+                        val type = HealthType(
+                            id = editType?.id ?: 0,
+                            personId = healthPerson.id,
+                            name = name.trim(), unit = unit.trim(),
+                            ranges = ranges.toList()
+                        )
+
+                        if (type.id == 0L) {
+                            eventDispatch(Event.SaveHealthType(type))
+                        } else {
+                            eventDispatch(Event.UpdateHealthType(type))
                         }
                     }
                 },
@@ -157,12 +166,14 @@ fun AddOrEditHealthTypeScreen(
                             value = lowerLimit,
                             onValueChange = { lowerLimit = it },
                             label = { Text("下限值") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.weight(1f)
                         )
                         OutlinedTextField(
                             value = upperLimit,
                             onValueChange = { upperLimit = it },
                             label = { Text("上限值") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.weight(1f)
                         )
                     }

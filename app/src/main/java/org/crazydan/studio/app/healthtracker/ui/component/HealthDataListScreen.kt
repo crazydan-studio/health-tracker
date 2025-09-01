@@ -3,20 +3,16 @@ package org.crazydan.studio.app.healthtracker.ui.component
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Recycling
+import androidx.compose.material3.Badge
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.receiveAsFlow
 
 /**
  *
@@ -25,37 +21,14 @@ import kotlinx.coroutines.flow.receiveAsFlow
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun <T> HealthDataListScreen(
+fun HealthDataListScreen(
     title: @Composable () -> Unit,
-    floatingActionButton: @Composable () -> Unit = {},
-    deletedMessage: (T) -> String,
-    onUndelete: (T) -> Unit,
+    deletedAmount: Long,
+    onViewDeleted: () -> Unit,
     onNavigateBack: (() -> Unit)? = null,
-    content: @Composable (PaddingValues, afterDeleted: (T) -> Unit) -> Unit
+    floatingActionButton: @Composable () -> Unit = {},
+    content: @Composable (PaddingValues) -> Unit
 ) {
-    val deletedDataChannel = remember { Channel<T>(Channel.UNLIMITED) }
-
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    LaunchedEffect(deletedDataChannel) {
-        deletedDataChannel.receiveAsFlow().collect { data ->
-            val result = snackbarHostState.showSnackbar(
-                message = deletedMessage(data),
-                actionLabel = "撤销",
-                duration = SnackbarDuration.Long
-            )
-
-            when (result) {
-                SnackbarResult.ActionPerformed -> {
-                    onUndelete(data)
-                }
-
-                SnackbarResult.Dismissed -> {
-                }
-            }
-        }
-    }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -66,16 +39,19 @@ fun <T> HealthDataListScreen(
                             Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
                         }
                     }
+                },
+                actions = {
+                    TextButton(onClick = onViewDeleted) {
+                        Icon(Icons.Default.Recycling, contentDescription = "回收站")
+                        Badge {
+                            val text = if (deletedAmount > 99) "99+" else deletedAmount.toString()
+                            Text(text)
+                        }
+                    }
                 }
             )
         },
         floatingActionButton = floatingActionButton,
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
-        },
-    ) { padding ->
-        content(padding) { data ->
-            deletedDataChannel.trySend(data)
-        }
-    }
+        content = content
+    )
 }

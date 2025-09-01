@@ -18,7 +18,6 @@ interface HealthTypeDao {
     @Insert
     suspend fun insert(healthType: HealthType): Long
 
-    // TODO 更新 HealthRecord#rangeName
     @Update
     suspend fun update(healthType: HealthType)
 
@@ -31,11 +30,14 @@ interface HealthTypeDao {
     @Query("DELETE FROM $HEALTH_TYPE_TABLE_NAME WHERE id = :id")
     suspend fun forceDelete(id: Long)
 
-    @Query("SELECT * FROM $HEALTH_TYPE_TABLE_NAME WHERE deleted = 0 ORDER BY name")
-    fun getAll(): Flow<List<HealthType>>
-
     @Query("SELECT * FROM $HEALTH_TYPE_TABLE_NAME WHERE personId = :personId AND deleted = 0 ORDER BY name")
     fun getByPersonId(personId: Long): Flow<List<HealthType>>
+
+    @Query("SELECT * FROM $HEALTH_TYPE_TABLE_NAME WHERE personId = :personId AND deleted = 1 ORDER BY name")
+    fun getDeletedByPersonId(personId: Long): Flow<List<HealthType>>
+
+    @Query("SELECT count(id) FROM $HEALTH_TYPE_TABLE_NAME WHERE personId = :personId AND deleted = 1")
+    fun countDeletedByPersonId(personId: Long): Flow<Long>
 
     @Query("SELECT * FROM $HEALTH_TYPE_TABLE_NAME WHERE id = :id")
     fun getById(id: Long): Flow<HealthType?>

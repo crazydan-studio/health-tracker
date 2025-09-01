@@ -33,6 +33,12 @@ interface HealthPersonDao {
     @Query("SELECT * FROM $HEALTH_PERSON_TABLE_NAME WHERE deleted = 0 ORDER BY familyName, givenName")
     fun getAll(): Flow<List<HealthPerson>>
 
+    @Query("SELECT * FROM $HEALTH_PERSON_TABLE_NAME WHERE deleted = 1 ORDER BY familyName, givenName")
+    fun getDeleted(): Flow<List<HealthPerson>>
+
+    @Query("SELECT count(id) FROM $HEALTH_PERSON_TABLE_NAME WHERE deleted = 1")
+    fun countDeleted(): Flow<Long>
+
     @Query("SELECT * FROM $HEALTH_PERSON_TABLE_NAME WHERE id = :id")
     fun getById(id: Long): Flow<HealthPerson?>
 }

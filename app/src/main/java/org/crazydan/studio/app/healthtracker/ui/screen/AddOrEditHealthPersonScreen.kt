@@ -21,15 +21,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.StateFlow
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
+import org.crazydan.studio.app.healthtracker.ui.Event
+import org.crazydan.studio.app.healthtracker.ui.EventDispatch
 import org.crazydan.studio.app.healthtracker.ui.component.DateInputPicker
 import org.crazydan.studio.app.healthtracker.ui.component.TimeInputPicker
 import org.crazydan.studio.app.healthtracker.util.epochMillisToLocalDateTime
@@ -45,25 +45,27 @@ import java.time.LocalTime
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddOrEditHealthPersonScreen(
-    editPerson: StateFlow<HealthPerson?>? = null,
-    onSave: (HealthPerson) -> Unit,
-    onCancel: () -> Unit
+    editPerson: HealthPerson? = null,
+    eventDispatch: EventDispatch,
 ) {
-    val currentEditPerson = editPerson?.collectAsState()?.value
+    var label by remember { mutableStateOf("") }
+    label = editPerson?.label ?: ""
 
-    var label by remember { mutableStateOf(currentEditPerson?.label ?: "") }
-    var familyName by remember { mutableStateOf(currentEditPerson?.familyName ?: "") }
-    var givenName by remember { mutableStateOf(currentEditPerson?.givenName ?: "") }
+    var familyName by remember { mutableStateOf("") }
+    familyName = editPerson?.familyName ?: ""
+
+    var givenName by remember { mutableStateOf("") }
+    givenName = editPerson?.givenName ?: ""
 
     val birthday =
-        if (currentEditPerson == null) null
-        else epochMillisToLocalDateTime(currentEditPerson.birthday)
-    var birthDate: LocalDate? by remember {
-        mutableStateOf(birthday?.toLocalDate())
-    }
-    var birthTime: LocalTime? by remember {
-        mutableStateOf(birthday?.toLocalTime())
-    }
+        if (editPerson == null) null
+        else epochMillisToLocalDateTime(editPerson.birthday)
+
+    var birthDate by remember { mutableStateOf<LocalDate?>(null) }
+    birthDate = birthday?.toLocalDate()
+
+    var birthTime by remember { mutableStateOf<LocalTime?>(null) }
+    birthTime = birthday?.toLocalTime()
 
     Scaffold(
         topBar = {
@@ -74,7 +76,9 @@ fun AddOrEditHealthPersonScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onCancel) {
+                    IconButton(onClick = {
+                        eventDispatch(Event.NavBack())
+                    }) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
                     }
                 }
@@ -84,14 +88,18 @@ fun AddOrEditHealthPersonScreen(
             Button(
                 onClick = {
                     if (familyName.isNotBlank() && givenName.isNotBlank() && birthDate != null && birthTime != null) {
-                        onSave(
-                            HealthPerson(
-                                id = currentEditPerson?.id ?: 0,
-                                label = label.trim(),
-                                familyName = familyName.trim(), givenName = givenName.trim(),
-                                birthday = toEpochMillis(birthDate!!, birthTime!!)
-                            )
+                        val person = HealthPerson(
+                            id = editPerson?.id ?: 0,
+                            label = label.trim(),
+                            familyName = familyName.trim(), givenName = givenName.trim(),
+                            birthday = toEpochMillis(birthDate!!, birthTime!!)
                         )
+
+                        if (person.id == 0L) {
+                            eventDispatch(Event.SaveHealthPerson(person))
+                        } else {
+                            eventDispatch(Event.UpdateHealthPerson(person))
+                        }
                     }
                 },
                 enabled = familyName.isNotBlank() && givenName.isNotBlank() && birthDate != null && birthTime != null

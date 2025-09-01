@@ -33,9 +33,8 @@ fun DateInputPicker(
     format: String = "yyyy-MM-dd",
     onValueChange: ((LocalDate) -> Unit)? = null,
 ) {
-    var selectedDate: LocalDate? by remember {
-        mutableStateOf(value)
-    }
+    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+    selectedDate = value
 
     var showDatePicker by remember { mutableStateOf(false) }
     val dateFormatter = remember { DateTimeFormatter.ofPattern(format) }

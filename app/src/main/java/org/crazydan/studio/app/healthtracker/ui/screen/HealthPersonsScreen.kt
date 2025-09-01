@@ -16,16 +16,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.StateFlow
 import org.crazydan.studio.app.healthtracker.R
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
+import org.crazydan.studio.app.healthtracker.ui.Event
+import org.crazydan.studio.app.healthtracker.ui.EventDispatch
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCard
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataListScreen
 import org.crazydan.studio.app.healthtracker.util.calculateAge
@@ -40,33 +39,29 @@ import java.sql.Timestamp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HealthPersonsScreen(
-    healthPersons: StateFlow<List<HealthPerson>>,
-    onAddPerson: () -> Unit,
-    onDeletePerson: (HealthPerson) -> Unit,
-    onUndeletePerson: (HealthPerson) -> Unit,
-    onEditPerson: (HealthPerson) -> Unit,
-    onViewTypes: (HealthPerson) -> Unit
+    healthPersons: List<HealthPerson>,
+    deletedPersonAmount: Long,
+    eventDispatch: EventDispatch,
 ) {
-    // 使用 collectAsState() 将 StateFlow 转换为 Compose 状态
-    val persons by healthPersons.collectAsState()
-
     HealthDataListScreen(
+        deletedAmount = deletedPersonAmount,
         title = {
             Text(
                 stringResource(R.string.app_name)
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddPerson) {
+            FloatingActionButton(onClick = {
+                eventDispatch(Event.WillAddHealthPerson())
+            }) {
                 Icon(Icons.Default.Add, contentDescription = "添加人员")
             }
         },
-        deletedMessage = { person ->
-            "已删除人员【${getPersonFullName(person)}】"
+        onViewDeleted = {
+            eventDispatch(Event.ViewDeletedHealthPersons())
         },
-        onUndelete = onUndeletePerson,
-    ) { padding, afterDeleted ->
-        if (persons.isEmpty()) {
+    ) { padding ->
+        if (healthPersons.isEmpty()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -82,15 +77,10 @@ fun HealthPersonsScreen(
                     .padding(padding)
                     .fillMaxSize()
             ) {
-                items(persons) { person ->
+                items(healthPersons) { person ->
                     HealthPersonItem(
                         person = person,
-                        onDeletePerson = {
-                            onDeletePerson(person)
-                            afterDeleted(person)
-                        },
-                        onEditPerson = { onEditPerson(person) },
-                        onViewTypes = { onViewTypes(person) },
+                        eventDispatch = eventDispatch,
                     )
                 }
             }
@@ -101,14 +91,18 @@ fun HealthPersonsScreen(
 @Composable
 private fun HealthPersonItem(
     person: HealthPerson,
-    onDeletePerson: () -> Unit,
-    onEditPerson: () -> Unit,
-    onViewTypes: () -> Unit,
+    eventDispatch: EventDispatch,
 ) {
     HealthDataCard(
-        onEdit = onEditPerson,
-        onDelete = onDeletePerson,
-        onView = onViewTypes,
+        onEdit = {
+            eventDispatch(Event.WillEditHealthPerson(person.id))
+        },
+        onDelete = {
+            eventDispatch(Event.DeleteHealthPerson(person.id))
+        },
+        onView = {
+            eventDispatch(Event.ViewHealthTypesOfPerson(person.id))
+        },
     ) {
         val fullName = getPersonFullName(person)
         val label =
@@ -137,8 +131,6 @@ private fun HealthPersonItemPreview() {
             givenName = "五",
             birthday = Timestamp.valueOf("1988-08-10 08:10:00.000").time,
         ),
-        onDeletePerson = {},
-        onEditPerson = {},
-        onViewTypes = {},
+        eventDispatch = {},
     )
 }
