@@ -4,27 +4,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -40,6 +30,7 @@ import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.NormalRange
 import org.crazydan.studio.app.healthtracker.ui.Event
 import org.crazydan.studio.app.healthtracker.ui.EventDispatch
+import org.crazydan.studio.app.healthtracker.ui.component.AddOrEditHealthDataScreen
 
 /**
  *
@@ -70,165 +61,138 @@ fun AddOrEditHealthTypeScreen(
     var lowerLimit by remember { mutableStateOf("") }
     var upperLimit by remember { mutableStateOf("") }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        (if (editType == null) "添加" else "编辑") + "健康类型"
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        eventDispatch(Event.NavBack())
-                    }) {
-                        Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
-                    }
-                }
+    AddOrEditHealthDataScreen(
+        title = {
+            Text(
+                (if (editType == null) "添加" else "编辑") + "健康类型"
             )
         },
-        floatingActionButton = {
-            Button(
-                onClick = {
-                    if (name.isNotBlank() && unit.isNotBlank()) {
-                        val type = HealthType(
-                            id = editType?.id ?: 0,
-                            personId = healthPerson.id,
-                            name = name.trim(), unit = unit.trim(),
-                            ranges = ranges.toList()
-                        )
+        onNavigateBack = { eventDispatch(Event.NavBack()) },
+        canSave = name.isNotBlank() && unit.isNotBlank(),
+        onSaveData = {
+            val type = HealthType(
+                id = editType?.id ?: 0,
+                personId = healthPerson.id,
+                name = name.trim(), unit = unit.trim(),
+                ranges = ranges.toList()
+            )
 
-                        if (type.id == 0L) {
-                            eventDispatch(Event.SaveHealthType(type))
-                        } else {
-                            eventDispatch(Event.UpdateHealthType(type))
-                        }
-                    }
-                },
-                enabled = name.isNotBlank() && unit.isNotBlank()
-            ) {
-                Icon(Icons.Default.Save, contentDescription = "保存")
-                Spacer(modifier = Modifier.padding(4.dp))
-                Text("保存")
+            if (type.id == 0L) {
+                eventDispatch(Event.SaveHealthType(type))
+            } else {
+                eventDispatch(Event.UpdateHealthType(type))
+            }
+        },
+    ) {
+        // 基本信息
+        Card {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("基本信息", style = MaterialTheme.typography.headlineSmall)
+
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("类型名称") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = unit,
+                    onValueChange = { unit = it },
+                    label = { Text("单位") },
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // 基本信息
-            Card {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("基本信息", style = MaterialTheme.typography.headlineSmall)
 
-                    Spacer(modifier = Modifier.height(16.dp))
+        // 添加范围
+        Spacer(modifier = Modifier.height(16.dp))
+        Card {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("添加正常范围", style = MaterialTheme.typography.headlineSmall)
+
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = rangeName,
+                    onValueChange = { rangeName = it },
+                    label = { Text("范围名称") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
                     OutlinedTextField(
-                        value = name,
-                        onValueChange = { name = it },
-                        label = { Text("类型名称") },
-                        modifier = Modifier.fillMaxWidth()
+                        value = lowerLimit,
+                        onValueChange = { lowerLimit = it },
+                        label = { Text("下限值") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f)
                     )
-
-                    Spacer(modifier = Modifier.height(16.dp))
                     OutlinedTextField(
-                        value = unit,
-                        onValueChange = { unit = it },
-                        label = { Text("单位") },
-                        modifier = Modifier.fillMaxWidth()
+                        value = upperLimit,
+                        onValueChange = { upperLimit = it },
+                        label = { Text("上限值") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f)
                     )
                 }
-            }
 
-            // 添加范围
-            Card {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("添加正常范围", style = MaterialTheme.typography.headlineSmall)
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = rangeName,
-                        onValueChange = { rangeName = it },
-                        label = { Text("范围名称") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        OutlinedTextField(
-                            value = lowerLimit,
-                            onValueChange = { lowerLimit = it },
-                            label = { Text("下限值") },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.weight(1f)
-                        )
-                        OutlinedTextField(
-                            value = upperLimit,
-                            onValueChange = { upperLimit = it },
-                            label = { Text("上限值") },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(
-                        onClick = {
-                            if (rangeName.isNotBlank() &&
-                                lowerLimit.toFloatOrNull() != null &&
-                                upperLimit.toFloatOrNull() != null
-                            ) {
-                                ranges.add(
-                                    NormalRange(
-                                        name = rangeName.trim(),
-                                        lowerLimit = lowerLimit.toFloat(),
-                                        upperLimit = upperLimit.toFloat(),
-                                    )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        if (rangeName.isNotBlank() &&
+                            lowerLimit.toFloatOrNull() != null &&
+                            upperLimit.toFloatOrNull() != null
+                        ) {
+                            ranges.add(
+                                NormalRange(
+                                    name = rangeName.trim(),
+                                    lowerLimit = lowerLimit.toFloat(),
+                                    upperLimit = upperLimit.toFloat(),
                                 )
+                            )
 
-                                // 清空输入
-                                rangeName = ""
-                                lowerLimit = ""
-                                upperLimit = ""
-                            }
-                        },
-                        enabled = rangeName.isNotBlank() &&
-                                lowerLimit.toFloatOrNull() != null &&
-                                upperLimit.toFloatOrNull() != null,
-                        modifier = Modifier.align(Alignment.End)
-                    ) {
-                        Text("添加范围")
-                    }
+                            // 清空输入
+                            rangeName = ""
+                            lowerLimit = ""
+                            upperLimit = ""
+                        }
+                    },
+                    enabled = rangeName.isNotBlank() &&
+                            lowerLimit.toFloatOrNull() != null &&
+                            upperLimit.toFloatOrNull() != null,
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text("添加范围")
                 }
             }
+        }
 
-            // 已添加的范围
-            if (ranges.isNotEmpty()) {
-                Card {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("已添加的范围", style = MaterialTheme.typography.headlineSmall)
+        // 已添加的范围
+        if (ranges.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Card {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("已添加的范围", style = MaterialTheme.typography.headlineSmall)
 
-                        ranges.forEachIndexed { index, range ->
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically,
+                    ranges.forEachIndexed { index, range ->
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(range.name)
+                            Text("${range.lowerLimit} - ${range.upperLimit}")
+                            TextButton(
+                                onClick = { ranges.removeAt(index) }
                             ) {
-                                Text(range.name)
-                                Text("${range.lowerLimit} - ${range.upperLimit}")
-                                TextButton(
-                                    onClick = { ranges.removeAt(index) }
-                                ) {
-                                    Text("删除")
-                                }
+                                Text("删除")
                             }
                         }
                     }

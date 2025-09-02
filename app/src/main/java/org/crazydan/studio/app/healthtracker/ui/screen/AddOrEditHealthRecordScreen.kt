@@ -1,30 +1,16 @@
 package org.crazydan.studio.app.healthtracker.ui.screen
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Save
-import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +25,7 @@ import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.ui.Event
 import org.crazydan.studio.app.healthtracker.ui.EventDispatch
+import org.crazydan.studio.app.healthtracker.ui.component.AddOrEditHealthDataScreen
 import org.crazydan.studio.app.healthtracker.ui.component.DateInputPicker
 import org.crazydan.studio.app.healthtracker.ui.component.TimeInputPicker
 import org.crazydan.studio.app.healthtracker.util.epochMillisToLocalDateTime
@@ -87,159 +74,128 @@ fun AddOrEditHealthRecordScreen(
     var timestampTime by remember { mutableStateOf(LocalTime.now().noSeconds()) }
     timestampTime = timestamp?.toLocalTime() ?: LocalTime.now().noSeconds()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        (if (editRecord == null) "添加" else "编辑") + "${healthType.name}记录"
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        eventDispatch(Event.NavBack())
-                    }) {
-                        Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
-                    }
-                }
+    AddOrEditHealthDataScreen(
+        title = {
+            Text(
+                (if (editRecord == null) "添加" else "编辑") + "${healthType.name}记录"
             )
         },
-        floatingActionButton = {
-            Button(
-                onClick = {
-                    value.toFloatOrNull()?.let {
-                        val record = HealthRecord(
-                            id = editRecord?.id ?: 0,
-                            value = it,
-                            timestamp = toEpochMillis(timestampDate, timestampTime),
-                            typeId = healthType.id,
-                            personId = healthPerson.id,
-                            rangeName = rangeName,
-                            notes = notes,
-                            createdAt = System.currentTimeMillis(),
-                        )
+        onNavigateBack = { eventDispatch(Event.NavBack()) },
+        canSave = value.toFloatOrNull() != null,
+        onSaveData = {
+            val record = HealthRecord(
+                id = editRecord?.id ?: 0,
+                value = value.toFloatOrNull()!!,
+                timestamp = toEpochMillis(timestampDate, timestampTime),
+                typeId = healthType.id,
+                personId = healthPerson.id,
+                rangeName = rangeName,
+                notes = notes,
+                createdAt = System.currentTimeMillis(),
+            )
 
-                        if (record.id == 0L) {
-                            eventDispatch(Event.SaveHealthRecord(record))
-                        } else {
-                            eventDispatch(Event.UpdateHealthRecord(record))
-                        }
-                    }
-                },
-                enabled = value.toFloatOrNull() != null
-            ) {
-                Icon(Icons.Default.Save, contentDescription = "保存")
-                Spacer(modifier = Modifier.padding(4.dp))
-                Text("保存")
+            if (record.id == 0L) {
+                eventDispatch(Event.SaveHealthRecord(record))
+            } else {
+                eventDispatch(Event.UpdateHealthRecord(record))
             }
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Column {
+        },
+    ) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = { value = it },
+            label = { Text("测量值 (${healthType.unit})") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+        DateInputPicker(
+            value = timestampDate,
+            label = { Text("测量日期") },
+            onValueChange = { timestampDate = it },
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        TimeInputPicker(
+            value = timestampTime,
+            label = { Text("测量时间") },
+            onValueChange = { timestampTime = it },
+        )
+
+        if (!ranges.isEmpty()) {
+            Spacer(modifier = Modifier.height(16.dp))
+            // 范围选择
+            ExposedDropdownMenuBox(
+                expanded = rangeExpanded,
+                onExpandedChange = { rangeExpanded = !rangeExpanded }
+            ) {
                 OutlinedTextField(
-                    value = value,
-                    onValueChange = { value = it },
-                    label = { Text("测量值 (${healthType.unit})") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth()
+                    value = rangeName,
+                    readOnly = true,
+                    onValueChange = { rangeName = it },
+                    label = { Text("数据范围") },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = rangeExpanded)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(MenuAnchorType.PrimaryNotEditable),
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
-                DateInputPicker(
-                    value = timestampDate,
-                    label = { Text("测量日期") },
-                    onValueChange = { timestampDate = it },
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                TimeInputPicker(
-                    value = timestampTime,
-                    label = { Text("测量时间") },
-                    onValueChange = { timestampTime = it },
-                )
-
-                if (!ranges.isEmpty()) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    // 范围选择
-                    ExposedDropdownMenuBox(
-                        expanded = rangeExpanded,
-                        onExpandedChange = { rangeExpanded = !rangeExpanded }
-                    ) {
-                        OutlinedTextField(
-                            value = rangeName,
-                            readOnly = true,
-                            onValueChange = { rangeName = it },
-                            label = { Text("数据范围") },
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = rangeExpanded)
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .menuAnchor(MenuAnchorType.PrimaryNotEditable),
-                        )
-
-                        ExposedDropdownMenu(
-                            expanded = rangeExpanded,
-                            onDismissRequest = { rangeExpanded = false }
-                        ) {
-                            ranges.forEach { range ->
-                                DropdownMenuItem(
-                                    text = { Text(range) },
-                                    onClick = {
-                                        rangeName = range
-                                        rangeExpanded = false
-                                    }
-                                )
+                ExposedDropdownMenu(
+                    expanded = rangeExpanded,
+                    onDismissRequest = { rangeExpanded = false }
+                ) {
+                    ranges.forEach { range ->
+                        DropdownMenuItem(
+                            text = { Text(range) },
+                            onClick = {
+                                rangeName = range
+                                rangeExpanded = false
                             }
-                        }
+                        )
                     }
                 }
+            }
+        }
 
-                Spacer(modifier = Modifier.height(16.dp))
-                if (healthRecordNotes.isEmpty()) {
-                    OutlinedTextField(
-                        value = notes,
-                        onValueChange = { notes = it },
-                        label = { Text("备注 (可选)") },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                } else {
-                    ExposedDropdownMenuBox(
-                        expanded = noteExpanded,
-                        onExpandedChange = { noteExpanded = !noteExpanded }
-                    ) {
-                        OutlinedTextField(
-                            value = notes,
-                            onValueChange = { notes = it },
-                            label = { Text("备注 (可选)") },
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = noteExpanded)
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .menuAnchor(MenuAnchorType.PrimaryEditable),
-                        )
+        Spacer(modifier = Modifier.height(16.dp))
+        if (healthRecordNotes.isEmpty()) {
+            OutlinedTextField(
+                value = notes,
+                onValueChange = { notes = it },
+                label = { Text("备注 (可选)") },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        } else {
+            ExposedDropdownMenuBox(
+                expanded = noteExpanded,
+                onExpandedChange = { noteExpanded = !noteExpanded }
+            ) {
+                OutlinedTextField(
+                    value = notes,
+                    onValueChange = { notes = it },
+                    label = { Text("备注 (可选)") },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = noteExpanded)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(MenuAnchorType.PrimaryEditable),
+                )
 
-                        ExposedDropdownMenu(
-                            expanded = noteExpanded,
-                            onDismissRequest = { noteExpanded = false }
-                        ) {
-                            healthRecordNotes.forEach { n ->
-                                DropdownMenuItem(
-                                    text = { Text(n) },
-                                    onClick = {
-                                        notes = n
-                                        noteExpanded = false
-                                    }
-                                )
+                ExposedDropdownMenu(
+                    expanded = noteExpanded,
+                    onDismissRequest = { noteExpanded = false }
+                ) {
+                    healthRecordNotes.forEach { n ->
+                        DropdownMenuItem(
+                            text = { Text(n) },
+                            onClick = {
+                                notes = n
+                                noteExpanded = false
                             }
-                        }
+                        )
                     }
                 }
             }

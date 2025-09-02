@@ -1,25 +1,11 @@
 package org.crazydan.studio.app.healthtracker.ui.screen
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Save
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.ui.Event
 import org.crazydan.studio.app.healthtracker.ui.EventDispatch
+import org.crazydan.studio.app.healthtracker.ui.component.AddOrEditHealthDataScreen
 import org.crazydan.studio.app.healthtracker.ui.component.DateInputPicker
 import org.crazydan.studio.app.healthtracker.ui.component.TimeInputPicker
 import org.crazydan.studio.app.healthtracker.util.epochMillisToLocalDateTime
@@ -67,95 +54,64 @@ fun AddOrEditHealthPersonScreen(
     var birthTime by remember { mutableStateOf<LocalTime?>(null) }
     birthTime = birthday?.toLocalTime()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        (if (editPerson == null) "添加" else "编辑") + "人员信息"
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        eventDispatch(Event.NavBack())
-                    }) {
-                        Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
-                    }
-                }
+    AddOrEditHealthDataScreen(
+        title = {
+            Text(
+                (if (editPerson == null) "添加" else "编辑") + "人员信息"
             )
         },
-        floatingActionButton = {
-            Button(
-                onClick = {
-                    if (familyName.isNotBlank() && givenName.isNotBlank() && birthDate != null && birthTime != null) {
-                        val person = HealthPerson(
-                            id = editPerson?.id ?: 0,
-                            label = label.trim(),
-                            familyName = familyName.trim(), givenName = givenName.trim(),
-                            birthday = toEpochMillis(birthDate!!, birthTime!!)
-                        )
+        onNavigateBack = { eventDispatch(Event.NavBack()) },
+        canSave = familyName.isNotBlank() && givenName.isNotBlank() && birthDate != null && birthTime != null,
+        onSaveData = {
+            val person = HealthPerson(
+                id = editPerson?.id ?: 0,
+                label = label.trim(),
+                familyName = familyName.trim(), givenName = givenName.trim(),
+                birthday = toEpochMillis(birthDate!!, birthTime!!)
+            )
 
-                        if (person.id == 0L) {
-                            eventDispatch(Event.SaveHealthPerson(person))
-                        } else {
-                            eventDispatch(Event.UpdateHealthPerson(person))
-                        }
-                    }
-                },
-                enabled = familyName.isNotBlank() && givenName.isNotBlank() && birthDate != null && birthTime != null
-            ) {
-                Icon(Icons.Default.Save, contentDescription = "保存")
-                Spacer(modifier = Modifier.padding(4.dp))
-                Text("保存")
+            if (person.id == 0L) {
+                eventDispatch(Event.SaveHealthPerson(person))
+            } else {
+                eventDispatch(Event.UpdateHealthPerson(person))
             }
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                OutlinedTextField(
-                    value = label,
-                    onValueChange = { label = it },
-                    label = { Text("称呼") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+        },
+    ) {
+        OutlinedTextField(
+            value = label,
+            onValueChange = { label = it },
+            label = { Text("称呼") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
-                Spacer(modifier = Modifier.height(16.dp))
-                OutlinedTextField(
-                    value = familyName,
-                    onValueChange = { familyName = it },
-                    label = { Text("姓") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+        Spacer(modifier = Modifier.height(16.dp))
+        OutlinedTextField(
+            value = familyName,
+            onValueChange = { familyName = it },
+            label = { Text("姓") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
-                Spacer(modifier = Modifier.height(16.dp))
-                OutlinedTextField(
-                    value = givenName,
-                    onValueChange = { givenName = it },
-                    label = { Text("名") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+        Spacer(modifier = Modifier.height(16.dp))
+        OutlinedTextField(
+            value = givenName,
+            onValueChange = { givenName = it },
+            label = { Text("名") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
-                Spacer(modifier = Modifier.height(16.dp))
-                DateInputPicker(
-                    value = birthDate,
-                    label = { Text("出生日期") },
-                    onValueChange = { birthDate = it },
-                )
+        Spacer(modifier = Modifier.height(16.dp))
+        DateInputPicker(
+            value = birthDate,
+            label = { Text("出生日期") },
+            onValueChange = { birthDate = it },
+        )
 
-                Spacer(modifier = Modifier.height(16.dp))
-                TimeInputPicker(
-                    value = birthTime,
-                    label = { Text("出生时间") },
-                    onValueChange = { birthTime = it },
-                )
-            }
-        }
+        Spacer(modifier = Modifier.height(16.dp))
+        TimeInputPicker(
+            value = birthTime,
+            label = { Text("出生时间") },
+            onValueChange = { birthTime = it },
+        )
     }
 }

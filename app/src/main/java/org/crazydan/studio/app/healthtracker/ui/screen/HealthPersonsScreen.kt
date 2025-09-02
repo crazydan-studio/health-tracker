@@ -1,22 +1,11 @@
 package org.crazydan.studio.app.healthtracker.ui.screen
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -26,6 +15,7 @@ import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.ui.Event
 import org.crazydan.studio.app.healthtracker.ui.EventDispatch
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCard
+import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCardActions
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataListScreen
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataLoadingScreen
 import org.crazydan.studio.app.healthtracker.util.calculateAge
@@ -51,65 +41,42 @@ fun HealthPersonsScreen(
 
     HealthDataListScreen(
         deletedAmount = deletedPersonAmount,
+        dataList = healthPersons,
         title = {
             Text(
                 stringResource(R.string.app_name)
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(onClick = {
-                eventDispatch(Event.WillAddHealthPerson())
-            }) {
-                Icon(Icons.Default.Add, contentDescription = "添加人员")
-            }
+        onAddData = {
+            eventDispatch(Event.WillAddHealthPerson())
         },
         onViewDeleted = {
             eventDispatch(Event.ViewDeletedHealthPersons())
         },
-    ) { padding ->
-        if (healthPersons.isEmpty()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text("暂无人员信息，请点击右下角按钮添加")
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize()
-            ) {
-                items(healthPersons) { person ->
-                    HealthPersonItem(
-                        person = person,
-                        eventDispatch = eventDispatch,
-                    )
-                }
-            }
-        }
+    ) { person ->
+        HealthPersonCard(
+            person = person,
+            actions = HealthDataCardActions(
+                onEdit = {
+                    eventDispatch(Event.WillEditHealthPerson(person.id))
+                },
+                onDelete = {
+                    eventDispatch(Event.DeleteHealthPerson(person.id))
+                },
+                onView = {
+                    eventDispatch(Event.ViewHealthTypesOfPerson(person.id))
+                },
+            ),
+        )
     }
 }
 
 @Composable
-private fun HealthPersonItem(
+fun HealthPersonCard(
     person: HealthPerson,
-    eventDispatch: EventDispatch,
+    actions: HealthDataCardActions,
 ) {
-    HealthDataCard(
-        onEdit = {
-            eventDispatch(Event.WillEditHealthPerson(person.id))
-        },
-        onDelete = {
-            eventDispatch(Event.DeleteHealthPerson(person.id))
-        },
-        onView = {
-            eventDispatch(Event.ViewHealthTypesOfPerson(person.id))
-        },
-    ) {
+    HealthDataCard(actions) {
         val fullName = getPersonFullName(person)
         val label =
             if (person.label.isNullOrBlank()) fullName
@@ -128,8 +95,8 @@ private fun getPersonFullName(person: HealthPerson): String {
 
 @Preview
 @Composable
-private fun HealthPersonItemPreview() {
-    HealthPersonItem(
+private fun HealthPersonCardPreview() {
+    HealthPersonCard(
         person = HealthPerson(
             id = 0,
             label = "老五",
@@ -137,6 +104,6 @@ private fun HealthPersonItemPreview() {
             givenName = "五",
             birthday = Timestamp.valueOf("1988-08-10 08:10:00.000").time,
         ),
-        eventDispatch = {},
+        actions = HealthDataCardActions(),
     )
 }

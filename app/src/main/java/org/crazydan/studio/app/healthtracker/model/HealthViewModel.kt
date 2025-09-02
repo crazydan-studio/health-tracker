@@ -24,6 +24,10 @@ class HealthViewModel @Inject constructor(
         return repository.getAllHealthPersons()
     }
 
+    fun getDeletedHealthPersons(): Flow<List<HealthPerson>> {
+        return repository.getDeletedHealthPersons()
+    }
+
     suspend fun addHealthPerson(healthPerson: HealthPerson): Long {
         return repository.insertHealthPerson(healthPerson)
     }
@@ -44,12 +48,21 @@ class HealthViewModel @Inject constructor(
         repository.undeleteHealthPerson(id)
     }
 
+    suspend fun clearDeletedHealthPersons() {
+        repository.clearDeletedHealthPersons()
+    }
+
+    //
     fun getHealthType(id: Long): Flow<HealthType?> {
         return repository.getHealthTypeById(id)
     }
 
     fun getHealthTypes(personId: Long): Flow<List<HealthType>> {
         return repository.getHealthTypesByPersonId(personId)
+    }
+
+    fun getDeletedHealthTypes(personId: Long): Flow<List<HealthType>> {
+        return repository.getDeletedHealthTypesByPersonId(personId)
     }
 
     suspend fun addHealthType(healthType: HealthType): Long {
@@ -72,12 +85,21 @@ class HealthViewModel @Inject constructor(
         repository.undeleteHealthType(id)
     }
 
+    suspend fun clearDeletedHealthTypes(personId: Long) {
+        repository.clearDeletedHealthTypes(personId)
+    }
+
+    //
     fun getHealthRecord(id: Long): Flow<HealthRecord?> {
         return repository.getHealthRecordById(id)
     }
 
     fun getHealthRecords(typeId: Long): Flow<List<HealthRecord>> {
         return repository.getHealthRecordsByTypeId(typeId)
+    }
+
+    fun getDeletedHealthRecords(typeId: Long): Flow<List<HealthRecord>> {
+        return repository.getDeletedHealthRecordsByTypeId(typeId)
     }
 
     fun getHealthRecordNotes(typeId: Long): Flow<List<String>> {
@@ -102,5 +124,9 @@ class HealthViewModel @Inject constructor(
 
     suspend fun undeleteHealthRecord(id: Long) {
         repository.undeleteHealthRecord(id)
+    }
+
+    suspend fun clearDeletedHealthRecords(typeId: Long) {
+        repository.clearDeletedHealthRecords(typeId)
     }
 }

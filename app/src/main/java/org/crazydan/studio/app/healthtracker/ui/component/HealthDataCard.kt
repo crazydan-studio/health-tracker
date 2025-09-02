@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -22,6 +23,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 
+class HealthDataCardActions(
+    val onEdit: (() -> Unit)? = null,
+    val onView: (() -> Unit)? = null,
+    val onDelete: (() -> Unit)? = null,
+    val onUndelete: (() -> Unit)? = null,
+)
+
 /**
  *
  * @author <a href="mailto:flytreeleft@crazydan.org">flytreeleft</a>
@@ -29,9 +37,7 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun HealthDataCard(
-    onDelete: () -> Unit,
-    onEdit: () -> Unit,
-    onView: (() -> Unit)? = null,
+    actions: HealthDataCardActions,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     ElevatedCard(
@@ -41,7 +47,7 @@ fun HealthDataCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .clickable(onClick = { onView?.invoke() })
+            .clickable(onClick = { actions.onView?.invoke() })
     ) {
         Column(
             modifier = Modifier
@@ -50,24 +56,36 @@ fun HealthDataCard(
             content = content
         )
 
-        Row(
-            horizontalArrangement = Arrangement.End,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-        ) {
-            TextButton(
-                modifier = Modifier.alpha(0.4f),
-                onClick = onDelete
+        if (actions.onEdit != null || actions.onDelete != null || actions.onUndelete != null) {
+            Row(
+                horizontalArrangement = Arrangement.End,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
             ) {
-                Icon(Icons.Default.Delete, contentDescription = "删除")
-                Text(text = "删除")
-            }
+                actions.onDelete?.let { action ->
+                    TextButton(
+                        modifier = Modifier.alpha(0.4f),
+                        onClick = action
+                    ) {
+                        Icon(Icons.Default.Delete, contentDescription = "删除")
+                        Text(text = "删除")
+                    }
+                }
+                actions.onUndelete?.let { action ->
+                    TextButton(onClick = action) {
+                        Icon(Icons.Default.Restore, contentDescription = "还原")
+                        Text(text = "还原")
+                    }
+                }
 
-            Spacer(modifier = Modifier.width(8.dp))
-            TextButton(onClick = onEdit) {
-                Icon(Icons.Default.Edit, contentDescription = "编辑")
-                Text(text = "编辑")
+                actions.onEdit?.let { action ->
+                    Spacer(modifier = Modifier.width(8.dp))
+                    TextButton(onClick = action) {
+                        Icon(Icons.Default.Edit, contentDescription = "编辑")
+                        Text(text = "编辑")
+                    }
+                }
             }
         }
     }

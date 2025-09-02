@@ -30,6 +30,9 @@ interface HealthRecordDao {
     @Query("DELETE FROM $HEALTH_RECORD_TABLE_NAME WHERE id = :id")
     suspend fun forceDelete(id: Long)
 
+    @Query("SELECT * FROM $HEALTH_RECORD_TABLE_NAME WHERE id = :id")
+    fun getById(id: Long): Flow<HealthRecord?>
+
     @Query("SELECT * FROM $HEALTH_RECORD_TABLE_NAME WHERE typeId = :typeId AND deleted = 0 ORDER BY timestamp DESC")
     fun getByTypeId(typeId: Long): Flow<List<HealthRecord>>
 
@@ -42,6 +45,6 @@ interface HealthRecordDao {
     @Query("SELECT count(id) FROM $HEALTH_RECORD_TABLE_NAME WHERE typeId = :typeId AND deleted = 1")
     fun countDeletedByTypeId(typeId: Long): Flow<Long>
 
-    @Query("SELECT * FROM $HEALTH_RECORD_TABLE_NAME WHERE id = :id")
-    fun getById(id: Long): Flow<HealthRecord?>
+    @Query("DELETE FROM $HEALTH_RECORD_TABLE_NAME WHERE typeId = :typeId AND deleted = 1")
+    suspend fun clearDeleted(typeId: Long)
 }

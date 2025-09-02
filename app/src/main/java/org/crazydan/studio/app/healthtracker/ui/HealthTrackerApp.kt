@@ -10,16 +10,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.launch
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
@@ -27,6 +23,9 @@ import org.crazydan.studio.app.healthtracker.model.HealthViewModel
 import org.crazydan.studio.app.healthtracker.ui.screen.AddOrEditHealthPersonScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.AddOrEditHealthRecordScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.AddOrEditHealthTypeScreen
+import org.crazydan.studio.app.healthtracker.ui.screen.DeletedHealthPersonsScreen
+import org.crazydan.studio.app.healthtracker.ui.screen.DeletedHealthRecordsScreen
+import org.crazydan.studio.app.healthtracker.ui.screen.DeletedHealthTypesScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.HealthPersonsScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.HealthRecordDetailsScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.HealthRecordsScreen
@@ -76,6 +75,10 @@ fun HealthTrackerApp() {
             }
         }
         composable("deletedHealthPersons") {
+            ShowDeletedHealthPersonsScreen(
+                viewModel = viewModel,
+                eventDispatch = eventDispatch,
+            )
         }
         //
         composable("healthTypes/{personId}") { backStackEntry ->
@@ -119,12 +122,11 @@ fun HealthTrackerApp() {
         composable("deletedHealthTypes/{personId}") { backStackEntry ->
             val personId = requireArg(backStackEntry, "personId").toLong()
 
-            LaunchedEffectWithHealthPerson(
+            ShowDeletedHealthTypesScreen(
                 personId = personId,
                 viewModel = viewModel,
-            ) { person ->
-                //
-            }
+                eventDispatch = eventDispatch,
+            )
         }
         //
         composable("healthRecords/{typeId}/{personId}") { backStackEntry ->
@@ -190,141 +192,19 @@ fun HealthTrackerApp() {
         composable("deletedHealthRecords/{typeId}/{personId}") { backStackEntry ->
             val typeId = requireArg(backStackEntry, "typeId").toLong()
             val personId = requireArg(backStackEntry, "personId").toLong()
+
+            ShowDeletedHealthRecordsScreen(
+                typeId = typeId,
+                personId = personId,
+                viewModel = viewModel,
+                eventDispatch = eventDispatch,
+            )
         }
     }
 }
 
 private fun requireArg(backStackEntry: NavBackStackEntry, arg: String): String {
     return backStackEntry.arguments!!.getString(arg)!!
-}
-
-private fun dispatchEvent(
-    e: Event,
-    viewModel: HealthViewModel,
-    navController: NavController,
-    coroutineScope: CoroutineScope,
-) {
-    val goback = fun() {
-        navController.popBackStack()
-    }
-
-    when (e) {
-        is Event.NavBack -> {
-            goback()
-        }
-
-        is Event.WillAddHealthPerson -> {
-            navController.navigate("addHealthPerson")
-        }
-
-        is Event.WillEditHealthPerson -> {
-            navController.navigate("editHealthPerson/${e.id}")
-        }
-
-        is Event.ViewDeletedHealthPersons -> {
-            navController.navigate("deletedHealthPersons")
-        }
-
-        is Event.SaveHealthPerson -> {
-            coroutineScope.launch {
-                viewModel.addHealthPerson(e.data)
-                goback()
-            }
-        }
-
-        is Event.UpdateHealthPerson -> {
-            coroutineScope.launch {
-                viewModel.updateHealthPerson(e.data)
-                goback()
-            }
-        }
-
-        is Event.DeleteHealthPerson -> {
-            coroutineScope.launch {
-                viewModel.deleteHealthPerson(e.id)
-            }
-        }
-
-        //
-        is Event.WillAddHealthTypeOfPerson -> {
-            navController.navigate("addHealthType/${e.id}")
-        }
-
-        is Event.ViewHealthTypesOfPerson -> {
-            navController.navigate("healthTypes/${e.id}")
-        }
-
-        is Event.ViewDeletedHealthTypesOfPerson -> {
-            navController.navigate("deletedHealthTypes/${e.id}")
-        }
-
-        //
-        is Event.WillEditHealthType -> {
-            navController.navigate("editHealthType/${e.id}/${e.personId}")
-        }
-
-        is Event.DeleteHealthType -> {
-            coroutineScope.launch {
-                viewModel.deleteHealthType(e.id)
-            }
-        }
-
-        is Event.SaveHealthType -> {
-            coroutineScope.launch {
-                viewModel.addHealthType(e.data)
-                goback()
-            }
-        }
-
-        is Event.UpdateHealthType -> {
-            coroutineScope.launch {
-                viewModel.updateHealthType(e.data)
-                goback()
-            }
-        }
-
-        //
-        is Event.WillAddHealthRecordOfType -> {
-            navController.navigate("addHealthRecord/${e.id}/${e.personId}")
-        }
-
-        is Event.ViewHealthRecordsOfType -> {
-            navController.navigate("healthRecords/${e.id}/${e.personId}")
-        }
-
-        is Event.ViewHealthRecordDetailsOfType -> {
-            navController.navigate("healthRecordDetails/${e.id}/${e.personId}")
-        }
-
-        is Event.ViewDeletedHealthRecordsOfType -> {
-            navController.navigate("deletedHealthRecords/${e.id}/${e.personId}")
-        }
-
-        //
-        is Event.WillEditHealthRecord -> {
-            navController.navigate("editHealthRecord/${e.id}/${e.typeId}/${e.personId}")
-        }
-
-        is Event.DeleteHealthRecord -> {
-            coroutineScope.launch {
-                viewModel.deleteHealthRecord(e.id)
-            }
-        }
-
-        is Event.SaveHealthRecord -> {
-            coroutineScope.launch {
-                viewModel.addHealthRecord(e.data)
-                goback()
-            }
-        }
-
-        is Event.UpdateHealthRecord -> {
-            coroutineScope.launch {
-                viewModel.updateHealthRecord(e.data)
-                goback()
-            }
-        }
-    }
 }
 
 @Composable
@@ -357,6 +237,25 @@ private fun ShowHealthPersonsScreen(
 }
 
 @Composable
+private fun ShowDeletedHealthPersonsScreen(
+    viewModel: HealthViewModel,
+    eventDispatch: EventDispatch,
+) {
+    var healthPersons by remember { mutableStateOf<List<HealthPerson>?>(null) }
+
+    LaunchedEffect(Unit) {
+        viewModel.getDeletedHealthPersons().collectLatest { list ->
+            healthPersons = list
+        }
+    }
+
+    DeletedHealthPersonsScreen(
+        healthPersons = healthPersons,
+        eventDispatch = eventDispatch,
+    )
+}
+
+@Composable
 private fun ShowHealthTypesScreen(
     personId: Long,
     viewModel: HealthViewModel,
@@ -383,6 +282,33 @@ private fun ShowHealthTypesScreen(
         healthPerson = healthPerson,
         healthTypes = healthTypes,
         deletedTypeAmount = deletedHealthTypeAmount,
+        eventDispatch = eventDispatch,
+    )
+}
+
+@Composable
+private fun ShowDeletedHealthTypesScreen(
+    personId: Long,
+    viewModel: HealthViewModel,
+    eventDispatch: EventDispatch,
+) {
+    var healthPerson by remember { mutableStateOf<HealthPerson?>(null) }
+    var healthTypes by remember { mutableStateOf<List<HealthType>?>(null) }
+
+    LaunchedEffect(personId) {
+        combine(
+            viewModel.getHealthPerson(personId),
+            viewModel.getDeletedHealthTypes(personId),
+        ) { person, types ->
+            healthPerson = person
+            healthTypes = types
+        }
+            .collectLatest { it }
+    }
+
+    DeletedHealthTypesScreen(
+        healthPerson = healthPerson,
+        healthTypes = healthTypes,
         eventDispatch = eventDispatch,
     )
 }
@@ -432,7 +358,6 @@ private fun ShowHealthRecordDetailsScreen(
     var deletedRecordAmount by remember { mutableLongStateOf(0L) }
 
     LaunchedEffect(typeId, personId) {
-        delay(100)
         combine(
             viewModel.getHealthType(typeId),
             viewModel.getHealthPerson(personId),
@@ -452,6 +377,38 @@ private fun ShowHealthRecordDetailsScreen(
         healthType = healthType,
         healthRecords = healthRecords,
         deletedRecordAmount = deletedRecordAmount,
+        eventDispatch = eventDispatch,
+    )
+}
+
+@Composable
+private fun ShowDeletedHealthRecordsScreen(
+    typeId: Long,
+    personId: Long,
+    viewModel: HealthViewModel,
+    eventDispatch: EventDispatch,
+) {
+    var healthType by remember { mutableStateOf<HealthType?>(null) }
+    var healthPerson by remember { mutableStateOf<HealthPerson?>(null) }
+    var healthRecords by remember { mutableStateOf<List<HealthRecord>?>(null) }
+
+    LaunchedEffect(typeId, personId) {
+        combine(
+            viewModel.getHealthType(typeId),
+            viewModel.getHealthPerson(personId),
+            viewModel.getDeletedHealthRecords(typeId),
+        ) { type, person, records ->
+            healthType = type
+            healthPerson = person
+            healthRecords = records
+        }
+            .collectLatest { it }
+    }
+
+    DeletedHealthRecordsScreen(
+        healthPerson = healthPerson,
+        healthType = healthType,
+        healthRecords = healthRecords,
         eventDispatch = eventDispatch,
     )
 }

@@ -1,11 +1,7 @@
 package org.crazydan.studio.app.healthtracker.ui.screen
 
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,6 +15,7 @@ import org.crazydan.studio.app.healthtracker.model.getPersonLabel
 import org.crazydan.studio.app.healthtracker.ui.Event
 import org.crazydan.studio.app.healthtracker.ui.EventDispatch
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCard
+import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCardActions
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataListScreen
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataLoadingScreen
 import org.crazydan.studio.app.healthtracker.util.formatEpochMillis
@@ -44,6 +41,7 @@ fun HealthRecordDetailsScreen(
 
     HealthDataListScreen(
         deletedAmount = deletedRecordAmount,
+        dataList = healthRecords,
         title = {
             Text(getPersonLabel(healthType.name + "记录", healthPerson))
         },
@@ -55,46 +53,36 @@ fun HealthRecordDetailsScreen(
                 )
             )
         },
-        onNavigateBack = {
-            eventDispatch(Event.NavBack())
-        },
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-        ) {
-            items(healthRecords) { record ->
-                HealthRecordItem(
-                    type = healthType,
-                    record = record,
-                    eventDispatch = eventDispatch,
-                )
-            }
-        }
+        onNavigateBack = { eventDispatch(Event.NavBack()) },
+    ) { record ->
+        HealthRecordCard(
+            type = healthType,
+            record = record,
+            actions = HealthDataCardActions(
+                onEdit = {
+                    eventDispatch(
+                        Event.WillEditHealthRecord(
+                            record.id,
+                            record.typeId,
+                            record.personId
+                        )
+                    )
+                },
+                onDelete = {
+                    eventDispatch(Event.DeleteHealthRecord(record.id))
+                },
+            ),
+        )
     }
 }
 
 @Composable
-private fun HealthRecordItem(
+fun HealthRecordCard(
     type: HealthType,
     record: HealthRecord,
-    eventDispatch: EventDispatch,
+    actions: HealthDataCardActions,
 ) {
-    HealthDataCard(
-        onEdit = {
-            eventDispatch(
-                Event.WillEditHealthRecord(
-                    record.id,
-                    record.typeId,
-                    record.personId
-                )
-            )
-        },
-        onDelete = {
-            eventDispatch(Event.DeleteHealthRecord(record.id))
-        },
-    ) {
+    HealthDataCard(actions) {
         val label = "${record.value}${type.unit}"
         val timestamp = formatTimestamp(record)
         val notes = record.notes.ifBlank { "无" }
