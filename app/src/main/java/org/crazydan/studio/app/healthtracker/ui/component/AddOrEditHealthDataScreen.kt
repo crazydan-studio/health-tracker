@@ -29,8 +29,10 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun AddOrEditHealthDataScreen(
     title: @Composable () -> Unit,
-    canSave: Boolean,
-    onSaveData: () -> Unit,
+    // Note: 需采用函数方式，直接传值会因为变量更新导致视图重新布局，
+    // 进而使得填写过程中将其他输入重置的问题
+    canSave: () -> Boolean,
+    onSave: () -> Unit,
     onNavigateBack: () -> Unit,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -44,13 +46,14 @@ fun AddOrEditHealthDataScreen(
                     }
                 },
                 actions = {
+                    val enabled = canSave()
                     Button(
                         onClick = {
-                            if (canSave) {
-                                onSaveData()
+                            if (enabled) {
+                                onSave()
                             }
                         },
-                        enabled = canSave,
+                        enabled = enabled,
                     ) {
                         Icon(Icons.Default.Save, contentDescription = "保存")
                         Text("保存")

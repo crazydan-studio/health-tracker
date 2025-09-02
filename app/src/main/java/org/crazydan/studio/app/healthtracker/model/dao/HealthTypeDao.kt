@@ -33,10 +33,10 @@ interface HealthTypeDao {
     @Query("SELECT * FROM $HEALTH_TYPE_TABLE_NAME WHERE id = :id")
     fun getById(id: Long): Flow<HealthType?>
 
-    @Query("SELECT * FROM $HEALTH_TYPE_TABLE_NAME WHERE personId = :personId AND deleted = 0 ORDER BY name")
+    @Query("SELECT * FROM $HEALTH_TYPE_TABLE_NAME WHERE personId = :personId AND deleted = 0 ORDER BY id asc")
     fun getByPersonId(personId: Long): Flow<List<HealthType>>
 
-    @Query("SELECT * FROM $HEALTH_TYPE_TABLE_NAME WHERE personId = :personId AND deleted = 1 ORDER BY name")
+    @Query("SELECT * FROM $HEALTH_TYPE_TABLE_NAME WHERE personId = :personId AND deleted = 1 ORDER BY id asc")
     fun getDeletedByPersonId(personId: Long): Flow<List<HealthType>>
 
     @Query("SELECT count(id) FROM $HEALTH_TYPE_TABLE_NAME WHERE personId = :personId AND deleted = 1")

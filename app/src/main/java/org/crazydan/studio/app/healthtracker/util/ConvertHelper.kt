@@ -35,9 +35,13 @@ fun getFullName(familyName: String, givenName: String): String {
     return "${familyName}${nameSeparator}${givenName}"
 }
 
-fun toEpochMillis(date: LocalDate, time: LocalTime): Long {
+fun toEpochMillis(date: LocalDate, time: LocalTime?): Long {
     val zoneId = ZoneId.systemDefault()
-    val zonedDateTime = ZonedDateTime.of(date, time, zoneId)
+    val zonedDateTime = ZonedDateTime.of(
+        date,
+        time ?: LocalTime.of(0, 0, 0, 0),
+        zoneId,
+    )
 
     return zonedDateTime.toInstant().toEpochMilli()
 }

@@ -49,13 +49,14 @@ fun AddOrEditHealthTypeScreen(
     }
 
     var name by remember { mutableStateOf("") }
-    name = editType?.name ?: ""
-
     var unit by remember { mutableStateOf("") }
-    unit = editType?.unit ?: ""
-
     val ranges = remember { mutableStateListOf<NormalRange>() }
-    editType?.ranges?.let { ranges.addAll(it) }
+
+    editType?.let { type ->
+        name = type.name
+        unit = type.unit
+        type.ranges.let { ranges.addAll(it) }
+    }
 
     var rangeName by remember { mutableStateOf("") }
     var lowerLimit by remember { mutableStateOf("") }
@@ -68,12 +69,15 @@ fun AddOrEditHealthTypeScreen(
             )
         },
         onNavigateBack = { eventDispatch(Event.NavBack()) },
-        canSave = name.isNotBlank() && unit.isNotBlank(),
-        onSaveData = {
+        canSave = {
+            name.isNotBlank() && unit.isNotBlank()
+        },
+        onSave = {
             val type = HealthType(
                 id = editType?.id ?: 0,
                 personId = healthPerson.id,
-                name = name.trim(), unit = unit.trim(),
+                name = name.trim(),
+                unit = unit.trim(),
                 ranges = ranges.toList()
             )
 

@@ -51,28 +51,27 @@ fun AddOrEditHealthRecordScreen(
         return
     }
 
-    var value by remember { mutableStateOf("") }
-    value = editRecord?.value?.toString() ?: ""
-
-    var notes by remember { mutableStateOf("") }
-    notes = editRecord?.notes ?: ""
-
-    val ranges = healthType.ranges.map { it.name }
-    var rangeName by remember { mutableStateOf("") }
-    rangeName = editRecord?.rangeName ?: ranges.firstOrNull() ?: ""
-
     var rangeExpanded by remember { mutableStateOf(false) }
     var noteExpanded by remember { mutableStateOf(false) }
 
-    val timestamp =
-        if (editRecord == null) null
-        else epochMillisToLocalDateTime(editRecord.timestamp)
-
+    var value by remember { mutableStateOf("") }
+    var rangeName by remember { mutableStateOf("") }
+    var notes by remember { mutableStateOf("") }
     var timestampDate by remember { mutableStateOf(LocalDate.now()) }
-    timestampDate = timestamp?.toLocalDate() ?: LocalDate.now()
-
     var timestampTime by remember { mutableStateOf(LocalTime.now().noSeconds()) }
-    timestampTime = timestamp?.toLocalTime() ?: LocalTime.now().noSeconds()
+
+    val ranges = healthType.ranges.map { it.name }
+    rangeName = ranges.firstOrNull() ?: ""
+
+    editRecord?.let { record ->
+        value = record.value.toString()
+        rangeName = record.rangeName
+        notes = record.notes
+
+        val timestamp = epochMillisToLocalDateTime(record.timestamp)
+        timestampDate = timestamp.toLocalDate() ?: LocalDate.now()
+        timestampTime = timestamp.toLocalTime() ?: LocalTime.now().noSeconds()
+    }
 
     AddOrEditHealthDataScreen(
         title = {
@@ -81,8 +80,10 @@ fun AddOrEditHealthRecordScreen(
             )
         },
         onNavigateBack = { eventDispatch(Event.NavBack()) },
-        canSave = value.toFloatOrNull() != null,
-        onSaveData = {
+        canSave = {
+            value.toFloatOrNull() != null
+        },
+        onSave = {
             val record = HealthRecord(
                 id = editRecord?.id ?: 0,
                 value = value.toFloatOrNull()!!,

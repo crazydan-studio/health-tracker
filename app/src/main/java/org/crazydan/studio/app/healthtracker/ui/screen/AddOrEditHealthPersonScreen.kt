@@ -36,23 +36,20 @@ fun AddOrEditHealthPersonScreen(
     eventDispatch: EventDispatch,
 ) {
     var label by remember { mutableStateOf("") }
-    label = editPerson?.label ?: ""
-
     var familyName by remember { mutableStateOf("") }
-    familyName = editPerson?.familyName ?: ""
-
     var givenName by remember { mutableStateOf("") }
-    givenName = editPerson?.givenName ?: ""
-
-    val birthday =
-        if (editPerson == null) null
-        else epochMillisToLocalDateTime(editPerson.birthday)
-
     var birthDate by remember { mutableStateOf<LocalDate?>(null) }
-    birthDate = birthday?.toLocalDate()
-
     var birthTime by remember { mutableStateOf<LocalTime?>(null) }
-    birthTime = birthday?.toLocalTime()
+
+    editPerson?.let { person ->
+        label = person.label ?: ""
+        familyName = person.familyName
+        givenName = person.givenName
+
+        val birthday = epochMillisToLocalDateTime(person.birthday)
+        birthDate = birthday.toLocalDate()
+        birthTime = birthday.toLocalTime()
+    }
 
     AddOrEditHealthDataScreen(
         title = {
@@ -61,13 +58,15 @@ fun AddOrEditHealthPersonScreen(
             )
         },
         onNavigateBack = { eventDispatch(Event.NavBack()) },
-        canSave = familyName.isNotBlank() && givenName.isNotBlank() && birthDate != null && birthTime != null,
-        onSaveData = {
+        canSave = {
+            familyName.isNotBlank() && givenName.isNotBlank() && birthDate != null
+        },
+        onSave = {
             val person = HealthPerson(
                 id = editPerson?.id ?: 0,
                 label = label.trim(),
                 familyName = familyName.trim(), givenName = givenName.trim(),
-                birthday = toEpochMillis(birthDate!!, birthTime!!)
+                birthday = toEpochMillis(birthDate!!, birthTime)
             )
 
             if (person.id == 0L) {
@@ -110,7 +109,7 @@ fun AddOrEditHealthPersonScreen(
         Spacer(modifier = Modifier.height(16.dp))
         TimeInputPicker(
             value = birthTime,
-            label = { Text("出生时间") },
+            label = { Text("出生时间 (可选)") },
             onValueChange = { birthTime = it },
         )
     }
