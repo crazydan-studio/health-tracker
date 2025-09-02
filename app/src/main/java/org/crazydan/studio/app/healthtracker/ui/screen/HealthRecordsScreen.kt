@@ -105,7 +105,7 @@ fun HealthRecordsScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("暂无${healthType.name}数据，请点击右下角按钮添加")
+                Text("暂无数据，请点击右下角按钮添加")
             }
         } else {
             Column(

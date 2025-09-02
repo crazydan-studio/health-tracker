@@ -17,10 +17,12 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartModel
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartType
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartView
+import com.github.aachartmodel.aainfographics.aachartcreator.AAChartZoomType
 import com.github.aachartmodel.aainfographics.aachartcreator.AADataElement
 import com.github.aachartmodel.aainfographics.aachartcreator.AAOptions
 import com.github.aachartmodel.aainfographics.aachartcreator.AASeriesElement
 import com.github.aachartmodel.aainfographics.aachartcreator.aa_toAAOptions
+import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAChart
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AALabel
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AALabels
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAPlotBandsElement
@@ -167,20 +169,38 @@ private fun createSplineChartModelOptions(
         .yAxisMin(0)
         .colorsTheme(
             arrayOf(
-                "rgba(4, 214, 159, 1)",
-                "rgba(30, 143, 255, 1)",
-                "rgba(239, 71, 110, 1)",
-                "rgba(255, 209, 102, 1)",
+                "rgba(30, 144, 255, 1)",
+                "rgba(234, 0, 123, 1)",
+                "rgba(73, 193, 182, 1)",
+                "rgba(253, 194, 10, 1)",
+                "rgba(247, 131, 32, 1)",
+                "rgba(6, 142, 129, 1)",
+                "rgba(12, 150, 116, 1)",
+                "rgba(125, 255, 192, 1)",
+                "rgba(209, 27, 95, 1)",
+                "rgba(250, 205, 50, 1)",
+                "rgba(255, 255, 160, 1)",
+                "rgba(234, 0, 123, 1)",
             )
         )
         .series(series)
         .aa_toAAOptions()
 
+    options.chart(AAChart().pinchType(AAChartZoomType.X))
+
     val plotColors = arrayOf(
-        "rgba(4, 214, 159, 0.2)",
-        "rgba(30, 143, 255, 0.2)",
-        "rgba(239, 71, 110, 0.2)",
-        "rgba(255, 209, 102, 0.2)",
+        "rgba(30, 144, 255, 0.2)",
+        "rgba(234, 0, 123, 0.2)",
+        "rgba(73, 193, 182, 0.2)",
+        "rgba(253, 194, 10, 0.2)",
+        "rgba(247, 131, 32, 0.2)",
+        "rgba(6, 142, 129, 0.2)",
+        "rgba(12, 150, 116, 0.2)",
+        "rgba(125, 255, 192, 0.2)",
+        "rgba(209, 27, 95, 0.2)",
+        "rgba(250, 205, 50, 0.2)",
+        "rgba(255, 255, 160, 0.2)",
+        "rgba(234, 0, 123, 0.2)",
     )
     val plots = healthType.ranges.mapIndexed { index, range ->
         val color = plotColors[index]
@@ -235,7 +255,7 @@ private fun createSplineChartModelOptions(
                         return formatDateTime(date) 
                                 + '<br/>' + this.series.name
                                 + ': <b>' + value + '${healthType.unit}</b>'
-                                + (typeof this.key == 'string' ? '<br/>备注: ' + this.key : '');
+                                + (typeof this.key == 'string' ? '<br/>备注: <b>' + this.key + '</b>' : '');
                     }
                 """
         )
