@@ -15,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
@@ -329,7 +330,7 @@ private fun ShowHealthPersonsScreen(
     viewModel: HealthViewModel,
     eventDispatch: EventDispatch,
 ) {
-    var healthPersons by remember { mutableStateOf<List<HealthPerson>>(emptyList()) }
+    var healthPersons by remember { mutableStateOf<List<HealthPerson>?>(null) }
     var deletedHealthPersonAmount by remember { mutableLongStateOf(0L) }
 
     LaunchedEffect(Unit) {
@@ -429,6 +430,7 @@ private fun ShowHealthRecordDetailsScreen(
     var deletedRecordAmount by remember { mutableLongStateOf(0L) }
 
     LaunchedEffect(typeId, personId) {
+        delay(100)
         combine(
             viewModel.getHealthType(typeId),
             viewModel.getHealthPerson(personId),

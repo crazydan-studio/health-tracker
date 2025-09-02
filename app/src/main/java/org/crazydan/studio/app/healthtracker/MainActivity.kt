@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
 import org.crazydan.studio.app.healthtracker.ui.HealthTrackerApp
 import org.crazydan.studio.app.healthtracker.ui.theme.HealthTrackerTheme
+import org.crazydan.studio.app.healthtracker.ui.theme.getThemeResId
 
 /**
  *
@@ -19,11 +20,16 @@ import org.crazydan.studio.app.healthtracker.ui.theme.HealthTrackerTheme
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(getThemeResId(resources))
+
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            HealthTrackerTheme {
+            HealthTrackerTheme(
+                resources = resources,
+            ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

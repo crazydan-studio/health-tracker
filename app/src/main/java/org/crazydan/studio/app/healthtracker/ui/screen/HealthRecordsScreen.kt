@@ -31,6 +31,7 @@ import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.getPersonLabel
 import org.crazydan.studio.app.healthtracker.ui.Event
 import org.crazydan.studio.app.healthtracker.ui.EventDispatch
+import org.crazydan.studio.app.healthtracker.ui.component.HealthDataLoadingScreen
 import org.crazydan.studio.app.healthtracker.ui.component.HealthRecordAverageCircle
 import org.crazydan.studio.app.healthtracker.ui.component.HealthRecordsChart
 
@@ -48,6 +49,7 @@ fun HealthRecordsScreen(
     eventDispatch: EventDispatch,
 ) {
     if (healthPerson == null || healthType == null) {
+        HealthDataLoadingScreen()
         return
     }
 

@@ -27,6 +27,7 @@ import org.crazydan.studio.app.healthtracker.ui.Event
 import org.crazydan.studio.app.healthtracker.ui.EventDispatch
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCard
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataListScreen
+import org.crazydan.studio.app.healthtracker.ui.component.HealthDataLoadingScreen
 import org.crazydan.studio.app.healthtracker.util.calculateAge
 import org.crazydan.studio.app.healthtracker.util.getFullName
 import java.sql.Timestamp
@@ -39,10 +40,15 @@ import java.sql.Timestamp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HealthPersonsScreen(
-    healthPersons: List<HealthPerson>,
+    healthPersons: List<HealthPerson>?,
     deletedPersonAmount: Long,
     eventDispatch: EventDispatch,
 ) {
+    if (healthPersons == null) {
+        HealthDataLoadingScreen()
+        return
+    }
+
     HealthDataListScreen(
         deletedAmount = deletedPersonAmount,
         title = {

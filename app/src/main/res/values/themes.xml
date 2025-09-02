@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.HealthTracker" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.HealthTracker" parent="android:Theme.Material.NoActionBar" />
+
+    <style name="Theme.HealthTracker.Night" parent="Theme.HealthTracker">
+        <!-- rgb(20, 18, 24) -->
+        <item name="android:background">#141218</item>
+    </style>
+
+    <style name="Theme.HealthTracker.Light" parent="Theme.HealthTracker">
+        <!-- rgb(254, 247, 255) -->
+        <item name="android:background">#fef7ff</item>
+    </style>
 </resources>

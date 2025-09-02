@@ -28,6 +28,7 @@ import org.crazydan.studio.app.healthtracker.ui.Event
 import org.crazydan.studio.app.healthtracker.ui.EventDispatch
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCard
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataListScreen
+import org.crazydan.studio.app.healthtracker.ui.component.HealthDataLoadingScreen
 
 /**
  *
@@ -43,6 +44,7 @@ fun HealthTypesScreen(
     eventDispatch: EventDispatch,
 ) {
     if (healthPerson == null) {
+        HealthDataLoadingScreen()
         return
     }
 
