@@ -20,6 +20,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -56,6 +57,7 @@ fun AddOrEditHealthRecordScreen(
     editRecord: HealthRecord? = null,
     healthType: HealthType?,
     healthPerson: HealthPerson?,
+    healthRecordNotes: List<String>,
     eventDispatch: EventDispatch,
 ) {
     if (healthPerson == null || healthType == null) {
@@ -73,6 +75,7 @@ fun AddOrEditHealthRecordScreen(
     rangeName = editRecord?.rangeName ?: ranges.firstOrNull() ?: ""
 
     var rangeExpanded by remember { mutableStateOf(false) }
+    var noteExpanded by remember { mutableStateOf(false) }
 
     val timestamp =
         if (editRecord == null) null
@@ -178,7 +181,7 @@ fun AddOrEditHealthRecordScreen(
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .menuAnchor()
+                                .menuAnchor(MenuAnchorType.PrimaryNotEditable),
                         )
 
                         ExposedDropdownMenu(
@@ -199,12 +202,46 @@ fun AddOrEditHealthRecordScreen(
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-                OutlinedTextField(
-                    value = notes,
-                    onValueChange = { notes = it },
-                    label = { Text("备注 (可选)") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                if (healthRecordNotes.isEmpty()) {
+                    OutlinedTextField(
+                        value = notes,
+                        onValueChange = { notes = it },
+                        label = { Text("备注 (可选)") },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                } else {
+                    ExposedDropdownMenuBox(
+                        expanded = noteExpanded,
+                        onExpandedChange = { noteExpanded = !noteExpanded }
+                    ) {
+                        OutlinedTextField(
+                            value = notes,
+                            onValueChange = { notes = it },
+                            label = { Text("备注 (可选)") },
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = noteExpanded)
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor(MenuAnchorType.PrimaryEditable),
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = noteExpanded,
+                            onDismissRequest = { noteExpanded = false }
+                        ) {
+                            healthRecordNotes.forEach { n ->
+                                DropdownMenuItem(
+                                    text = { Text(n) },
+                                    onClick = {
+                                        notes = n
+                                        noteExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }

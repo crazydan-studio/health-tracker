@@ -63,6 +63,8 @@ class HealthRepository(
 
     fun getHealthRecordsByTypeId(typeId: Long): Flow<List<HealthRecord>> = healthRecordDao.getByTypeId(typeId)
 
+    fun getHealthRecordNotesByTypeId(typeId: Long): Flow<List<String>> = healthRecordDao.getNotesByTypeId(typeId)
+
     fun getDeletedHealthRecordsByTypeId(typeId: Long): Flow<List<HealthRecord>> =
         healthRecordDao.getDeletedByTypeId(typeId)
 

@@ -33,6 +33,9 @@ interface HealthRecordDao {
     @Query("SELECT * FROM $HEALTH_RECORD_TABLE_NAME WHERE typeId = :typeId AND deleted = 0 ORDER BY timestamp DESC")
     fun getByTypeId(typeId: Long): Flow<List<HealthRecord>>
 
+    @Query("SELECT DISTINCT notes FROM $HEALTH_RECORD_TABLE_NAME WHERE typeId = :typeId")
+    fun getNotesByTypeId(typeId: Long): Flow<List<String>>
+
     @Query("SELECT * FROM $HEALTH_RECORD_TABLE_NAME WHERE typeId = :typeId AND deleted = 1 ORDER BY timestamp DESC")
     fun getDeletedByTypeId(typeId: Long): Flow<List<HealthRecord>>
 

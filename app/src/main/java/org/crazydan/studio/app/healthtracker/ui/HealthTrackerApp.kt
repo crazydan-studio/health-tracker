@@ -146,10 +146,11 @@ fun HealthTrackerApp() {
                 typeId = typeId,
                 personId = personId,
                 viewModel = viewModel,
-            ) { _, type, person ->
+            ) { _, type, person, notes ->
                 AddOrEditHealthRecordScreen(
                     healthPerson = person,
                     healthType = type,
+                    healthRecordNotes = notes,
                     eventDispatch = eventDispatch,
                 )
             }
@@ -164,11 +165,12 @@ fun HealthTrackerApp() {
                 typeId = typeId,
                 personId = personId,
                 viewModel = viewModel,
-            ) { record, type, person ->
+            ) { record, type, person, notes ->
                 AddOrEditHealthRecordScreen(
                     editRecord = record,
                     healthPerson = person,
                     healthType = type,
+                    healthRecordNotes = notes,
                     eventDispatch = eventDispatch,
                 )
             }
@@ -501,24 +503,27 @@ private fun LaunchedEffectWithHealthRecord(
     typeId: Long,
     personId: Long,
     viewModel: HealthViewModel,
-    content: @Composable (HealthRecord?, HealthType?, HealthPerson?) -> Unit,
+    content: @Composable (HealthRecord?, HealthType?, HealthPerson?, List<String>) -> Unit,
 ) {
-    var healthRecord by remember { mutableStateOf<HealthRecord?>(null) }
     var healthType by remember { mutableStateOf<HealthType?>(null) }
     var healthPerson by remember { mutableStateOf<HealthPerson?>(null) }
+    var healthRecord by remember { mutableStateOf<HealthRecord?>(null) }
+    var healthRecordNotes by remember { mutableStateOf<List<String>>(emptyList()) }
 
     LaunchedEffect(recordId, typeId, personId) {
         combine(
             recordId?.let { viewModel.getHealthRecord(recordId) } ?: flowOf(null),
             viewModel.getHealthType(typeId),
             viewModel.getHealthPerson(personId),
-        ) { record, type, person ->
+            viewModel.getHealthRecordNotes(typeId),
+        ) { record, type, person, notes ->
             healthType = type
             healthPerson = person
             healthRecord = record
+            healthRecordNotes = notes.filter { it.isNotBlank() }
         }
             .collectLatest { it }
     }
 
-    content(healthRecord, healthType, healthPerson)
+    content(healthRecord, healthType, healthPerson, healthRecordNotes)
 }

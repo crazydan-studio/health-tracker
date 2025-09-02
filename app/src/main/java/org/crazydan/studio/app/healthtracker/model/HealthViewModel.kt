@@ -80,6 +80,10 @@ class HealthViewModel @Inject constructor(
         return repository.getHealthRecordsByTypeId(typeId)
     }
 
+    fun getHealthRecordNotes(typeId: Long): Flow<List<String>> {
+        return repository.getHealthRecordNotesByTypeId(typeId)
+    }
+
     suspend fun addHealthRecord(healthRecord: HealthRecord): Long {
         return repository.insertHealthRecord(healthRecord)
     }

@@ -97,6 +97,7 @@ private fun HealthRecordItem(
     ) {
         val label = "${record.value}${type.unit}"
         val timestamp = formatTimestamp(record)
+        val notes = record.notes.ifBlank { "无" }
 
         Text(text = label, style = MaterialTheme.typography.headlineSmall)
 
@@ -107,6 +108,9 @@ private fun HealthRecordItem(
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = "数据范围: ${record.rangeName}")
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(text = "备注: $notes")
     }
 }
 

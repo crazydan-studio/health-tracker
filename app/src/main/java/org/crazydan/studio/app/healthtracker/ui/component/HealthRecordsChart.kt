@@ -207,7 +207,7 @@ private fun createSplineChartModelOptions(
             
             return month + '-' + day + ' ' + hours + ':' + minutes;
         }
-    """.trimIndent()
+    """
     options.xAxis
         ?.labels(
             AALabels()
@@ -221,7 +221,7 @@ private fun createSplineChartModelOptions(
                 const date = new Date(this.value);
                 return formatDateTime(date);
             }
-        """.trimIndent()
+        """
                 )
         )
     options.tooltip
@@ -232,11 +232,12 @@ private fun createSplineChartModelOptions(
                         const formatDateTime = $dateFormatter;
                         const date = new Date(this.x);
                         const value = this.y;
-                        return formatDateTime(date) + '<br/>'
-                                + this.series.name
-                                + ': <b>' + value + '${healthType.unit}</b>';
+                        return formatDateTime(date) 
+                                + '<br/>' + this.series.name
+                                + ': <b>' + value + '${healthType.unit}</b>'
+                                + (typeof this.key == 'string' ? '<br/>备注: ' + this.key : '');
                     }
-                """.trimIndent()
+                """
         )
 
     options.plotOptions?.series?.events = AASeriesEvents()
@@ -299,7 +300,7 @@ private fun createSplineChartModelOptions(
             }
             return enableDefault;
         }
-    """.trimIndent()
+    """
         )
 
     return options
@@ -320,7 +321,10 @@ private fun createSeries(
     return ranges.map { range ->
         val data: Array<Any> = records.map { record ->
             if (record.rangeName == range.name || range == nullRange) {
-                AADataElement().x(record.timestamp).y(record.value)
+                AADataElement()
+                    .name(record.notes)
+                    .x(record.timestamp)
+                    .y(record.value)
             } else {
                 "null"
             }
@@ -331,6 +335,19 @@ private fun createSeries(
             //.connectNulls(true)
             .data(data)
     }
+//        .toMutableList()
+//        .also {
+//            it.add(
+//                AASeriesElement()
+//                    .name("全部")
+//                    .data(records.map { record ->
+//                        AADataElement()
+//                            .name(record.notes)
+//                            .x(record.timestamp)
+//                            .y(record.value)
+//                    }.toTypedArray())
+//            )
+//        }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
