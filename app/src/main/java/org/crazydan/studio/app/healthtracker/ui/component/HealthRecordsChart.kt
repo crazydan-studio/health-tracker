@@ -140,12 +140,7 @@ fun HealthRecordsChart(
             }
         },
         update = { view ->
-            view.aa_refreshChartWithChartOptions(
-                chartModelOptions
-            )
-            view.aa_onlyRefreshTheChartDataWithChartOptionsSeriesArray(
-                createSeries(healthType, healthRecords).toTypedArray(), true
-            )
+            view.aa_refreshChartWithChartOptions(chartModelOptions)
         },
         modifier = modifier
     )
@@ -339,22 +334,28 @@ private fun createSeries(
     }
 
     return ranges.map { range ->
-        val data: Array<Any> = records.map { record ->
-            if (record.rangeName == range.name || range == nullRange) {
-                AADataElement()
-                    .name(record.notes)
-                    .x(record.timestamp)
-                    .y(record.value)
-            } else {
-                "null"
+        Series(
+            name = range.name,
+            data = records.map { record ->
+                if (record.rangeName == range.name || range == nullRange) {
+                    AADataElement()
+                        .name(record.notes)
+                        .x(record.timestamp)
+                        .y(record.value)
+                } else {
+                    "null"
+                }
             }
-        }.filter { it != "null" }.toTypedArray()
-
-        AASeriesElement()
-            .name(range.name)
-            //.connectNulls(true)
-            .data(data)
+                .filter { it != "null" },
+        )
     }
+        .filter { it.data.isNotEmpty() }
+        .map {
+            AASeriesElement()
+                .name(it.name)
+                //.connectNulls(true)
+                .data(it.data.toTypedArray())
+        }
 //        .toMutableList()
 //        .also {
 //            it.add(
@@ -369,6 +370,11 @@ private fun createSeries(
 //            )
 //        }
 }
+
+private data class Series(
+    val name: String,
+    val data: List<Any>,
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

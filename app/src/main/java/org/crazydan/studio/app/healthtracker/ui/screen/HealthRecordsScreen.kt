@@ -93,7 +93,7 @@ fun HealthRecordsScreen(
                     )
                 )
             }) {
-                Icon(Icons.Default.Add, contentDescription = "添加记录")
+                Icon(Icons.Default.Add, contentDescription = "添加")
             }
         }
     ) { padding ->

@@ -25,12 +25,12 @@ import org.crazydan.studio.app.healthtracker.model.NormalRange
 /**
  * 计算特定 range 的健康记录平均值
  */
-private fun calculateRangeAverage(records: List<HealthRecord>, rangeName: String?): Double {
+private fun calculateRangeAverage(records: List<HealthRecord>, rangeName: String?): Double? {
     val rangeRecords = rangeName?.let { range ->
         records.filter { it.rangeName == range }
     } ?: records
 
-    if (rangeRecords.isEmpty()) return 0.0
+    if (rangeRecords.isEmpty()) return null
 
     return rangeRecords.map { it.value.toDouble() }.average()
 }
@@ -62,6 +62,10 @@ fun HealthRecordAverageCircle(
     strokeWidth: Dp = 8.dp,
 ) {
     val value = calculateRangeAverage(records, range?.name)
+    if (value == null) {
+        return
+    }
+
     // 根据平均值与范围的关系确定背景颜色
     val backgroundColor = getRangeColor(range, value)
 
