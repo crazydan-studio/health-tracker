@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
+import org.crazydan.studio.app.healthtracker.model.HEALTH_RECORD_TABLE_NAME
 import org.crazydan.studio.app.healthtracker.model.HEALTH_TYPE_TABLE_NAME
 import org.crazydan.studio.app.healthtracker.model.HealthType
 
@@ -44,4 +45,11 @@ interface HealthTypeDao {
 
     @Query("DELETE FROM $HEALTH_TYPE_TABLE_NAME WHERE personId = :personId AND deleted = 1")
     suspend fun clearDeleted(personId: Long)
+
+    @Query(
+        "DELETE FROM $HEALTH_RECORD_TABLE_NAME" +
+                " WHERE typeId in" +
+                " (select id FROM $HEALTH_TYPE_TABLE_NAME WHERE personId = :personId AND deleted = 1)"
+    )
+    suspend fun clearRecordsOfDeleted(personId: Long)
 }

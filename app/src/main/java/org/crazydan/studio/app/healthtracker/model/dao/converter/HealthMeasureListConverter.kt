@@ -1,26 +1,26 @@
-package org.crazydan.studio.app.healthtracker.model.dao
+package org.crazydan.studio.app.healthtracker.model.dao.converter
 
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import org.crazydan.studio.app.healthtracker.model.NormalRange
+import org.crazydan.studio.app.healthtracker.model.HealthMeasure
 
 /**
  *
  * @author <a href="mailto:flytreeleft@crazydan.org">flytreeleft</a>
  * @date 2025-08-28
  */
-class NormalRangeListConverter {
+class HealthMeasureListConverter {
     private val gson = Gson()
-    private val type = object : TypeToken<List<NormalRange>>() {}.type
+    private val type = object : TypeToken<List<HealthMeasure>>() {}.type
 
     @TypeConverter
-    fun fromRangeList(ranges: List<NormalRange>?): String {
-        return gson.toJson(ranges, type)
+    fun toJson(measures: List<HealthMeasure>?): String {
+        return gson.toJson(measures, type)
     }
 
     @TypeConverter
-    fun toRangeList(json: String?): List<NormalRange> {
+    fun fromJson(json: String?): List<HealthMeasure> {
         return if (json.isNullOrEmpty()) {
             emptyList()
         } else {

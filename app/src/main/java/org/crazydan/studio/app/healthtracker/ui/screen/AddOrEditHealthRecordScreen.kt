@@ -23,6 +23,7 @@ import com.marosseleng.compose.material3.datetimepickers.time.domain.noSeconds
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
+import org.crazydan.studio.app.healthtracker.model.getMeasureNameByCode
 import org.crazydan.studio.app.healthtracker.ui.Event
 import org.crazydan.studio.app.healthtracker.ui.EventDispatch
 import org.crazydan.studio.app.healthtracker.ui.component.AddOrEditHealthDataScreen
@@ -55,17 +56,16 @@ fun AddOrEditHealthRecordScreen(
     var noteExpanded by remember { mutableStateOf(false) }
 
     var value by remember { mutableStateOf("") }
-    var rangeName by remember { mutableStateOf("") }
+    var measureCode by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
     var timestampDate by remember { mutableStateOf(LocalDate.now()) }
     var timestampTime by remember { mutableStateOf(LocalTime.now().noSeconds()) }
 
-    val ranges = healthType.ranges.map { it.name }
-    rangeName = ranges.firstOrNull() ?: ""
+    measureCode = healthType.measures.firstOrNull()?.code ?: ""
 
     editRecord?.let { record ->
         value = record.value.toString()
-        rangeName = record.rangeName
+        measureCode = record.measure
         notes = record.notes
 
         val timestamp = epochMillisToLocalDateTime(record.timestamp)
@@ -90,7 +90,7 @@ fun AddOrEditHealthRecordScreen(
                 timestamp = toEpochMillis(timestampDate, timestampTime),
                 typeId = healthType.id,
                 personId = healthPerson.id,
-                rangeName = rangeName,
+                measure = measureCode,
                 notes = notes,
                 createdAt = System.currentTimeMillis(),
             )
@@ -123,7 +123,7 @@ fun AddOrEditHealthRecordScreen(
             onValueChange = { timestampTime = it },
         )
 
-        if (!ranges.isEmpty()) {
+        if (!healthType.measures.isEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
             // 范围选择
             ExposedDropdownMenuBox(
@@ -131,10 +131,10 @@ fun AddOrEditHealthRecordScreen(
                 onExpandedChange = { rangeExpanded = !rangeExpanded }
             ) {
                 OutlinedTextField(
-                    value = rangeName,
+                    value = getMeasureNameByCode(healthType, measureCode),
                     readOnly = true,
-                    onValueChange = { rangeName = it },
-                    label = { Text("数据范围") },
+                    onValueChange = { },
+                    label = { Text("测量指标") },
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = rangeExpanded)
                     },
@@ -147,11 +147,11 @@ fun AddOrEditHealthRecordScreen(
                     expanded = rangeExpanded,
                     onDismissRequest = { rangeExpanded = false }
                 ) {
-                    ranges.forEach { range ->
+                    healthType.measures.forEach { measure ->
                         DropdownMenuItem(
-                            text = { Text(range) },
+                            text = { Text(measure.name) },
                             onClick = {
-                                rangeName = range
+                                measureCode = measure.code
                                 rangeExpanded = false
                             }
                         )

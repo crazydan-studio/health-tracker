@@ -1,7 +1,6 @@
 package org.crazydan.studio.app.healthtracker.model
 
 import androidx.room.Entity
-import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
 const val HEALTH_RECORD_TABLE_NAME = "health_record"
@@ -11,17 +10,7 @@ const val HEALTH_RECORD_TABLE_NAME = "health_record"
  * @author <a href="mailto:flytreeleft@crazydan.org">flytreeleft</a>
  * @date 2025-08-28
  */
-@Entity(
-    tableName = HEALTH_RECORD_TABLE_NAME,
-    foreignKeys = [
-        ForeignKey(
-            entity = HealthType::class,
-            parentColumns = ["id"],
-            childColumns = ["typeId"],
-            onDelete = ForeignKey.CASCADE
-        )
-    ]
-)
+@Entity(tableName = HEALTH_RECORD_TABLE_NAME)
 data class HealthRecord(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
@@ -37,8 +26,8 @@ data class HealthRecord(
     /** 数据时间戳，默认与 [createdAt] 相同 */
     val timestamp: Long,
 
-    /** 关联的 [NormalRange] 名称 */
-    val rangeName: String = "",
+    /** 关联的 [HealthMeasure.code] */
+    val measure: String = "",
     /** 可选备注 */
     val notes: String = "",
 

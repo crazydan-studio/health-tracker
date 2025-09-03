@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,11 +24,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import org.crazydan.studio.app.healthtracker.model.HealthLimit
+import org.crazydan.studio.app.healthtracker.model.HealthMeasure
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthType
-import org.crazydan.studio.app.healthtracker.model.NormalRange
+import org.crazydan.studio.app.healthtracker.model.genMeasureCode
 import org.crazydan.studio.app.healthtracker.ui.Event
 import org.crazydan.studio.app.healthtracker.ui.EventDispatch
 import org.crazydan.studio.app.healthtracker.ui.component.AddOrEditHealthDataScreen
@@ -50,17 +54,18 @@ fun AddOrEditHealthTypeScreen(
 
     var name by remember { mutableStateOf("") }
     var unit by remember { mutableStateOf("") }
-    val ranges = remember { mutableStateListOf<NormalRange>() }
+    var limit by remember { mutableStateOf(HealthLimit()) }
+    val measures = remember { mutableStateListOf<HealthMeasure>() }
 
     editType?.let { type ->
         name = type.name
         unit = type.unit
-        type.ranges.let { ranges.addAll(it) }
+        limit = type.limit
+        type.measures.let { measures.addAll(it) }
     }
 
-    var rangeName by remember { mutableStateOf("") }
-    var lowerLimit by remember { mutableStateOf("") }
-    var upperLimit by remember { mutableStateOf("") }
+    var showEditMeasureDialog by remember { mutableStateOf(false) }
+    var editMeasure by remember { mutableStateOf<HealthMeasure?>(null) }
 
     AddOrEditHealthDataScreen(
         title = {
@@ -78,7 +83,8 @@ fun AddOrEditHealthTypeScreen(
                 personId = healthPerson.id,
                 name = name.trim(),
                 unit = unit.trim(),
-                ranges = ranges.toList()
+                limit = limit,
+                measures = measures.toList(),
             )
 
             if (type.id == 0L) {
@@ -108,95 +114,75 @@ fun AddOrEditHealthTypeScreen(
                     label = { Text("单位") },
                     modifier = Modifier.fillMaxWidth()
                 )
-            }
-        }
-
-        // 添加范围
-        Spacer(modifier = Modifier.height(16.dp))
-        Card {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("添加正常范围", style = MaterialTheme.typography.headlineSmall)
-
-                Spacer(modifier = Modifier.height(16.dp))
-                OutlinedTextField(
-                    value = rangeName,
-                    onValueChange = { rangeName = it },
-                    label = { Text("范围名称") },
-                    modifier = Modifier.fillMaxWidth()
-                )
 
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     OutlinedTextField(
-                        value = lowerLimit,
-                        onValueChange = { lowerLimit = it },
-                        label = { Text("下限值") },
+                        value = limit.lower?.toString() ?: "",
+                        onValueChange = {
+                            limit = limit.copy(lower = it.toFloatOrNull())
+                        },
+                        label = { Text("下限值 (可选)") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
                     )
+
                     OutlinedTextField(
-                        value = upperLimit,
-                        onValueChange = { upperLimit = it },
-                        label = { Text("上限值") },
+                        value = limit.upper?.toString() ?: "",
+                        onValueChange = {
+                            limit = limit.copy(upper = it.toFloatOrNull())
+                        },
+                        label = { Text("上限值 (可选)") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
                     )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = {
-                        if (rangeName.isNotBlank() &&
-                            lowerLimit.toFloatOrNull() != null &&
-                            upperLimit.toFloatOrNull() != null
-                        ) {
-                            ranges.add(
-                                NormalRange(
-                                    name = rangeName.trim(),
-                                    lowerLimit = lowerLimit.toFloat(),
-                                    upperLimit = upperLimit.toFloat(),
-                                )
-                            )
-
-                            // 清空输入
-                            rangeName = ""
-                            lowerLimit = ""
-                            upperLimit = ""
-                        }
-                    },
-                    enabled = rangeName.isNotBlank() &&
-                            lowerLimit.toFloatOrNull() != null &&
-                            upperLimit.toFloatOrNull() != null,
-                    modifier = Modifier.align(Alignment.End)
-                ) {
-                    Text("添加范围")
                 }
             }
         }
 
-        // 已添加的范围
-        if (ranges.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Card {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("已添加的范围", style = MaterialTheme.typography.headlineSmall)
+        Spacer(modifier = Modifier.height(16.dp))
+        Card {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text("测量指标", style = MaterialTheme.typography.headlineSmall)
+                    TextButton(onClick = {
+                        editMeasure = emptyMeasure()
+                        showEditMeasureDialog = true
+                    }) {
+                        Text("添加")
+                    }
+                }
 
-                    ranges.forEachIndexed { index, range ->
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(range.name)
-                            Text("${range.lowerLimit} - ${range.upperLimit}")
+                measures.forEachIndexed { index, measure ->
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(measure.name)
+                        Text(measure.limit.toString())
+
+                        Row {
                             TextButton(
-                                onClick = { ranges.removeAt(index) }
+                                onClick = { measures.removeAt(index) }
                             ) {
                                 Text("删除")
+                            }
+                            TextButton(
+                                onClick = {
+                                    editMeasure = measure
+                                    showEditMeasureDialog = true
+                                }
+                            ) {
+                                Text("修改")
                             }
                         }
                     }
@@ -204,4 +190,108 @@ fun AddOrEditHealthTypeScreen(
             }
         }
     }
+
+    if (showEditMeasureDialog && editMeasure != null) {
+        EditHealthMeasureDialog(
+            measure = editMeasure!!,
+            onSave = {
+                measures.add(it)
+            },
+            onClose = { showEditMeasureDialog = false }
+        )
+    }
+}
+
+private fun emptyMeasure(): HealthMeasure {
+    return HealthMeasure(code = "", name = "", limit = HealthLimit())
+}
+
+@Composable
+private fun EditHealthMeasureDialog(
+    measure: HealthMeasure,
+    onSave: (HealthMeasure) -> Unit,
+    onClose: () -> Unit,
+) {
+    var editMeasure by remember { mutableStateOf(measure) }
+
+    val canSave = fun(): Boolean {
+        return editMeasure.name.isNotBlank()
+                && editMeasure.limit.lower != null
+                && editMeasure.limit.upper != null
+    }
+
+    AlertDialog(
+        onDismissRequest = onClose,
+        title = {
+            Text(
+                if (editMeasure.code.isEmpty())
+                    "添加测量指标"
+                else "编辑测量指标"
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (canSave()) {
+                        val m =
+                            if (editMeasure.code.isEmpty())
+                                editMeasure.copy(code = genMeasureCode())
+                            else editMeasure
+                        onSave(m)
+
+                        onClose()
+                    }
+                },
+                enabled = canSave(),
+            ) {
+                Text("保存")
+            }
+        },
+        dismissButton = {
+            Button(
+                modifier = Modifier.alpha(0.5f),
+                onClick = onClose,
+            ) {
+                Text("取消")
+            }
+        },
+        text = {
+            OutlinedTextField(
+                value = editMeasure.name,
+                onValueChange = { editMeasure = editMeasure.copy(name = it) },
+                label = { Text("指标名称") },
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                OutlinedTextField(
+                    value = editMeasure.limit.lower?.toString() ?: "",
+                    onValueChange = {
+                        editMeasure = editMeasure.copy(
+                            limit = editMeasure.limit.copy(lower = it.toFloatOrNull())
+                        )
+                    },
+                    label = { Text("下限值") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.weight(1f),
+                )
+
+                OutlinedTextField(
+                    value = editMeasure.limit.upper?.toString() ?: "",
+                    onValueChange = {
+                        editMeasure = editMeasure.copy(
+                            limit = editMeasure.limit.copy(upper = it.toFloatOrNull())
+                        )
+                    },
+                    label = { Text("上限值") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
+    )
 }

@@ -9,9 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.crazydan.studio.app.healthtracker.model.HealthLimit
+import org.crazydan.studio.app.healthtracker.model.HealthMeasure
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthType
-import org.crazydan.studio.app.healthtracker.model.NormalRange
 import org.crazydan.studio.app.healthtracker.model.getPersonLabel
 import org.crazydan.studio.app.healthtracker.ui.Event
 import org.crazydan.studio.app.healthtracker.ui.EventDispatch
@@ -96,12 +97,17 @@ fun HealthTypeCard(
         Spacer(modifier = Modifier.height(8.dp))
         Text(text = "单位: ${type.unit}")
 
-        if (type.ranges.isNotEmpty()) {
+        if (type.limit.lower != null || type.limit.upper != null) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "正常范围:", style = MaterialTheme.typography.labelMedium)
+            Text(text = "限制范围: ${type.limit} ${type.unit}")
+        }
 
-            type.ranges.forEach { range ->
-                Text(text = "  ${range.name}: ${range.lowerLimit} ~ ${range.upperLimit} ${type.unit}")
+        if (type.measures.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "测量指标:", style = MaterialTheme.typography.labelMedium)
+
+            type.measures.forEach { measure ->
+                Text(text = "  ${measure.name}: ${measure.limit} ${type.unit}")
             }
         }
     }
@@ -109,18 +115,22 @@ fun HealthTypeCard(
 
 @Preview
 @Composable
-private fun HealthTypeItemPreview() {
+private fun HealthTypeCardPreview() {
     HealthTypeCard(
         type = HealthType(
             id = 0,
             personId = 0,
             name = "血糖",
             unit = "mmol/L",
-            ranges = listOf(
-                NormalRange(
+            limit = HealthLimit(),
+            measures = listOf(
+                HealthMeasure(
+                    code = "",
                     name = "餐后 2h",
-                    lowerLimit = 3.2f,
-                    upperLimit = 10f,
+                    limit = HealthLimit(
+                        lower = 3.2f,
+                        upper = 10f,
+                    )
                 ),
             ),
         ),

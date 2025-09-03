@@ -49,6 +49,9 @@ class HealthViewModel @Inject constructor(
     }
 
     suspend fun clearDeletedHealthPersons() {
+        repository.clearHealthRecordsOfDeletedHealthPersons()
+        repository.clearHealthTypesOfDeletedHealthPersons()
+
         repository.clearDeletedHealthPersons()
     }
 
@@ -86,6 +89,8 @@ class HealthViewModel @Inject constructor(
     }
 
     suspend fun clearDeletedHealthTypes(personId: Long) {
+        repository.clearHealthRecordsOfDeletedHealthTypes(personId)
+
         repository.clearDeletedHealthTypes(personId)
     }
 

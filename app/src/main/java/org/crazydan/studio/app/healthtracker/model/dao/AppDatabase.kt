@@ -6,6 +6,8 @@ import androidx.room.TypeConverters
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
+import org.crazydan.studio.app.healthtracker.model.dao.converter.HealthLimitConverter
+import org.crazydan.studio.app.healthtracker.model.dao.converter.HealthMeasureListConverter
 
 /**
  *
@@ -14,10 +16,10 @@ import org.crazydan.studio.app.healthtracker.model.HealthType
  */
 @Database(
     entities = [HealthPerson::class, HealthType::class, HealthRecord::class],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
-@TypeConverters(NormalRangeListConverter::class)
+@TypeConverters(HealthMeasureListConverter::class, HealthLimitConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun healthPersonDao(): HealthPersonDao
     abstract fun healthTypeDao(): HealthTypeDao

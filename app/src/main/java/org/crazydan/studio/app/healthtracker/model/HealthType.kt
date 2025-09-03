@@ -1,7 +1,9 @@
 package org.crazydan.studio.app.healthtracker.model
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import org.crazydan.studio.app.healthtracker.util.genCode
 
 const val HEALTH_TYPE_TABLE_NAME = "health_type"
 
@@ -23,18 +25,37 @@ data class HealthType(
     val name: String,
     /** 数据单位，如，mmol/L */
     val unit: String,
-    /** 正常范围列表 */
-    val ranges: List<NormalRange>,
+
+    val limit: HealthLimit,
+
+    /** 测量指标列表 */
+    val measures: List<HealthMeasure>,
 )
 
-/** 正常范围 */
-data class NormalRange(
-//    /** 唯一标识，自动生成 */
-//    val code: String,
-    /** 范围名称，如，空腹 8h */
+/** 测量指标 */
+data class HealthMeasure(
+    /** 唯一标识，自动生成，用于避免名字变更造成关联引用失效 */
+    val code: String,
+    /** 指标名称，如，空腹 8h */
     val name: String,
-    /** 上限值 */
-    val upperLimit: Float,
-    /** 下限值 */
-    val lowerLimit: Float,
+    val limit: HealthLimit,
 )
+
+data class HealthLimit(
+    /** 上限值 */
+    val upper: Float? = null,
+    /** 下限值 */
+    val lower: Float? = null,
+) {
+    override fun toString(): String {
+        return "${lower ?: "*"} ~ ${upper ?: "*"}"
+    }
+}
+
+fun genMeasureCode(): String {
+    return genCode(8)
+}
+
+fun getMeasureNameByCode(healthType: HealthType, measureCode: String): String {
+    return healthType.measures.firstOrNull { it.code == measureCode }?.name ?: "<关联缺失>"
+}

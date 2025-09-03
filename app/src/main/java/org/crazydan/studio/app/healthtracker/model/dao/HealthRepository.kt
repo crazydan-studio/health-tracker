@@ -34,6 +34,10 @@ class HealthRepository(
 
     suspend fun clearDeletedHealthPersons() = healthPersonDao.clearDeleted()
 
+    suspend fun clearHealthTypesOfDeletedHealthPersons() = healthPersonDao.clearTypesOfDeleted()
+
+    suspend fun clearHealthRecordsOfDeletedHealthPersons() = healthPersonDao.clearRecordsOfDeleted()
+
     // HealthType operations
     suspend fun insertHealthType(healthType: HealthType): Long = healthTypeDao.insert(healthType)
 
@@ -53,6 +57,8 @@ class HealthRepository(
     fun countDeletedHealthTypesByPersonId(personId: Long): Flow<Long> = healthTypeDao.countDeletedByPersonId(personId)
 
     suspend fun clearDeletedHealthTypes(personId: Long) = healthTypeDao.clearDeleted(personId)
+
+    suspend fun clearHealthRecordsOfDeletedHealthTypes(personId: Long) = healthTypeDao.clearRecordsOfDeleted(personId)
 
     // HealthRecord operations
     suspend fun insertHealthRecord(healthRecord: HealthRecord): Long = healthRecordDao.insert(healthRecord)

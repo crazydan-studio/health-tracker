@@ -117,11 +117,11 @@ fun HealthRecordsScreen(
                         .fillMaxWidth()
                         .horizontalScroll(rememberScrollState()),
                 ) {
-                    if (healthType.ranges.isNotEmpty()) {
-                        healthType.ranges.forEach { range ->
+                    if (healthType.measures.isNotEmpty()) {
+                        healthType.measures.forEach { measure ->
                             HealthRecordAverageCircle(
-                                label = "<${range.name}>均值",
-                                range = range,
+                                label = "<${measure.name}>均值",
+                                measure = measure,
                                 records = healthRecords,
                                 modifier = Modifier.padding(16.dp)
                             )

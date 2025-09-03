@@ -9,6 +9,7 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.Date
 import java.util.Locale
+import kotlin.random.Random
 
 /**
  *
@@ -57,4 +58,12 @@ fun formatEpochMillis(millis: Long, format: String): String {
     val dateFormat = SimpleDateFormat(format, Locale.getDefault())
 
     return dateFormat.format(Date(millis))
+}
+
+fun genCode(length: Int): String {
+    val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
+
+    return (1..length)
+        .map { allowedChars.random(Random) }
+        .joinToString("")
 }

@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
+import org.crazydan.studio.app.healthtracker.model.getMeasureNameByCode
 import org.crazydan.studio.app.healthtracker.model.getPersonLabel
 import org.crazydan.studio.app.healthtracker.ui.Event
 import org.crazydan.studio.app.healthtracker.ui.EventDispatch
@@ -92,9 +93,9 @@ fun HealthRecordCard(
         Spacer(modifier = Modifier.height(8.dp))
         Text(text = "测量时间: $timestamp")
 
-        if (record.rangeName.isNotEmpty()) {
+        if (record.measure.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "数据范围: ${record.rangeName}")
+            Text(text = "测量指标: ${getMeasureNameByCode(type, record.measure)}")
         }
 
         Spacer(modifier = Modifier.height(8.dp))

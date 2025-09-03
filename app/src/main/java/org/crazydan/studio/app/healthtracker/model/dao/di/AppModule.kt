@@ -12,6 +12,7 @@ import org.crazydan.studio.app.healthtracker.model.dao.HealthPersonDao
 import org.crazydan.studio.app.healthtracker.model.dao.HealthRecordDao
 import org.crazydan.studio.app.healthtracker.model.dao.HealthRepository
 import org.crazydan.studio.app.healthtracker.model.dao.HealthTypeDao
+import org.crazydan.studio.app.healthtracker.model.dao.upgrader.MigrationFromV2ToV3
 import javax.inject.Singleton
 
 /**
@@ -32,6 +33,7 @@ object AppModule {
             "health_tracker.db"
         )
             //.fallbackToDestructiveMigration(false)
+            .addMigrations(MigrationFromV2ToV3())
             .build()
     }
 

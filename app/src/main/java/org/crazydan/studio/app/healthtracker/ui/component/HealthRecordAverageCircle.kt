@@ -19,35 +19,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.crazydan.studio.app.healthtracker.model.HealthMeasure
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
-import org.crazydan.studio.app.healthtracker.model.NormalRange
-
-/**
- * 计算特定 range 的健康记录平均值
- */
-private fun calculateRangeAverage(records: List<HealthRecord>, rangeName: String?): Double? {
-    val rangeRecords = rangeName?.let { range ->
-        records.filter { it.rangeName == range }
-    } ?: records
-
-    if (rangeRecords.isEmpty()) return null
-
-    return rangeRecords.map { it.value.toDouble() }.average()
-}
-
-/**
- * 根据平均值与范围的关系确定背景颜色
- */
-private fun getRangeColor(range: NormalRange?, averageValue: Double): Color {
-    return when {
-        range != null && averageValue > range.upperLimit
-            -> Color(0xFFFFC107) // 黄色 - 高于上限
-        range != null && averageValue < range.lowerLimit
-            -> Color(0xFFF44336) // 红色 - 低于下限
-        else
-            -> Color(0xFF4CAF50) // 绿色 - 在正常范围内
-    }
-}
 
 /**
  * 圆形平均值显示组件
@@ -57,17 +30,17 @@ fun HealthRecordAverageCircle(
     label: String,
     records: List<HealthRecord>,
     modifier: Modifier = Modifier,
-    range: NormalRange? = null,
+    measure: HealthMeasure? = null,
     size: Dp = 120.dp,
     strokeWidth: Dp = 8.dp,
 ) {
-    val value = calculateRangeAverage(records, range?.name)
+    val value = calculateMeasureAverage(records, measure?.code)
     if (value == null) {
         return
     }
 
-    // 根据平均值与范围的关系确定背景颜色
-    val backgroundColor = getRangeColor(range, value)
+    val measureLevel = getMeasureLevel(measure, value)
+    val backgroundColor = getMeasureColor(measureLevel)
 
     Box(
         modifier = modifier.size(size),
@@ -87,11 +60,9 @@ fun HealthRecordAverageCircle(
             )
         }
 
-        // 显示文本信息
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 显示范围名称
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
@@ -102,12 +73,70 @@ fun HealthRecordAverageCircle(
             )
 
             Spacer(modifier = Modifier.height(4.dp))
-            // 显示平均值
             Text(
                 text = "%.1f".format(value),
                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onSurface
             )
+
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = when (measureLevel) {
+                    MeasureLevel.UpUpper -> "> 上限"
+                    MeasureLevel.LowLower -> "> 下限"
+                    else -> "正常"
+                },
+                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                lineHeight = 14.sp,
+                modifier = Modifier.padding(horizontal = strokeWidth)
+            )
         }
     }
+}
+
+/**
+ * 计算特定测量指标的健康记录平均值
+ */
+private fun calculateMeasureAverage(records: List<HealthRecord>, measureCode: String?): Double? {
+    val measureRecords = measureCode?.let { m ->
+        records.filter { it.measure == m }
+    } ?: records
+
+    if (measureRecords.isEmpty()) return null
+
+    return measureRecords.map { it.value.toDouble() }.average()
+}
+
+private fun getMeasureLevel(measure: HealthMeasure?, averageValue: Double): MeasureLevel {
+    return when {
+        measure != null
+                && measure.limit.upper != null
+                && averageValue > measure.limit.upper
+            -> MeasureLevel.UpUpper
+
+        measure != null
+                && measure.limit.lower != null
+                && averageValue < measure.limit.lower
+            -> MeasureLevel.LowLower
+
+        else
+            -> MeasureLevel.Normal
+    }
+}
+
+private fun getMeasureColor(measureLevel: MeasureLevel): Color {
+    return when (measureLevel) {
+        MeasureLevel.UpUpper
+            -> Color(0xFFFFC107) // 黄色 - 高于上限
+        MeasureLevel.LowLower
+            -> Color(0xFFF44336) // 红色 - 低于下限
+        else
+            -> Color(0xFF4CAF50) // 绿色 - 在正常范围内
+    }
+}
+
+enum class MeasureLevel {
+    Normal, UpUpper, LowLower
 }
