@@ -55,22 +55,24 @@ fun AddOrEditHealthRecordScreen(
     var rangeExpanded by remember { mutableStateOf(false) }
     var noteExpanded by remember { mutableStateOf(false) }
 
-    var value by remember { mutableStateOf("") }
-    var measureCode by remember { mutableStateOf("") }
-    var notes by remember { mutableStateOf("") }
-    var timestampDate by remember { mutableStateOf(LocalDate.now()) }
-    var timestampTime by remember { mutableStateOf(LocalTime.now().noSeconds()) }
+    var measureCode by remember(editRecord) {
+        mutableStateOf(
+            editRecord?.measure
+                ?: healthType.measures.firstOrNull()?.code
+                ?: ""
+        )
+    }
+    var value by remember(editRecord) {
+        mutableStateOf(editRecord?.value?.toString() ?: "")
+    }
+    var notes by remember(editRecord) { mutableStateOf(editRecord?.notes ?: "") }
 
-    measureCode = healthType.measures.firstOrNull()?.code ?: ""
-
-    editRecord?.let { record ->
-        value = record.value.toString()
-        measureCode = record.measure
-        notes = record.notes
-
-        val timestamp = epochMillisToLocalDateTime(record.timestamp)
-        timestampDate = timestamp.toLocalDate() ?: LocalDate.now()
-        timestampTime = timestamp.toLocalTime() ?: LocalTime.now().noSeconds()
+    val timestamp = epochMillisToLocalDateTime(editRecord?.timestamp)
+    var timestampDate by remember(editRecord) {
+        mutableStateOf(timestamp?.toLocalDate() ?: LocalDate.now())
+    }
+    var timestampTime by remember(editRecord) {
+        mutableStateOf(timestamp?.toLocalTime() ?: LocalTime.now().noSeconds())
     }
 
     AddOrEditHealthDataScreen(

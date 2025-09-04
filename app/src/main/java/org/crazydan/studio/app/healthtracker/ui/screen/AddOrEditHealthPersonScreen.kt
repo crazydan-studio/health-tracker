@@ -21,8 +21,6 @@ import org.crazydan.studio.app.healthtracker.ui.component.DateInputPicker
 import org.crazydan.studio.app.healthtracker.ui.component.TimeInputPicker
 import org.crazydan.studio.app.healthtracker.util.epochMillisToLocalDateTime
 import org.crazydan.studio.app.healthtracker.util.toEpochMillis
-import java.time.LocalDate
-import java.time.LocalTime
 
 /**
  *
@@ -35,21 +33,13 @@ fun AddOrEditHealthPersonScreen(
     editPerson: HealthPerson? = null,
     eventDispatch: EventDispatch,
 ) {
-    var label by remember { mutableStateOf("") }
-    var familyName by remember { mutableStateOf("") }
-    var givenName by remember { mutableStateOf("") }
-    var birthDate by remember { mutableStateOf<LocalDate?>(null) }
-    var birthTime by remember { mutableStateOf<LocalTime?>(null) }
+    var label by remember(editPerson) { mutableStateOf(editPerson?.label ?: "") }
+    var familyName by remember(editPerson) { mutableStateOf(editPerson?.familyName ?: "") }
+    var givenName by remember(editPerson) { mutableStateOf(editPerson?.givenName ?: "") }
 
-    editPerson?.let { person ->
-        label = person.label ?: ""
-        familyName = person.familyName
-        givenName = person.givenName
-
-        val birthday = epochMillisToLocalDateTime(person.birthday)
-        birthDate = birthday.toLocalDate()
-        birthTime = birthday.toLocalTime()
-    }
+    val birthday = epochMillisToLocalDateTime(editPerson?.birthday)
+    var birthDate by remember(editPerson) { mutableStateOf(birthday?.toLocalDate()) }
+    var birthTime by remember(editPerson) { mutableStateOf(birthday?.toLocalTime()) }
 
     AddOrEditHealthDataScreen(
         title = {

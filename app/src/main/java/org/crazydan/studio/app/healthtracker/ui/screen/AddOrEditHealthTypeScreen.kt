@@ -22,9 +22,9 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import org.crazydan.studio.app.healthtracker.model.HealthLimit
@@ -52,16 +52,12 @@ fun AddOrEditHealthTypeScreen(
         return
     }
 
-    var name by remember { mutableStateOf("") }
-    var unit by remember { mutableStateOf("") }
-    var limit by remember { mutableStateOf(HealthLimit()) }
-    val measures = remember { mutableStateListOf<HealthMeasure>() }
-
-    editType?.let { type ->
-        name = type.name
-        unit = type.unit
-        limit = type.limit
-        type.measures.let { measures.addAll(it) }
+    var name by remember(editType) { mutableStateOf(editType?.name ?: "") }
+    var unit by remember(editType) { mutableStateOf(editType?.unit ?: "") }
+    var upperLimit by remember(editType) { mutableStateOf(editType?.limit?.upper?.toString() ?: "") }
+    var lowerLimit by remember(editType) { mutableStateOf(editType?.limit?.lower?.toString() ?: "") }
+    val measures = remember(editType) {
+        editType?.measures?.toMutableStateList() ?: mutableStateListOf()
     }
 
     var showEditMeasureDialog by remember { mutableStateOf(false) }
@@ -83,7 +79,10 @@ fun AddOrEditHealthTypeScreen(
                 personId = healthPerson.id,
                 name = name.trim(),
                 unit = unit.trim(),
-                limit = limit,
+                limit = HealthLimit(
+                    upper = upperLimit.toFloatOrNull(),
+                    lower = lowerLimit.toFloatOrNull(),
+                ),
                 measures = measures.toList(),
             )
 
@@ -121,20 +120,16 @@ fun AddOrEditHealthTypeScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     OutlinedTextField(
-                        value = limit.lower?.toString() ?: "",
-                        onValueChange = {
-                            limit = limit.copy(lower = it.toFloatOrNull())
-                        },
+                        value = upperLimit,
+                        onValueChange = { upperLimit = it },
                         label = { Text("下限值 (可选)") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f),
                     )
 
                     OutlinedTextField(
-                        value = limit.upper?.toString() ?: "",
-                        onValueChange = {
-                            limit = limit.copy(upper = it.toFloatOrNull())
-                        },
+                        value = lowerLimit,
+                        onValueChange = { lowerLimit = it },
                         label = { Text("上限值 (可选)") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f),
@@ -194,8 +189,13 @@ fun AddOrEditHealthTypeScreen(
     if (showEditMeasureDialog && editMeasure != null) {
         EditHealthMeasureDialog(
             measure = editMeasure!!,
-            onSave = {
-                measures.add(it)
+            onSave = { m ->
+                val index = measures.indexOfFirst { m.code == it.code }
+                if (index < 0) {
+                    measures.add(m)
+                } else {
+                    measures[index] = m
+                }
             },
             onClose = { showEditMeasureDialog = false }
         )
@@ -212,19 +212,15 @@ private fun EditHealthMeasureDialog(
     onSave: (HealthMeasure) -> Unit,
     onClose: () -> Unit,
 ) {
-    var editMeasure by remember { mutableStateOf(measure) }
-
-    val canSave = fun(): Boolean {
-        return editMeasure.name.isNotBlank()
-                && editMeasure.limit.lower != null
-                && editMeasure.limit.upper != null
-    }
+    var name by remember { mutableStateOf(measure.name) }
+    var upperLimit by remember { mutableStateOf(measure.limit.upper?.toString() ?: "") }
+    var lowerLimit by remember { mutableStateOf(measure.limit.lower?.toString() ?: "") }
 
     AlertDialog(
         onDismissRequest = onClose,
         title = {
             Text(
-                if (editMeasure.code.isEmpty())
+                if (measure.code.isEmpty())
                     "添加测量指标"
                 else "编辑测量指标"
             )
@@ -232,65 +228,64 @@ private fun EditHealthMeasureDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    if (canSave()) {
-                        val m =
-                            if (editMeasure.code.isEmpty())
-                                editMeasure.copy(code = genMeasureCode())
-                            else editMeasure
-                        onSave(m)
-
-                        onClose()
+                    var m = HealthMeasure(
+                        code = measure.code,
+                        name = name,
+                        limit = HealthLimit(
+                            lower = lowerLimit.toFloatOrNull(),
+                            upper = upperLimit.toFloatOrNull(),
+                        )
+                    )
+                    if (m.code.isEmpty()) {
+                        m = m.copy(code = genMeasureCode())
                     }
+                    onSave(m)
+
+                    onClose()
                 },
-                enabled = canSave(),
+                enabled = name.isNotBlank() && (
+                        lowerLimit.toFloatOrNull() != null
+                                || upperLimit.toFloatOrNull() != null
+                        ),
             ) {
                 Text("保存")
             }
         },
         dismissButton = {
-            Button(
-                modifier = Modifier.alpha(0.5f),
-                onClick = onClose,
-            ) {
+            Button(onClick = onClose) {
                 Text("取消")
             }
         },
         text = {
-            OutlinedTextField(
-                value = editMeasure.name,
-                onValueChange = { editMeasure = editMeasure.copy(name = it) },
-                label = { Text("指标名称") },
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
+            Column {
                 OutlinedTextField(
-                    value = editMeasure.limit.lower?.toString() ?: "",
-                    onValueChange = {
-                        editMeasure = editMeasure.copy(
-                            limit = editMeasure.limit.copy(lower = it.toFloatOrNull())
-                        )
-                    },
-                    label = { Text("下限值") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.weight(1f),
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("指标名称") },
+                    modifier = Modifier.fillMaxWidth(),
                 )
 
-                OutlinedTextField(
-                    value = editMeasure.limit.upper?.toString() ?: "",
-                    onValueChange = {
-                        editMeasure = editMeasure.copy(
-                            limit = editMeasure.limit.copy(upper = it.toFloatOrNull())
-                        )
-                    },
-                    label = { Text("上限值") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.weight(1f),
-                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    OutlinedTextField(
+                        value = lowerLimit,
+                        onValueChange = { lowerLimit = it },
+                        label = { Text("下限值") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f),
+                    )
+
+                    OutlinedTextField(
+                        value = upperLimit,
+                        onValueChange = { upperLimit = it },
+                        label = { Text("上限值") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f),
+                    )
+                }
             }
         }
     )

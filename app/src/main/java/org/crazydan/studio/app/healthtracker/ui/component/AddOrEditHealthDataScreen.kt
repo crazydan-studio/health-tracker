@@ -46,14 +46,9 @@ fun AddOrEditHealthDataScreen(
                     }
                 },
                 actions = {
-                    val enabled = canSave()
                     Button(
-                        onClick = {
-                            if (enabled) {
-                                onSave()
-                            }
-                        },
-                        enabled = enabled,
+                        onClick = onSave,
+                        enabled = canSave(),
                     ) {
                         Icon(Icons.Default.Save, contentDescription = "保存")
                         Text("保存")
