@@ -13,9 +13,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -28,6 +30,7 @@ import org.crazydan.studio.app.healthtracker.ui.Event
 import org.crazydan.studio.app.healthtracker.ui.EventDispatch
 import org.crazydan.studio.app.healthtracker.ui.component.AddOrEditHealthDataScreen
 import org.crazydan.studio.app.healthtracker.ui.component.DateInputPicker
+import org.crazydan.studio.app.healthtracker.ui.component.TagsEditor
 import org.crazydan.studio.app.healthtracker.ui.component.TimeInputPicker
 import org.crazydan.studio.app.healthtracker.util.epochMillisToLocalDateTime
 import org.crazydan.studio.app.healthtracker.util.toEpochMillis
@@ -45,7 +48,7 @@ fun AddOrEditHealthRecordScreen(
     editRecord: HealthRecord? = null,
     healthType: HealthType?,
     healthPerson: HealthPerson?,
-    healthRecordNotes: List<String>,
+    healthRecordTags: List<String>,
     eventDispatch: EventDispatch,
 ) {
     if (healthPerson == null || healthType == null) {
@@ -53,7 +56,6 @@ fun AddOrEditHealthRecordScreen(
     }
 
     var rangeExpanded by remember { mutableStateOf(false) }
-    var noteExpanded by remember { mutableStateOf(false) }
 
     var measureCode by remember(editRecord) {
         mutableStateOf(
@@ -65,7 +67,9 @@ fun AddOrEditHealthRecordScreen(
     var value by remember(editRecord) {
         mutableStateOf(editRecord?.value?.toString() ?: "")
     }
-    var notes by remember(editRecord) { mutableStateOf(editRecord?.notes ?: "") }
+    val tags = remember(editRecord) {
+        editRecord?.tags?.toMutableStateList() ?: mutableStateListOf()
+    }
 
     val timestamp = epochMillisToLocalDateTime(editRecord?.timestamp)
     var timestampDate by remember(editRecord) {
@@ -93,7 +97,7 @@ fun AddOrEditHealthRecordScreen(
                 typeId = healthType.id,
                 personId = healthPerson.id,
                 measure = measureCode,
-                notes = notes,
+                tags = tags.toList(),
                 createdAt = System.currentTimeMillis(),
             )
 
@@ -107,7 +111,7 @@ fun AddOrEditHealthRecordScreen(
         OutlinedTextField(
             value = value,
             onValueChange = { value = it },
-            label = { Text("测量值 (${healthType.unit})") },
+            label = { Text("采集值 (${healthType.unit})") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth()
         )
@@ -115,13 +119,13 @@ fun AddOrEditHealthRecordScreen(
         Spacer(modifier = Modifier.height(16.dp))
         DateInputPicker(
             value = timestampDate,
-            label = { Text("测量日期") },
+            label = { Text("采集日期") },
             onValueChange = { timestampDate = it },
         )
         Spacer(modifier = Modifier.height(16.dp))
         TimeInputPicker(
             value = timestampTime,
-            label = { Text("测量时间") },
+            label = { Text("采集时间") },
             onValueChange = { timestampTime = it },
         )
 
@@ -136,7 +140,7 @@ fun AddOrEditHealthRecordScreen(
                     value = getMeasureNameByCode(healthType, measureCode),
                     readOnly = true,
                     onValueChange = { },
-                    label = { Text("测量指标") },
+                    label = { Text("采集指标") },
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = rangeExpanded)
                     },
@@ -163,45 +167,15 @@ fun AddOrEditHealthRecordScreen(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-        if (healthRecordNotes.isEmpty()) {
-            OutlinedTextField(
-                value = notes,
-                onValueChange = { notes = it },
-                label = { Text("备注 (可选)") },
-                modifier = Modifier.fillMaxWidth(),
-            )
-        } else {
-            ExposedDropdownMenuBox(
-                expanded = noteExpanded,
-                onExpandedChange = { noteExpanded = !noteExpanded }
-            ) {
-                OutlinedTextField(
-                    value = notes,
-                    onValueChange = { notes = it },
-                    label = { Text("备注 (可选)") },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = noteExpanded)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(MenuAnchorType.PrimaryEditable),
-                )
-
-                ExposedDropdownMenu(
-                    expanded = noteExpanded,
-                    onDismissRequest = { noteExpanded = false }
-                ) {
-                    healthRecordNotes.forEach { n ->
-                        DropdownMenuItem(
-                            text = { Text(n) },
-                            onClick = {
-                                notes = n
-                                noteExpanded = false
-                            }
-                        )
-                    }
+        TagsEditor(
+            allTags = healthRecordTags,
+            selectedTags = tags,
+            onAdd = {
+                if (!tags.contains(it)) {
+                    tags.add(it)
                 }
-            }
-        }
+            },
+            onRemove = { tags.remove(it) },
+        )
     }
 }

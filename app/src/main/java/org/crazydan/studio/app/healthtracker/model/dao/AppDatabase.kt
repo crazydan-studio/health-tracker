@@ -8,6 +8,7 @@ import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.dao.converter.HealthLimitConverter
 import org.crazydan.studio.app.healthtracker.model.dao.converter.HealthMeasureListConverter
+import org.crazydan.studio.app.healthtracker.model.dao.converter.StringListConverter
 
 /**
  *
@@ -15,11 +16,18 @@ import org.crazydan.studio.app.healthtracker.model.dao.converter.HealthMeasureLi
  * @date 2025-08-28
  */
 @Database(
-    entities = [HealthPerson::class, HealthType::class, HealthRecord::class],
-    version = 3,
+    entities = [
+        HealthPerson::class, HealthType::class,
+        HealthRecord::class,
+    ],
+    version = 4,
     exportSchema = false
 )
-@TypeConverters(HealthMeasureListConverter::class, HealthLimitConverter::class)
+@TypeConverters(
+    HealthMeasureListConverter::class,
+    HealthLimitConverter::class,
+    StringListConverter::class
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun healthPersonDao(): HealthPersonDao
     abstract fun healthTypeDao(): HealthTypeDao

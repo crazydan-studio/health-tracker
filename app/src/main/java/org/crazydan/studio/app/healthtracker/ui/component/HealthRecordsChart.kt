@@ -32,6 +32,7 @@ import org.crazydan.studio.app.healthtracker.model.HealthLimit
 import org.crazydan.studio.app.healthtracker.model.HealthMeasure
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
+import org.crazydan.studio.app.healthtracker.ui.screen.PreviewSample
 import java.sql.Timestamp
 import java.util.Calendar
 import java.util.Date
@@ -269,7 +270,7 @@ private fun createSeries(
             data = records.map { record ->
                 if (record.measure == measure.code || measure == nullMeasure) {
                     AADataElement()
-                        .name(record.notes)
+                        //.name(record.notes)
                         .x(record.timestamp)
                         .y(record.value)
                 } else {
@@ -396,25 +397,7 @@ fun filterRecordsByTime(records: List<HealthRecord>, filter: TimeFilter): List<H
 @Composable
 private fun HealthRecordsChartPreview() {
     HealthRecordsChart(
-        healthType = HealthType(
-            id = 0,
-            personId = 0,
-            name = "血糖",
-            unit = "mmol/L",
-            limit = HealthLimit(upper = 10f, lower = 3.9f),
-            measures = listOf(
-                HealthMeasure(
-                    code = "kongfu",
-                    name = "空腹 8h",
-                    limit = HealthLimit(lower = 6f, upper = 7f),
-                ),
-                HealthMeasure(
-                    code = "canhou",
-                    name = "餐后 2h",
-                    limit = HealthLimit(lower = 6f, upper = 10f),
-                ),
-            ),
-        ),
+        healthType = PreviewSample().createHealthType(),
         healthRecords = listOf(
             HealthRecord(
                 id = 0, typeId = 0, personId = 0,
@@ -422,6 +405,7 @@ private fun HealthRecordsChartPreview() {
                 createdAt = Timestamp.valueOf("2025-08-10 08:10:00.000").time,
                 timestamp = Timestamp.valueOf("2025-08-10 08:10:00.000").time,
                 measure = "kongfu",
+                tags = listOf(),
             ),
             HealthRecord(
                 id = 0, typeId = 0, personId = 0,
@@ -429,6 +413,7 @@ private fun HealthRecordsChartPreview() {
                 createdAt = Timestamp.valueOf("2025-08-10 14:23:00.000").time,
                 timestamp = Timestamp.valueOf("2025-08-10 14:23:00.000").time,
                 measure = "canhou",
+                tags = listOf(),
             ),
             HealthRecord(
                 id = 0, typeId = 0, personId = 0,
@@ -436,6 +421,7 @@ private fun HealthRecordsChartPreview() {
                 createdAt = Timestamp.valueOf("2025-08-11 08:10:00.000").time,
                 timestamp = Timestamp.valueOf("2025-08-11 08:10:00.000").time,
                 measure = "kongfu",
+                tags = listOf(),
             ),
             HealthRecord(
                 id = 0, typeId = 0, personId = 0,
@@ -443,6 +429,7 @@ private fun HealthRecordsChartPreview() {
                 createdAt = Timestamp.valueOf("2025-08-11 14:23:00.000").time,
                 timestamp = Timestamp.valueOf("2025-08-11 14:23:00.000").time,
                 measure = "canhou",
+                tags = listOf(),
             ),
             HealthRecord(
                 id = 0, typeId = 0, personId = 0,
@@ -450,6 +437,7 @@ private fun HealthRecordsChartPreview() {
                 createdAt = Timestamp.valueOf("2025-08-12 08:10:00.000").time,
                 timestamp = Timestamp.valueOf("2025-08-12 08:10:00.000").time,
                 measure = "kongfu",
+                tags = listOf(),
             ),
             HealthRecord(
                 id = 0, typeId = 0, personId = 0,
@@ -457,6 +445,7 @@ private fun HealthRecordsChartPreview() {
                 createdAt = Timestamp.valueOf("2025-08-12 14:23:00.000").time,
                 timestamp = Timestamp.valueOf("2025-08-12 14:23:00.000").time,
                 measure = "canhou",
+                tags = listOf(),
             ),
             HealthRecord(
                 id = 0, typeId = 0, personId = 0,
@@ -464,6 +453,7 @@ private fun HealthRecordsChartPreview() {
                 createdAt = Timestamp.valueOf("2025-08-13 08:10:00.000").time,
                 timestamp = Timestamp.valueOf("2025-08-13 08:10:00.000").time,
                 measure = "kongfu",
+                tags = listOf(),
             ),
             HealthRecord(
                 id = 0, typeId = 0, personId = 0,
@@ -471,6 +461,7 @@ private fun HealthRecordsChartPreview() {
                 createdAt = Timestamp.valueOf("2025-08-13 14:23:00.000").time,
                 timestamp = Timestamp.valueOf("2025-08-13 14:23:00.000").time,
                 measure = "canhou",
+                tags = listOf(),
             ),
             HealthRecord(
                 id = 0, typeId = 0, personId = 0,
@@ -478,6 +469,7 @@ private fun HealthRecordsChartPreview() {
                 createdAt = Timestamp.valueOf("2025-08-14 08:10:00.000").time,
                 timestamp = Timestamp.valueOf("2025-08-14 08:10:00.000").time,
                 measure = "kongfu",
+                tags = listOf(),
             ),
             HealthRecord(
                 id = 0, typeId = 0, personId = 0,
@@ -485,6 +477,7 @@ private fun HealthRecordsChartPreview() {
                 createdAt = Timestamp.valueOf("2025-08-14 14:23:00.000").time,
                 timestamp = Timestamp.valueOf("2025-08-14 14:23:00.000").time,
                 measure = "canhou",
+                tags = listOf(),
             ),
         ).sortedBy { it.timestamp }
     )

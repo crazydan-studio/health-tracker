@@ -19,6 +19,7 @@ import java.lang.reflect.Type
 class MigrationFromV2ToV3() : Migration(2, 3) {
 
     override fun migrate(db: SupportSQLiteDatabase) {
+        // Note: 低版本 SQLite 不支持对列做修改、删除和重命名，只能重建表
         // alter table
         db.execSQL("alter table $HEALTH_TYPE_TABLE_NAME rename to type_")
         db.execSQL(

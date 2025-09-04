@@ -1,9 +1,11 @@
 package org.crazydan.studio.app.healthtracker.model.dao
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
+import org.crazydan.studio.app.healthtracker.model.dao.converter.StringListConverter
 
 /**
  *
@@ -73,7 +75,17 @@ class HealthRepository(
 
     fun getHealthRecordsByTypeId(typeId: Long): Flow<List<HealthRecord>> = healthRecordDao.getByTypeId(typeId)
 
-    fun getHealthRecordNotesByTypeId(typeId: Long): Flow<List<String>> = healthRecordDao.getNotesByTypeId(typeId)
+    fun getHealthRecordTagsByTypeId(typeId: Long): Flow<List<String>> {
+        return healthRecordDao.getTagsByTypeId(typeId).map { list ->
+            val set = mutableSetOf<String>()
+            list.forEach { json ->
+                val tags = StringListConverter().fromJson(json)
+                set.addAll(tags)
+            }
+
+            set.toList().sorted()
+        }
+    }
 
     fun getDeletedHealthRecordsByTypeId(typeId: Long): Flow<List<HealthRecord>> =
         healthRecordDao.getDeletedByTypeId(typeId)

@@ -148,11 +148,11 @@ fun HealthTrackerApp() {
                 typeId = typeId,
                 personId = personId,
                 viewModel = viewModel,
-            ) { _, type, person, notes ->
+            ) { _, type, person, tags ->
                 AddOrEditHealthRecordScreen(
                     healthPerson = person,
                     healthType = type,
-                    healthRecordNotes = notes,
+                    healthRecordTags = tags,
                     eventDispatch = eventDispatch,
                 )
             }
@@ -167,12 +167,12 @@ fun HealthTrackerApp() {
                 typeId = typeId,
                 personId = personId,
                 viewModel = viewModel,
-            ) { record, type, person, notes ->
+            ) { record, type, person, tags ->
                 AddOrEditHealthRecordScreen(
                     editRecord = record,
                     healthPerson = person,
                     healthType = type,
-                    healthRecordNotes = notes,
+                    healthRecordTags = tags,
                     eventDispatch = eventDispatch,
                 )
             }
@@ -465,22 +465,22 @@ private fun LaunchedEffectWithHealthRecord(
     var healthType by remember { mutableStateOf<HealthType?>(null) }
     var healthPerson by remember { mutableStateOf<HealthPerson?>(null) }
     var healthRecord by remember { mutableStateOf<HealthRecord?>(null) }
-    var healthRecordNotes by remember { mutableStateOf<List<String>>(emptyList()) }
+    var healthRecordTags by remember { mutableStateOf<List<String>>(emptyList()) }
 
     LaunchedEffect(recordId, typeId, personId) {
         combine(
             recordId?.let { viewModel.getHealthRecord(recordId) } ?: flowOf(null),
             viewModel.getHealthType(typeId),
             viewModel.getHealthPerson(personId),
-            viewModel.getHealthRecordNotes(typeId),
-        ) { record, type, person, notes ->
+            viewModel.getHealthRecordTags(typeId),
+        ) { record, type, person, tags ->
             healthType = type
             healthPerson = person
             healthRecord = record
-            healthRecordNotes = notes.filter { it.isNotBlank() }
+            healthRecordTags = tags
         }
             .collectLatest { it }
     }
 
-    content(healthRecord, healthType, healthPerson, healthRecordNotes)
+    content(healthRecord, healthType, healthPerson, healthRecordTags)
 }

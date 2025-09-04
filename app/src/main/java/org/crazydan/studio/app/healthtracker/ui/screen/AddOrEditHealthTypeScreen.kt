@@ -120,16 +120,16 @@ fun AddOrEditHealthTypeScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     OutlinedTextField(
-                        value = upperLimit,
-                        onValueChange = { upperLimit = it },
+                        value = lowerLimit,
+                        onValueChange = { lowerLimit = it },
                         label = { Text("下限值 (可选)") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f),
                     )
 
                     OutlinedTextField(
-                        value = lowerLimit,
-                        onValueChange = { lowerLimit = it },
+                        value = upperLimit,
+                        onValueChange = { upperLimit = it },
                         label = { Text("上限值 (可选)") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f),
@@ -146,7 +146,7 @@ fun AddOrEditHealthTypeScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text("测量指标", style = MaterialTheme.typography.headlineSmall)
+                    Text("采集指标", style = MaterialTheme.typography.headlineSmall)
                     TextButton(onClick = {
                         editMeasure = emptyMeasure()
                         showEditMeasureDialog = true
@@ -221,8 +221,8 @@ private fun EditHealthMeasureDialog(
         title = {
             Text(
                 if (measure.code.isEmpty())
-                    "添加测量指标"
-                else "编辑测量指标"
+                    "添加采集指标"
+                else "编辑采集指标"
             )
         },
         confirmButton = {

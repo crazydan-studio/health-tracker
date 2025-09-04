@@ -15,8 +15,8 @@ class HealthLimitConverter {
     private val type = object : TypeToken<HealthLimit>() {}.type
 
     @TypeConverter
-    fun toJson(limit: HealthLimit?): String {
-        return gson.toJson(limit, type)
+    fun toJson(obj: HealthLimit?): String {
+        return gson.toJson(obj, type)
     }
 
     @TypeConverter

@@ -9,8 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.crazydan.studio.app.healthtracker.model.HealthLimit
-import org.crazydan.studio.app.healthtracker.model.HealthMeasure
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.getPersonLabel
@@ -104,7 +102,7 @@ fun HealthTypeCard(
 
         if (type.measures.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "测量指标:", style = MaterialTheme.typography.labelMedium)
+            Text(text = "采集指标:", style = MaterialTheme.typography.labelMedium)
 
             type.measures.forEach { measure ->
                 Text(text = "  ${measure.name}: ${measure.limit} ${type.unit}")
@@ -117,23 +115,10 @@ fun HealthTypeCard(
 @Composable
 private fun HealthTypeCardPreview() {
     HealthTypeCard(
-        type = HealthType(
-            id = 0,
-            personId = 0,
-            name = "血糖",
-            unit = "mmol/L",
-            limit = HealthLimit(),
-            measures = listOf(
-                HealthMeasure(
-                    code = "",
-                    name = "餐后 2h",
-                    limit = HealthLimit(
-                        lower = 3.2f,
-                        upper = 10f,
-                    )
-                ),
-            ),
+        type = PreviewSample().createHealthType(),
+        actions = HealthDataCardActions(
+            onEdit = {},
+            onDelete = {},
         ),
-        actions = HealthDataCardActions(),
     )
 }

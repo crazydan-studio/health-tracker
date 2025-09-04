@@ -23,13 +23,13 @@ data class HealthRecord(
 
     /** 数据值 */
     val value: Float,
-    /** 数据时间戳，默认与 [createdAt] 相同 */
+    /** 采集时间，默认与 [createdAt] 相同 */
     val timestamp: Long,
 
     /** 关联的 [HealthMeasure.code] */
     val measure: String = "",
-    /** 可选备注 */
-    val notes: String = "",
+    /** 标签列表 */
+    val tags: List<String>,
 
     /** 创建时间 */
     val createdAt: Long,

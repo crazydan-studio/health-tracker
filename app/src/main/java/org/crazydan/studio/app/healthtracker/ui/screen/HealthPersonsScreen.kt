@@ -20,7 +20,6 @@ import org.crazydan.studio.app.healthtracker.ui.component.HealthDataListScreen
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataLoadingScreen
 import org.crazydan.studio.app.healthtracker.util.calculateAge
 import org.crazydan.studio.app.healthtracker.util.getFullName
-import java.sql.Timestamp
 
 /**
  *
@@ -97,13 +96,7 @@ private fun getPersonFullName(person: HealthPerson): String {
 @Composable
 private fun HealthPersonCardPreview() {
     HealthPersonCard(
-        person = HealthPerson(
-            id = 0,
-            label = "老五",
-            familyName = "王",
-            givenName = "五",
-            birthday = Timestamp.valueOf("1988-08-10 08:10:00.000").time,
-        ),
+        person = PreviewSample().createHealthPerson(),
         actions = HealthDataCardActions(),
     )
 }

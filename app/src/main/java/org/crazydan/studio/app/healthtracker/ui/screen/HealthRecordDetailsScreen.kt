@@ -1,12 +1,19 @@
 package org.crazydan.studio.app.healthtracker.ui.screen
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
@@ -84,25 +91,52 @@ fun HealthRecordCard(
     actions: HealthDataCardActions,
 ) {
     HealthDataCard(actions) {
-        val label = "${record.value}${type.unit}"
+        val label = "${record.value} ${type.unit}"
         val timestamp = formatTimestamp(record)
-        val notes = record.notes.ifBlank { "无" }
 
         Text(text = label, style = MaterialTheme.typography.headlineSmall)
 
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "测量时间: $timestamp")
+        Text(text = "采集时间: $timestamp")
 
         if (record.measure.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "测量指标: ${getMeasureNameByCode(type, record.measure)}")
+            Text(text = "采集指标: ${getMeasureNameByCode(type, record.measure)}")
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "备注: $notes")
+        if (record.tags.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                items(record.tags) { data ->
+                    AssistChip(
+                        onClick = { },
+                        label = { Text(data) },
+                        colors = AssistChipDefaults.assistChipColors(
+                            labelColor = MaterialTheme.colorScheme.primary
+                        ),
+                    )
+                }
+            }
+        }
     }
 }
 
 private fun formatTimestamp(record: HealthRecord): String {
     return formatEpochMillis(record.timestamp, "yyyy-MM-dd HH:mm")
+}
+
+@Preview
+@Composable
+private fun HealthRecordCardPreview() {
+    HealthRecordCard(
+        type = PreviewSample().createHealthType(),
+        record = PreviewSample().createHealthRecord(),
+        actions = HealthDataCardActions(
+            onEdit = {},
+            onDelete = {},
+        ),
+    )
 }

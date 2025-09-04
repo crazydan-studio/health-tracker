@@ -107,8 +107,8 @@ class HealthViewModel @Inject constructor(
         return repository.getDeletedHealthRecordsByTypeId(typeId)
     }
 
-    fun getHealthRecordNotes(typeId: Long): Flow<List<String>> {
-        return repository.getHealthRecordNotesByTypeId(typeId)
+    fun getHealthRecordTags(typeId: Long): Flow<List<String>> {
+        return repository.getHealthRecordTagsByTypeId(typeId)
     }
 
     suspend fun addHealthRecord(healthRecord: HealthRecord): Long {

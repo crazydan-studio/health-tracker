@@ -45,6 +45,6 @@ interface HealthRecordDao {
     @Query("DELETE FROM $HEALTH_RECORD_TABLE_NAME WHERE typeId = :typeId AND deleted = 1")
     suspend fun clearDeleted(typeId: Long)
 
-    @Query("SELECT DISTINCT notes FROM $HEALTH_RECORD_TABLE_NAME WHERE typeId = :typeId")
-    fun getNotesByTypeId(typeId: Long): Flow<List<String>>
+    @Query("SELECT DISTINCT tags FROM $HEALTH_RECORD_TABLE_NAME WHERE typeId = :typeId")
+    fun getTagsByTypeId(typeId: Long): Flow<List<String>>
 }
