@@ -1,10 +1,11 @@
 package org.crazydan.studio.app.healthtracker.ui.component
 
-import android.widget.FrameLayout
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,28 +15,36 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.viewinterop.AndroidView
-import com.github.aachartmodel.aainfographics.aachartcreator.AAChartModel
-import com.github.aachartmodel.aainfographics.aachartcreator.AAChartType
-import com.github.aachartmodel.aainfographics.aachartcreator.AAChartView
-import com.github.aachartmodel.aainfographics.aachartcreator.AAChartZoomType
-import com.github.aachartmodel.aainfographics.aachartcreator.AADataElement
-import com.github.aachartmodel.aainfographics.aachartcreator.AAOptions
-import com.github.aachartmodel.aainfographics.aachartcreator.AASeriesElement
-import com.github.aachartmodel.aainfographics.aachartcreator.aa_toAAOptions
-import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAChart
-import com.github.aachartmodel.aainfographics.aaoptionsmodel.AALabel
-import com.github.aachartmodel.aainfographics.aaoptionsmodel.AALabels
-import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAPlotBandsElement
-import com.github.aachartmodel.aainfographics.aaoptionsmodel.AASeriesEvents
-import org.crazydan.studio.app.healthtracker.model.HealthLimit
-import org.crazydan.studio.app.healthtracker.model.HealthMeasure
+import org.crazydan.studio.android.echarts.ECharts
+import org.crazydan.studio.android.echarts.EChartsOptions
+import org.crazydan.studio.android.echarts.option.AxisData
+import org.crazydan.studio.android.echarts.option.AxisType
+import org.crazydan.studio.android.echarts.option.DataZoomType
+import org.crazydan.studio.android.echarts.option.Series
+import org.crazydan.studio.android.echarts.option.SeriesLabel
+import org.crazydan.studio.android.echarts.option.SeriesMarkData
+import org.crazydan.studio.android.echarts.option.SeriesMarkLine
+import org.crazydan.studio.android.echarts.option.SeriesMarkPoint
+import org.crazydan.studio.android.echarts.option.Size
+import org.crazydan.studio.android.echarts.option.TooltipAxisPointer
+import org.crazydan.studio.android.echarts.option.TooltipTrigger
+import org.crazydan.studio.android.echarts.option.dataZoom
+import org.crazydan.studio.android.echarts.option.grid
+import org.crazydan.studio.android.echarts.option.legend
+import org.crazydan.studio.android.echarts.option.series
+import org.crazydan.studio.android.echarts.option.theme
+import org.crazydan.studio.android.echarts.option.tooltip
+import org.crazydan.studio.android.echarts.option.xAxis
+import org.crazydan.studio.android.echarts.option.yAxis
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.ui.screen.PreviewSample
+import org.crazydan.studio.app.healthtracker.ui.theme.isInDarkTheme
+import org.crazydan.studio.app.healthtracker.util.formatEpochMillis
 import java.sql.Timestamp
 import java.util.Calendar
 import java.util.Date
+import kotlin.math.max
 
 // 时间过滤选项
 enum class TimeFilter {
@@ -43,7 +52,6 @@ enum class TimeFilter {
 }
 
 /**
- * https://github.com/AAChartModel/AAChartCore-Kotlin
  *
  * @author <a href="mailto:flytreeleft@crazydan.org">flytreeleft</a>
  * @date 2025-08-28
@@ -54,257 +62,174 @@ fun HealthRecordsChart(
     healthRecords: List<HealthRecord>,
     modifier: Modifier = Modifier
 ) {
-    val chartModelOptions = remember(healthRecords) {
-        createSplineChartModelOptions(healthType, healthRecords)
+    val chartData = remember(healthRecords) {
+        createChartData(healthType, healthRecords)
+    }
+    val chartOptions = remember(chartData) {
+        createChartOptions(chartData)
     }
 
-    AndroidView(
-        factory = { ctx ->
-            AAChartView(ctx).apply {
-                layoutParams = FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.MATCH_PARENT,
-                    FrameLayout.LayoutParams.MATCH_PARENT
-                )
-
-                aa_drawChartWithChartOptions(chartModelOptions)
-            }
-        },
-        update = { view ->
-            view.aa_refreshChartWithChartOptions(chartModelOptions)
-        },
-        modifier = modifier
+    ECharts(
+        useDarkTheme = isInDarkTheme(),
+        options = chartOptions.theme(
+            backgroundColor = MaterialTheme.colorScheme.background,
+        ),
+        modifier = modifier,
     )
 }
 
-private fun createSplineChartModelOptions(
-    healthType: HealthType,
-    records: List<HealthRecord>,
-): AAOptions {
-    val series: Array<Any> = createSeries(healthType, records).toTypedArray()
+private fun createChartOptions(
+    data: ChartData,
+): EChartsOptions {
+    val options = EChartsOptions.tooltip(
+        trigger = TooltipTrigger.Axis,
+        axisPointer = TooltipAxisPointer(
+            type = TooltipAxisPointer.Type.Cross,
+        ),
+    ).legend(
+        top = Size.pixel(20),
+    ).grid(
+        left = Size.percent(10f),
+        right = Size.percent(10f),
+        bottom = Size.percent(15f),
+    ).xAxis(
+        type = AxisType.Category,
+        data = data.days.map { AxisData(value = it) },
+    ).yAxis(
+        scale = true,
+    ).dataZoom(
+        type = DataZoomType.Slider,
+        top = Size.percent(90f),
+        // 定位到最近一周的数据
+        startValueIndex = max(0, data.days.size - 7),
+        endValueIndex = data.days.size,
+    )
 
-    // 创建并配置图表模型
-    val options = AAChartModel()
-        .chartType(AAChartType.Spline)
-        //.backgroundColor("#4b2b7f")
-        .dataLabelsEnabled(true)
-        .markerRadius(4)
-        //.zoomType(AAChartZoomType.X)
-        .touchEventEnabled(true)
-        .yAxisTitle("${healthType.name} (${healthType.unit})")
-        .yAxisMin(0)
-        .colorsTheme(
-            arrayOf(
-                "rgba(30, 144, 255, 1)",
-                "rgba(234, 0, 123, 1)",
-                "rgba(73, 193, 182, 1)",
-                "rgba(253, 194, 10, 1)",
-                "rgba(247, 131, 32, 1)",
-                "rgba(6, 142, 129, 1)",
-                "rgba(12, 150, 116, 1)",
-                "rgba(125, 255, 192, 1)",
-                "rgba(209, 27, 95, 1)",
-                "rgba(250, 205, 50, 1)",
-                "rgba(255, 255, 160, 1)",
-                "rgba(234, 0, 123, 1)",
+    val series = mutableListOf<Series>()
+    data.lines.forEach { entry ->
+        series.add(
+            Series.Line(
+                name = entry.key,
+                data = entry.value.map { Series.Line.Data(value = it) },
             )
         )
-        .series(series)
-        .aa_toAAOptions()
-
-    options.chart(AAChart().pinchType(AAChartZoomType.X))
-
-    val plotColors = arrayOf(
-        "rgba(30, 144, 255, 0.2)",
-        "rgba(234, 0, 123, 0.2)",
-        "rgba(73, 193, 182, 0.2)",
-        "rgba(253, 194, 10, 0.2)",
-        "rgba(247, 131, 32, 0.2)",
-        "rgba(6, 142, 129, 0.2)",
-        "rgba(12, 150, 116, 0.2)",
-        "rgba(125, 255, 192, 0.2)",
-        "rgba(209, 27, 95, 0.2)",
-        "rgba(250, 205, 50, 0.2)",
-        "rgba(255, 255, 160, 0.2)",
-        "rgba(234, 0, 123, 0.2)",
-    )
-    val plots = healthType.measures.mapIndexed { index, measure ->
-        val color = plotColors[index]
-
-        // https://api.highcharts.com/highcharts/xAxis.plotBands.label
-        AAPlotBandsElement().label(
-            AALabel().text("${measure.name} (${measure.limit} ${healthType.unit})")
-        )
-            .index(2)
-            .color(color)
-            .from(measure.limit.lower)
-            .to(measure.limit.upper)
     }
-    options.yAxis
-        ?.plotBands(plots.toTypedArray())
-
-    val dateFormatter = """
-        function(date) {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            
-            return month + '-' + day + ' ' + hours + ':' + minutes;
-        }
-    """
-    options.xAxis
-        ?.labels(
-            AALabels()
-                .useHTML(true)
-                .rotation(-45)
-                // Note: 只能定义唯一一个匿名函数
-                .formatter(
-                    """
-            function() {
-                const formatDateTime = $dateFormatter;
-                const date = new Date(this.value);
-                return formatDateTime(date);
-            }
-        """
-                )
+    data.dots.forEach { entry ->
+        series.add(
+            Series.Candlestick(
+                name = entry.key,
+                dimensions = listOf("最早", "最晚", "最低", "最高"),
+                data = entry.value.map { Series.Candlestick.Data(value = it) },
+                markPoint = SeriesMarkPoint(
+                    data = listOf(
+                        SeriesMarkData(
+                            type = SeriesMarkData.Type.Max,
+                            valueIndex = 4,
+                        ),
+                        SeriesMarkData(
+                            type = SeriesMarkData.Type.Min,
+                            valueIndex = 3,
+                        ),
+                    ),
+                ),
+                markLine = SeriesMarkLine(
+                    data = listOf(
+                        SeriesMarkLine.Range(
+                            from = SeriesMarkData(
+                                type = SeriesMarkData.Type.Max,
+                                valueIndex = 4,
+                                symbol = SeriesMarkData.Symbol.Circle,
+                                symbolSize = 10,
+                                label = SeriesLabel(show = false),
+                            ),
+                            to = SeriesMarkData(
+                                type = SeriesMarkData.Type.Min,
+                                valueIndex = 3,
+                                symbol = SeriesMarkData.Symbol.Circle,
+                                symbolSize = 10,
+                                label = SeriesLabel(show = false),
+                            ),
+                        ),
+                    ),
+                ),
+            )
         )
-    options.tooltip
-        ?.shared(false)
-        ?.formatter(
-            """
-                    function () {
-                        const formatDateTime = $dateFormatter;
-                        const date = new Date(this.x);
-                        const value = this.y;
-                        return formatDateTime(date) 
-                                + '<br/>' + this.series.name
-                                + ': <b>' + value + '${healthType.unit}</b>'
-                                + (typeof this.key == 'string' ? '<br/>备注: <b>' + this.key + '</b>' : '');
-                    }
-                """
-        )
+    }
 
-    options.plotOptions?.series?.events = AASeriesEvents()
-        .legendItemClick(
-            """
-        function(event) {
-            function getVisibleMode(series, name) {
-                var allVisible = true;
-                var allHidden = true;
-                series.forEach(function(s) {
-                    if (s.name != name) {
-                        allVisible &= s.visible;
-                        allHidden &= (!s.visible);
-                    }
-                });
-                if (allVisible && !allHidden)
-                    return 'all-visible';
-                if (allHidden && !allVisible)
-                    return 'all-hidden';
-                return 'other-cases';
-            }
-            function getPlot(plots, name) {
-                return plots.filter(function(p) {
-                    return p.label.textStr.indexOf(name) >= 0;
-                })[0];
-            }
-            function showPlot(p, shown) {
-                if (shown) {
-                    p.svgElem.element.style.display = 'unset';
-                    p.label.element.style.display = 'unset';
-                } else {
-                    p.svgElem.element.style.display = 'none';
-                    p.label.element.style.display = 'none';
-                }
-            }
-            
-            var series = this.chart.series;
-            var mode = getVisibleMode(series, this.name);
-            
-            var plots = this.chart.yAxis[0].plotLinesAndBands || [];
-            var plot = getPlot(plots, this.name);
-            plots.forEach(function(p) { showPlot(p, true); });
-            
-            var enableDefault = false;
-            if (!this.visible) {
-                enableDefault = true;
-            }
-            else if (mode == 'all-visible') {
-                series.forEach(function(s) { s.hide(); });
-                plots.forEach(function(p) { showPlot(p, false); });
-                
-                this.show();
-                showPlot(plot, true);
-            }
-            else if (mode == 'all-hidden') {
-                series.forEach(function(s) { s.show(); });
-            }
-            else {
-                enableDefault = true;
-            }
-            return enableDefault;
-        }
-    """
-        )
-
-    return options
+    return options.series(series)
 }
 
-private fun createSeries(
+private fun createChartData(
     healthType: HealthType,
-    records: List<HealthRecord>
-): List<AASeriesElement> {
-    val nullMeasure = HealthMeasure(
-        code = "null",
-        name = healthType.name,
-        limit = HealthLimit(),
-    )
-    val measures = healthType.measures.ifEmpty {
-        listOf(nullMeasure)
+    records: List<HealthRecord>,
+): ChartData {
+    val maxDataAmountMap = mutableMapOf<String, Int>()
+    val seriesMap = mutableMapOf<String, MutableMap<String, MutableList<Float>>>()
+    records.asReversed().forEach { record ->
+        val measure = record.measure
+        val timestamp = formatEpochMillis(record.timestamp, "yyyy-MM-dd")
+
+        val list = seriesMap.computeIfAbsent(timestamp) {
+            mutableMapOf()
+        }.computeIfAbsent(measure) {
+            mutableListOf()
+        }
+        list.add(record.value)
+
+        maxDataAmountMap.computeIfAbsent(measure) { 0 }
+        maxDataAmountMap.computeIfPresent(measure) { k, v -> max(v, list.size) }
     }
 
-    return measures.map { measure ->
-        Series(
-            name = measure.name,
-            data = records.map { record ->
-                if (record.measure == measure.code || measure == nullMeasure) {
-                    AADataElement()
-                        //.name(record.notes)
-                        .x(record.timestamp)
-                        .y(record.value)
+    val days = seriesMap.keys
+    val lines = mutableMapOf<String, List<Number?>>()
+    val dots = mutableMapOf<String, List<List<Number?>>>()
+
+    healthType.measures.forEach { measure ->
+        val name = measure.name
+        val code = measure.code
+        val maxAmount = maxDataAmountMap.getOrDefault(code, 0)
+
+        if (maxAmount > 1) {
+            // 该指标同一天内含多个数据
+            dots.put(name, seriesMap.map { entry ->
+                val list = entry.value.getOrDefault(code, mutableListOf())
+
+                // 对应 K 线图：open，close，lowest，highest
+                if (list.isEmpty()) {
+                    listOf(null, null, null, null)
                 } else {
-                    "null"
+                    val first = list.first()
+                    val last = list.last()
+                    val min = list.min()
+                    val max = list.max()
+
+                    listOf(first, last, min, max)
                 }
-            }
-                .filter { it != "null" },
-        )
-    }
-        .filter { it.data.isNotEmpty() }
-        .map {
-            AASeriesElement()
-                .name(it.name)
-                //.connectNulls(true)
-                .data(it.data.toTypedArray())
+            })
+        } else if (maxAmount == 1) {
+            // 该指标同一天内仅含单个数据
+            lines.put(name, seriesMap.map { entry ->
+                entry.value
+                    .getOrDefault(code, mutableListOf())
+                    .firstOrNull()
+            })
+        } else {
+            // 该指标无数据
+            lines.put(name, listOf())
         }
-//        .toMutableList()
-//        .also {
-//            it.add(
-//                AASeriesElement()
-//                    .name("全部")
-//                    .data(records.map { record ->
-//                        AADataElement()
-//                            .name(record.notes)
-//                            .x(record.timestamp)
-//                            .y(record.value)
-//                    }.toTypedArray())
-//            )
-//        }
+    }
+
+    return ChartData(
+        days = days,
+        lines = lines,
+        dots = dots,
+    )
 }
 
-private data class Series(
-    val name: String,
-    val data: List<Any>,
+private data class ChartData(
+    val days: Collection<String>,
+    val lines: Map<String, List<Number?>>,
+    val dots: Map<String, List<List<Number?>>>,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -331,7 +256,7 @@ fun TimeFilterSelector(
             readOnly = true,
             label = { Text("时间范围") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.menuAnchor()
+            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable)
         )
 
         ExposedDropdownMenu(

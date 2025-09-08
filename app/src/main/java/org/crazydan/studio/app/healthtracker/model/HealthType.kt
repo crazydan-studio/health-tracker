@@ -57,5 +57,5 @@ fun genMeasureCode(): String {
 }
 
 fun getMeasureNameByCode(healthType: HealthType, measureCode: String): String {
-    return healthType.measures.firstOrNull { it.code == measureCode }?.name ?: "<关联缺失>"
+    return healthType.measures.firstOrNull { it.code == measureCode }?.name ?: "<指标缺失>"
 }

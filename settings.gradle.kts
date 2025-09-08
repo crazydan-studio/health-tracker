@@ -22,4 +22,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Health Tracker"
 include(":app")
- 
+include(":echarts")

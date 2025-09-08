@@ -71,14 +71,14 @@ fun AddOrEditHealthTypeScreen(
         },
         onNavigateBack = { eventDispatch(Event.NavBack()) },
         canSave = {
-            name.isNotBlank() && unit.isNotBlank()
+            name.isNotEmpty() && unit.isNotEmpty()
         },
         onSave = {
             val type = HealthType(
                 id = editType?.id ?: 0,
                 personId = healthPerson.id,
-                name = name.trim(),
-                unit = unit.trim(),
+                name = name,
+                unit = unit,
                 limit = HealthLimit(
                     upper = upperLimit.toFloatOrNull(),
                     lower = lowerLimit.toFloatOrNull(),
@@ -101,7 +101,7 @@ fun AddOrEditHealthTypeScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { name = it },
+                    onValueChange = { name = it.trim() },
                     label = { Text("类型名称") },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -109,7 +109,7 @@ fun AddOrEditHealthTypeScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 OutlinedTextField(
                     value = unit,
-                    onValueChange = { unit = it },
+                    onValueChange = { unit = it.trim() },
                     label = { Text("单位") },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -243,7 +243,7 @@ private fun EditHealthMeasureDialog(
 
                     onClose()
                 },
-                enabled = name.isNotBlank() && (
+                enabled = name.isNotEmpty() && (
                         lowerLimit.toFloatOrNull() != null
                                 || upperLimit.toFloatOrNull() != null
                         ),
@@ -260,7 +260,7 @@ private fun EditHealthMeasureDialog(
             Column {
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { name = it },
+                    onValueChange = { name = it.trim() },
                     label = { Text("指标名称") },
                     modifier = Modifier.fillMaxWidth(),
                 )

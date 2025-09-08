@@ -3,6 +3,7 @@ package org.crazydan.studio.app.healthtracker.ui.theme
 import android.app.Activity
 import android.content.res.Configuration
 import android.content.res.Resources
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -34,10 +35,9 @@ private val LightColorScheme = lightColorScheme(
  */
 @Composable
 fun HealthTrackerTheme(
-    resources: Resources,
     content: @Composable () -> Unit
 ) {
-    val darkTheme = isInDarkTheme(resources)
+    val darkTheme = isSystemInDarkTheme()
     val colorScheme = when {
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
@@ -68,6 +68,9 @@ fun getThemeResId(resources: Resources): Int {
     }
 }
 
-private fun isInDarkTheme(resources: Resources): Boolean {
+@Composable
+fun isInDarkTheme(): Boolean = isSystemInDarkTheme()
+
+fun isInDarkTheme(resources: Resources): Boolean {
     return resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
 }

@@ -99,7 +99,7 @@ private fun TagAddView(
             ) {
                 OutlinedTextField(
                     value = inputTag,
-                    onValueChange = { inputTag = it },
+                    onValueChange = { inputTag = it.trim() },
                     placeholder = { Text("输入标签...") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),

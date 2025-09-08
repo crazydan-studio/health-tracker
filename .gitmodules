@@ -1,0 +1,3 @@
+[submodule "echarts"]
+	path = echarts
+	url = git@github.com:crazydan-studio/echarts-android.git

@@ -49,13 +49,14 @@ fun AddOrEditHealthPersonScreen(
         },
         onNavigateBack = { eventDispatch(Event.NavBack()) },
         canSave = {
-            familyName.isNotBlank() && givenName.isNotBlank() && birthDate != null
+            familyName.isNotEmpty() && givenName.isNotEmpty() && birthDate != null
         },
         onSave = {
             val person = HealthPerson(
                 id = editPerson?.id ?: 0,
-                label = label.trim(),
-                familyName = familyName.trim(), givenName = givenName.trim(),
+                label = label,
+                familyName = familyName,
+                givenName = givenName,
                 birthday = toEpochMillis(birthDate!!, birthTime)
             )
 
@@ -68,7 +69,7 @@ fun AddOrEditHealthPersonScreen(
     ) {
         OutlinedTextField(
             value = label,
-            onValueChange = { label = it },
+            onValueChange = { label = it.trim() },
             label = { Text("称呼") },
             modifier = Modifier.fillMaxWidth()
         )
@@ -76,7 +77,7 @@ fun AddOrEditHealthPersonScreen(
         Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
             value = familyName,
-            onValueChange = { familyName = it },
+            onValueChange = { familyName = it.trim() },
             label = { Text("姓") },
             modifier = Modifier.fillMaxWidth()
         )
@@ -84,7 +85,7 @@ fun AddOrEditHealthPersonScreen(
         Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
             value = givenName,
-            onValueChange = { givenName = it },
+            onValueChange = { givenName = it.trim() },
             label = { Text("名") },
             modifier = Modifier.fillMaxWidth()
         )

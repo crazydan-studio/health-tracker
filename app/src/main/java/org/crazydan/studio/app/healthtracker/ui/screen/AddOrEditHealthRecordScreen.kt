@@ -96,7 +96,7 @@ fun AddOrEditHealthRecordScreen(
                 timestamp = toEpochMillis(timestampDate, timestampTime),
                 typeId = healthType.id,
                 personId = healthPerson.id,
-                measure = measureCode,
+                measure = measureCode.trim(),
                 tags = tags.toList(),
                 createdAt = System.currentTimeMillis(),
             )

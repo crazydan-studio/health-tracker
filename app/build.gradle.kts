@@ -97,9 +97,10 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)
 
-    //implementation(libs.vico.compose.m3)
+    //implementation("com.patrykandpatrick.vico:compose-m3:2.1.3")
     //implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
-    implementation(libs.aachartcore.kotlin)
+    //implementation("com.github.AAChartModel:AAChartCore-Kotlin:7.4.0")
+    implementation(project(":echarts"))
 
     implementation(libs.gson)
     implementation(libs.androidx.room.runtime)
