@@ -57,6 +57,7 @@ fun AddOrEditHealthRecordScreen(
 
     var rangeExpanded by remember { mutableStateOf(false) }
 
+    // TODO 根据采集记录，确定不同 timestamp 时间段内经常被选择的指标
     var measureCode by remember(editRecord) {
         mutableStateOf(
             editRecord?.measure
@@ -88,6 +89,8 @@ fun AddOrEditHealthRecordScreen(
         onNavigateBack = { eventDispatch(Event.NavBack()) },
         canSave = {
             value.toFloatOrNull() != null
+                    && (healthType.measures.isEmpty()
+                    || measureCode.isNotEmpty())
         },
         onSave = {
             val record = HealthRecord(
@@ -96,7 +99,7 @@ fun AddOrEditHealthRecordScreen(
                 timestamp = toEpochMillis(timestampDate, timestampTime),
                 typeId = healthType.id,
                 personId = healthPerson.id,
-                measure = measureCode.trim(),
+                measure = measureCode,
                 tags = tags.toList(),
                 createdAt = System.currentTimeMillis(),
             )

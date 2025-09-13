@@ -16,26 +16,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import org.crazydan.studio.android.echarts.ECharts
-import org.crazydan.studio.android.echarts.EChartsOptions
-import org.crazydan.studio.android.echarts.option.AxisData
-import org.crazydan.studio.android.echarts.option.AxisType
-import org.crazydan.studio.android.echarts.option.DataZoomType
-import org.crazydan.studio.android.echarts.option.Series
-import org.crazydan.studio.android.echarts.option.SeriesLabel
-import org.crazydan.studio.android.echarts.option.SeriesMarkData
-import org.crazydan.studio.android.echarts.option.SeriesMarkLine
-import org.crazydan.studio.android.echarts.option.SeriesMarkPoint
-import org.crazydan.studio.android.echarts.option.Size
-import org.crazydan.studio.android.echarts.option.TooltipAxisPointer
-import org.crazydan.studio.android.echarts.option.TooltipTrigger
-import org.crazydan.studio.android.echarts.option.dataZoom
-import org.crazydan.studio.android.echarts.option.grid
-import org.crazydan.studio.android.echarts.option.legend
-import org.crazydan.studio.android.echarts.option.series
-import org.crazydan.studio.android.echarts.option.theme
-import org.crazydan.studio.android.echarts.option.tooltip
-import org.crazydan.studio.android.echarts.option.xAxis
-import org.crazydan.studio.android.echarts.option.yAxis
+import org.crazydan.studio.android.echarts.compose.ECharts
+import org.crazydan.studio.app.healthtracker.model.HealthLimit
+import org.crazydan.studio.app.healthtracker.model.HealthMeasure
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.ui.screen.PreviewSample
@@ -65,98 +48,250 @@ fun HealthRecordsChart(
     val chartData = remember(healthRecords) {
         createChartData(healthType, healthRecords)
     }
-    val chartOptions = remember(chartData) {
-        createChartOptions(chartData)
+    val chartOption = remember(healthRecords) {
+        createChartOption(healthType, chartData)
     }
+
+    val bgColor = MaterialTheme.colorScheme.background
 
     ECharts(
         useDarkTheme = isInDarkTheme(),
-        options = chartOptions.theme(
-            backgroundColor = MaterialTheme.colorScheme.background,
-        ),
+        option = chartOption.also {
+            it.theme {
+                backgroundColor(rgba(bgColor))
+            }
+        },
         modifier = modifier,
     )
 }
 
-private fun createChartOptions(
-    data: ChartData,
-): EChartsOptions {
-    val options = EChartsOptions.tooltip(
-        trigger = TooltipTrigger.Axis,
-        axisPointer = TooltipAxisPointer(
-            type = TooltipAxisPointer.Type.Cross,
-        ),
-    ).legend(
-        top = Size.pixel(20),
-    ).grid(
-        left = Size.percent(10f),
-        right = Size.percent(10f),
-        bottom = Size.percent(15f),
-    ).xAxis(
-        type = AxisType.Category,
-        data = data.days.map { AxisData(value = it) },
-    ).yAxis(
-        scale = true,
-    ).dataZoom(
-        type = DataZoomType.Slider,
-        top = Size.percent(90f),
-        // 定位到最近一周的数据
-        startValueIndex = max(0, data.days.size - 7),
-        endValueIndex = data.days.size,
-    )
+private fun createChartOption(
+    healthType: HealthType,
+    chartData: ChartData,
+): ECharts.Option {
+    val option = ECharts.option {
+        tooltip {
+            triggerBy { axis }
+            axisPointer { type { cross } }
+        }
+        legend {
+            type { plain }
+            margin { top(20.px) }
+        }
 
-    val series = mutableListOf<Series>()
-    data.lines.forEach { entry ->
-        series.add(
-            Series.Line(
-                name = entry.key,
-                data = entry.value.map { Series.Line.Data(value = it) },
-            )
-        )
-    }
-    data.dots.forEach { entry ->
-        series.add(
-            Series.Candlestick(
-                name = entry.key,
-                dimensions = listOf("最早", "最晚", "最低", "最高"),
-                data = entry.value.map { Series.Candlestick.Data(value = it) },
-                markPoint = SeriesMarkPoint(
-                    data = listOf(
-                        SeriesMarkData(
-                            type = SeriesMarkData.Type.Max,
-                            valueIndex = 4,
-                        ),
-                        SeriesMarkData(
-                            type = SeriesMarkData.Type.Min,
-                            valueIndex = 3,
-                        ),
-                    ),
-                ),
-                markLine = SeriesMarkLine(
-                    data = listOf(
-                        SeriesMarkLine.Range(
-                            from = SeriesMarkData(
-                                type = SeriesMarkData.Type.Max,
-                                valueIndex = 4,
-                                symbol = SeriesMarkData.Symbol.Circle,
-                                symbolSize = 10,
-                                label = SeriesLabel(show = false),
-                            ),
-                            to = SeriesMarkData(
-                                type = SeriesMarkData.Type.Min,
-                                valueIndex = 3,
-                                symbol = SeriesMarkData.Symbol.Circle,
-                                symbolSize = 10,
-                                label = SeriesLabel(show = false),
-                            ),
-                        ),
-                    ),
-                ),
-            )
-        )
+        dataZoom {
+            slider {
+                margin {
+                    //top(90f.pct)
+                    left(10f.pct)
+                }
+                filterMode { filter }
+                window {
+                    // 定位到最近一周的数据
+                    val start = max(0, chartData.days.size - 7)
+                    val end = chartData.days.size
+                    range(start.idx, end.idx)
+                }
+            }
+        }
     }
 
-    return options.series(series)
+    option.grid {
+        showBorder(false)
+        margin {
+            horizontal(15f.pct)
+            //bottom(15f.pct)
+        }
+
+        xAxis {
+            type {
+                category {
+                    data {
+                        chartData.days.map {
+                            item(it) {}
+                        }
+                    }
+                }
+            }
+            axisTick {
+                show(true)
+                alignWithLabel(true)
+            }
+        }
+        yAxis {
+            name("${healthType.name} (${healthType.unit})") { position { middle() } }
+
+            type { value { fromZero(healthType.limit.lower != null) } }
+
+            healthType.limit.lower?.let { value ->
+                markLine {
+                    value(value)
+                    name("$value ⤓")
+                    label {
+                        position { end }
+                        formatter("{b}")
+                    }
+                }
+            }
+            healthType.limit.upper?.let { value ->
+                markLine {
+                    value(value)
+                    name("$value ⤒")
+                    label {
+                        position { end }
+                        formatter("{b}")
+                    }
+                }
+            }
+        }
+    }
+
+    option.series {
+        chartData.lines.forEach { entry ->
+            val seriesName = chartData.measures[entry.key]!!
+            val seriesLimit = chartData.measureLimits[entry.key]!!
+
+            line {
+                name(seriesName)
+                smooth(true)
+                connectNulls(true)
+
+                data {
+                    dimension("x", "y") {
+                        x("x")
+                        y("y")
+                    }
+
+                    entry.value.onEachIndexed { index, value ->
+                        item(index, value) {}
+                    }
+                }
+
+                if (seriesLimit.lower != null && seriesLimit.upper != null) {
+                    markArea {
+                        byYAxis {
+                            value(seriesLimit.lower, seriesLimit.upper)
+                            name("${seriesLimit.lower}\n ~\n${seriesLimit.upper}")
+                            label {
+                                position { right }
+                                formatter("{b}")
+                            }
+                        }
+                    }
+                } else if (seriesLimit.lower != null || seriesLimit.upper != null) {
+                    markLine {
+                        seriesLimit.lower?.let { value ->
+                            byYAxis {
+                                value(value)
+                                name("$value ⤓")
+                                label {
+                                    position { end }
+                                    formatter("{b}")
+                                }
+                            }
+                        }
+                        seriesLimit.upper?.let { value ->
+                            byYAxis {
+                                value(value)
+                                name("$value ⤒")
+                                label {
+                                    position { end }
+                                    formatter("{b}")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    option.series {
+        chartData.dots.forEach { entry ->
+            val seriesName = chartData.measures[entry.key]!!
+            val seriesLimit = chartData.measureLimits[entry.key]!!
+
+            candlestick {
+                name(seriesName)
+
+                data {
+                    dimension("x", "open", "close", "lowest", "highest") {
+                        x("x")
+                        y("open", "close", "lowest", "highest")
+                        tooltip("open" to "最早", "close" to "最晚", "lowest" to "最高", "highest" to "最低")
+                    }
+
+                    entry.value.onEachIndexed { index, value ->
+                        item(index, *value.toTypedArray()) {}
+                    }
+                }
+
+                markPoint {
+                    byData {
+                        byDimension { max("highest") }
+                    }
+                    byData {
+                        byDimension { min("lowest") }
+                    }
+                }
+
+                markLine {
+                    byData {
+                        symbol {
+                            shape { circle }
+                            size(10)
+                        }
+                        label { show(false) }
+
+                        start {
+                            byDimension { max("highest") }
+                        }
+                        end {
+                            byDimension { min("lowest") }
+                        }
+                    }
+
+                    if (seriesLimit.lower == null || seriesLimit.upper == null) {
+                        seriesLimit.lower?.let { value ->
+                            byYAxis {
+                                value(value)
+                                name("$value ⤓")
+                                label {
+                                    position { end }
+                                    formatter("{b}")
+                                }
+                            }
+                        }
+                        seriesLimit.upper?.let { value ->
+                            byYAxis {
+                                value(value)
+                                name("$value ⤒")
+                                label {
+                                    position { end }
+                                    formatter("{b}")
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (seriesLimit.lower != null && seriesLimit.upper != null) {
+                    markArea {
+                        byYAxis {
+                            value(seriesLimit.lower, seriesLimit.upper)
+                            name("${seriesLimit.lower}\n ~\n${seriesLimit.upper}")
+                            label {
+                                position { right }
+                                formatter("{b}")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return option
 }
 
 private fun createChartData(
@@ -183,15 +318,29 @@ private fun createChartData(
     val days = seriesMap.keys
     val lines = mutableMapOf<String, List<Number?>>()
     val dots = mutableMapOf<String, List<List<Number?>>>()
+    val measures =
+        healthType.measures.ifEmpty {
+            listOf(
+                HealthMeasure(
+                    code = "",
+                    name = healthType.name,
+                    limit = HealthLimit(),
+                )
+            )
+        }
 
-    healthType.measures.forEach { measure ->
+    val measureNameMap = mutableMapOf<String, String>()
+    val measureLimitMap = mutableMapOf<String, HealthLimit>()
+    measures.forEach { measure ->
         val name = measure.name
         val code = measure.code
-        val maxAmount = maxDataAmountMap.getOrDefault(code, 0)
+        measureNameMap.put(code, name)
+        measureLimitMap.put(code, measure.limit)
 
+        val maxAmount = maxDataAmountMap.getOrDefault(code, 0)
         if (maxAmount > 1) {
             // 该指标同一天内含多个数据
-            dots.put(name, seriesMap.map { entry ->
+            dots.put(code, seriesMap.map { entry ->
                 val list = entry.value.getOrDefault(code, mutableListOf())
 
                 // 对应 K 线图：open，close，lowest，highest
@@ -208,18 +357,20 @@ private fun createChartData(
             })
         } else if (maxAmount == 1) {
             // 该指标同一天内仅含单个数据
-            lines.put(name, seriesMap.map { entry ->
+            lines.put(code, seriesMap.map { entry ->
                 entry.value
                     .getOrDefault(code, mutableListOf())
                     .firstOrNull()
             })
         } else {
             // 该指标无数据
-            lines.put(name, listOf())
+            lines.put(code, listOf())
         }
     }
 
     return ChartData(
+        measures = measureNameMap,
+        measureLimits = measureLimitMap,
         days = days,
         lines = lines,
         dots = dots,
@@ -227,6 +378,8 @@ private fun createChartData(
 }
 
 private data class ChartData(
+    val measures: Map<String, String>,
+    val measureLimits: Map<String, HealthLimit>,
     val days: Collection<String>,
     val lines: Map<String, List<Number?>>,
     val dots: Map<String, List<List<Number?>>>,
