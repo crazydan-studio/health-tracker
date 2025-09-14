@@ -2,14 +2,13 @@ package org.crazydan.studio.app.healthtracker.model.dao.upgrader
 
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import org.crazydan.studio.app.healthtracker.model.HEALTH_RECORD_TABLE_NAME
 import org.crazydan.studio.app.healthtracker.model.HEALTH_TYPE_TABLE_NAME
 import org.crazydan.studio.app.healthtracker.model.HealthLimit
 import org.crazydan.studio.app.healthtracker.model.HealthMeasure
 import org.crazydan.studio.app.healthtracker.model.genMeasureCode
-import java.lang.reflect.Type
 
 /**
  *
@@ -71,8 +70,7 @@ class MigrationFromV2ToV3() : Migration(2, 3) {
 }
 
 private fun transferTypeMeasures(db: SupportSQLiteDatabase): Map<Long, List<HealthMeasure>> {
-    val gson = Gson()
-    val rangeListType = object : TypeToken<List<OldRange>>() {}.type
+    val json = Json { }
     val typeMeasuresMap = mutableMapOf<Long, List<HealthMeasure>>()
 
     db.query("select id, measures from $HEALTH_TYPE_TABLE_NAME").also { cursor ->
@@ -81,7 +79,7 @@ private fun transferTypeMeasures(db: SupportSQLiteDatabase): Map<Long, List<Heal
                 do {
                     val id = cursor.getLong(cursor.getColumnIndexOrThrow("id"))
                     val measures = jsonToMeasures(
-                        gson, rangeListType,
+                        json,
                         cursor.getString(cursor.getColumnIndexOrThrow("measures"))
                     )
 
@@ -98,7 +96,7 @@ private fun transferTypeMeasures(db: SupportSQLiteDatabase): Map<Long, List<Heal
     val statement = db.compileStatement("update $HEALTH_TYPE_TABLE_NAME set measures = ? where id = ?")
     try {
         typeMeasuresMap.forEach { id, measures ->
-            statement.bindString(1, gson.toJson(measures))
+            statement.bindString(1, json.encodeToString(measures))
             statement.bindLong(2, id)
 
             statement.executeUpdateDelete()
@@ -147,8 +145,8 @@ private fun transferRecordMeasureCodes(db: SupportSQLiteDatabase, typeMeasuresMa
     }
 }
 
-private fun jsonToMeasures(gson: Gson, type: Type, json: String): List<HealthMeasure> {
-    val ranges: List<OldRange> = gson.fromJson(json, type)
+private fun jsonToMeasures(json: Json, value: String): List<HealthMeasure> {
+    val ranges: List<OldRange> = json.decodeFromString(value)
 
     return if (ranges.isEmpty()) {
         emptyList()
@@ -166,6 +164,7 @@ private fun jsonToMeasures(gson: Gson, type: Type, json: String): List<HealthMea
     }
 }
 
+@Serializable
 data class OldRange(
     val name: String,
     val upperLimit: Float,

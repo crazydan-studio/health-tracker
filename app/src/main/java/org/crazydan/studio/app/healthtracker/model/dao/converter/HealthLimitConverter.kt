@@ -1,8 +1,7 @@
 package org.crazydan.studio.app.healthtracker.model.dao.converter
 
 import androidx.room.TypeConverter
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import kotlinx.serialization.json.Json
 import org.crazydan.studio.app.healthtracker.model.HealthLimit
 
 /**
@@ -11,20 +10,19 @@ import org.crazydan.studio.app.healthtracker.model.HealthLimit
  * @date 2025-09-03
  */
 class HealthLimitConverter {
-    private val gson = Gson()
-    private val type = object : TypeToken<HealthLimit>() {}.type
+    private val json = Json {}
 
     @TypeConverter
-    fun toJson(obj: HealthLimit?): String {
-        return gson.toJson(obj, type)
+    fun toJson(value: HealthLimit?): String {
+        return json.encodeToString(value)
     }
 
     @TypeConverter
-    fun fromJson(json: String?): HealthLimit {
-        return if (json.isNullOrEmpty()) {
+    fun fromJson(value: String?): HealthLimit {
+        return if (value.isNullOrEmpty()) {
             HealthLimit()
         } else {
-            gson.fromJson(json, type)
+            json.decodeFromString(value)
         }
     }
 }

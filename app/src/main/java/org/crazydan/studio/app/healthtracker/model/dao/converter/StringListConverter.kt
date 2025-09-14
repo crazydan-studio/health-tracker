@@ -1,8 +1,7 @@
 package org.crazydan.studio.app.healthtracker.model.dao.converter
 
 import androidx.room.TypeConverter
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import kotlinx.serialization.json.Json
 
 /**
  *
@@ -10,20 +9,19 @@ import com.google.gson.reflect.TypeToken
  * @date 2025-09-03
  */
 class StringListConverter {
-    private val gson = Gson()
-    private val type = object : TypeToken<List<String>>() {}.type
+    private val json = Json {}
 
     @TypeConverter
-    fun toJson(list: List<String>?): String {
-        return gson.toJson(list, type)
+    fun toJson(value: List<String>?): String {
+        return json.encodeToString(value)
     }
 
     @TypeConverter
-    fun fromJson(json: String?): List<String> {
-        return if (json.isNullOrEmpty()) {
+    fun fromJson(value: String?): List<String> {
+        return if (value.isNullOrEmpty()) {
             emptyList()
         } else {
-            gson.fromJson(json, type)
+            json.decodeFromString(value)
         }
     }
 }

@@ -17,6 +17,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -25,6 +26,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import org.crazydan.studio.app.healthtracker.model.HealthLimit
@@ -52,6 +55,16 @@ fun AddOrEditHealthTypeScreen(
         return
     }
 
+    val inAddMode = remember(editType) { editType == null }
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(inAddMode) {
+        if (inAddMode) {
+            focusRequester.requestFocus()
+        } else {
+            focusRequester.freeFocus()
+        }
+    }
+
     var name by remember(editType) { mutableStateOf(editType?.name ?: "") }
     var unit by remember(editType) { mutableStateOf(editType?.unit ?: "") }
     var upperLimit by remember(editType) { mutableStateOf(editType?.limit?.upper?.toString() ?: "") }
@@ -66,7 +79,7 @@ fun AddOrEditHealthTypeScreen(
     AddOrEditHealthDataScreen(
         title = {
             Text(
-                (if (editType == null) "添加" else "编辑") + "健康类型"
+                (if (inAddMode) "添加" else "编辑") + "健康类型"
             )
         },
         onNavigateBack = { eventDispatch(Event.NavBack()) },
@@ -103,7 +116,9 @@ fun AddOrEditHealthTypeScreen(
                     value = name,
                     onValueChange = { name = it.trim() },
                     label = { Text("类型名称") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))

@@ -7,11 +7,14 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.ui.Event
@@ -33,6 +36,16 @@ fun AddOrEditHealthPersonScreen(
     editPerson: HealthPerson? = null,
     eventDispatch: EventDispatch,
 ) {
+    val inAddMode = remember(editPerson) { editPerson == null }
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(inAddMode) {
+        if (inAddMode) {
+            focusRequester.requestFocus()
+        } else {
+            focusRequester.freeFocus()
+        }
+    }
+
     var label by remember(editPerson) { mutableStateOf(editPerson?.label ?: "") }
     var familyName by remember(editPerson) { mutableStateOf(editPerson?.familyName ?: "") }
     var givenName by remember(editPerson) { mutableStateOf(editPerson?.givenName ?: "") }
@@ -44,7 +57,7 @@ fun AddOrEditHealthPersonScreen(
     AddOrEditHealthDataScreen(
         title = {
             Text(
-                (if (editPerson == null) "添加" else "编辑") + "人员信息"
+                (if (inAddMode) "添加" else "编辑") + "人员信息"
             )
         },
         onNavigateBack = { eventDispatch(Event.NavBack()) },
@@ -71,7 +84,9 @@ fun AddOrEditHealthPersonScreen(
             value = label,
             onValueChange = { label = it.trim() },
             label = { Text("称呼") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(focusRequester)
         )
 
         Spacer(modifier = Modifier.height(16.dp))

@@ -86,7 +86,9 @@ android {
 
 dependencies {
     // 用于序列化 @Serializable 标注的对象，且其需要启用插件 org.jetbrains.kotlin.plugin.serialization
+    // https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/serialization-guide.md
     implementation(libs.kotlinx.serialization.json)
+    //implementation(libs.gson)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -106,7 +108,6 @@ dependencies {
     //implementation("com.github.AAChartModel:AAChartCore-Kotlin:7.4.0")
     implementation(project(":echarts"))
 
-    implementation(libs.gson)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)

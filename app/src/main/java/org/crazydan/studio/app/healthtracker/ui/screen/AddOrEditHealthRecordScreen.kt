@@ -12,6 +12,7 @@ import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -19,6 +20,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.marosseleng.compose.material3.datetimepickers.time.domain.noSeconds
@@ -55,6 +58,16 @@ fun AddOrEditHealthRecordScreen(
         return
     }
 
+    val inAddMode = remember(editRecord) { editRecord == null }
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(inAddMode) {
+        if (inAddMode) {
+            focusRequester.requestFocus()
+        } else {
+            focusRequester.freeFocus()
+        }
+    }
+
     var rangeExpanded by remember { mutableStateOf(false) }
 
     // TODO 根据采集记录，确定不同 timestamp 时间段内经常被选择的指标
@@ -83,7 +96,7 @@ fun AddOrEditHealthRecordScreen(
     AddOrEditHealthDataScreen(
         title = {
             Text(
-                (if (editRecord == null) "添加" else "编辑") + "${healthType.name}记录"
+                (if (inAddMode) "添加" else "编辑") + "${healthType.name}记录"
             )
         },
         onNavigateBack = { eventDispatch(Event.NavBack()) },
@@ -116,7 +129,9 @@ fun AddOrEditHealthRecordScreen(
             onValueChange = { value = it },
             label = { Text("采集值 (${healthType.unit})") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(focusRequester)
         )
 
         Spacer(modifier = Modifier.height(16.dp))

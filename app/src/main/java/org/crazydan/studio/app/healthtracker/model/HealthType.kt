@@ -1,8 +1,8 @@
 package org.crazydan.studio.app.healthtracker.model
 
 import androidx.room.Entity
-import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 import org.crazydan.studio.app.healthtracker.util.genCode
 
 const val HEALTH_TYPE_TABLE_NAME = "health_type"
@@ -33,6 +33,7 @@ data class HealthType(
 )
 
 /** 测量指标 */
+@Serializable
 data class HealthMeasure(
     /** 唯一标识，自动生成，用于避免名字变更造成关联引用失效 */
     val code: String,
@@ -41,6 +42,7 @@ data class HealthMeasure(
     val limit: HealthLimit,
 )
 
+@Serializable
 data class HealthLimit(
     /** 上限值 */
     val upper: Float? = null,
