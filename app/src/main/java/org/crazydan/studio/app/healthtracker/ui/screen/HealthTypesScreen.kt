@@ -82,7 +82,7 @@ fun HealthTypesScreen(
                             type.personId,
                             filter = HealthRecordFilter(
                                 startDate = toEpochMillis(now.minusDays(7)),
-                                endDate = toEpochMillis(now),
+                                endDate = toEpochMillis(now, untilToDayEnd = true),
                             ),
                         )
                     )

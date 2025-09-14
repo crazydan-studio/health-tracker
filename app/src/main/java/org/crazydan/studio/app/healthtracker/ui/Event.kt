@@ -12,8 +12,9 @@ import org.crazydan.studio.app.healthtracker.model.HealthType
  * @date 2025-09-01
  */
 sealed class Event {
-    class NavBack(val route: String? = null) : Event()
+    class NavBack() : Event()
 
+    // HealthPerson
     class WillAddHealthPerson() : Event()
     class WillEditHealthPerson(val id: Long) : Event()
     class SaveHealthPerson(val data: HealthPerson) : Event()
@@ -23,28 +24,34 @@ sealed class Event {
     class ViewDeletedHealthPersons() : Event()
     class ClearDeletedHealthPersons() : Event()
 
-    class WillAddHealthTypeOfPerson(val id: Long) : Event()
-    class ViewHealthTypesOfPerson(val id: Long) : Event()
-    class ViewDeletedHealthTypesOfPerson(val id: Long) : Event()
-    class ClearDeletedHealthTypesOfPerson(val id: Long) : Event()
+    class WillAddHealthTypeOfPerson(val personId: Long) : Event()
+    class ViewHealthTypesOfPerson(val personId: Long) : Event()
+    class ViewDeletedHealthTypesOfPerson(val personId: Long) : Event()
+    class ClearDeletedHealthTypesOfPerson(val personId: Long) : Event()
 
+    // HealthType
     class WillEditHealthType(val id: Long, val personId: Long) : Event()
     class SaveHealthType(val data: HealthType) : Event()
     class UpdateHealthType(val data: HealthType) : Event()
     class DeleteHealthType(val id: Long) : Event()
     class UndeleteHealthType(val id: Long) : Event()
 
-    class WillAddHealthRecordOfType(val id: Long, val personId: Long) : Event()
+    class WillAddHealthRecordOfType(val typeId: Long, val personId: Long) : Event()
     class ViewHealthRecordsOfType(
-        val id: Long, val personId: Long,
+        val typeId: Long, val personId: Long,
         val filter: HealthRecordFilter,
     ) : Event()
 
-    class ViewHealthRecordDetailsOfType(val id: Long, val personId: Long) : Event()
-    class ViewDeletedHealthRecordsOfType(val id: Long, val personId: Long) : Event()
-    class ClearDeletedHealthRecordsOfType(val id: Long) : Event()
+    class ViewHealthRecordDetailsOfType(val typeId: Long, val personId: Long) : Event()
+    class ViewDeletedHealthRecordsOfType(val typeId: Long, val personId: Long) : Event()
+    class ClearDeletedHealthRecordsOfType(val typeId: Long) : Event()
 
-    class WillEditHealthRecord(val id: Long, val typeId: Long, val personId: Long) : Event()
+    // HealthRecord
+    class WillEditHealthRecord(
+        val id: Long,
+        val typeId: Long, val personId: Long,
+    ) : Event()
+
     class SaveHealthRecord(val data: HealthRecord) : Event()
     class UpdateHealthRecord(val data: HealthRecord) : Event()
     class DeleteHealthRecord(val id: Long) : Event()

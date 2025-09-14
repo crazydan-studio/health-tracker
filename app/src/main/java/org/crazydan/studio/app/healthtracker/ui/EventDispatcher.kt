@@ -26,15 +26,21 @@ fun dispatchEvent(
         }
 
         is Event.WillAddHealthPerson -> {
-            navController.navigate("addHealthPerson")
+            navController.navigate(
+                Route.AddHealthPerson
+            )
         }
 
         is Event.WillEditHealthPerson -> {
-            navController.navigate("editHealthPerson/${e.id}")
+            navController.navigate(
+                Route.EditHealthPerson(personId = e.id)
+            )
         }
 
         is Event.ViewDeletedHealthPersons -> {
-            navController.navigate("deletedHealthPersons")
+            navController.navigate(
+                Route.DeletedHealthPersons
+            )
         }
 
         is Event.SaveHealthPerson -> {
@@ -71,20 +77,31 @@ fun dispatchEvent(
 
         //
         is Event.WillAddHealthTypeOfPerson -> {
-            navController.navigate("addHealthType/${e.id}")
+            navController.navigate(
+                Route.AddHealthType(personId = e.personId)
+            )
         }
 
         is Event.ViewHealthTypesOfPerson -> {
-            navController.navigate("healthTypes/${e.id}")
+            navController.navigate(
+                Route.HealthTypes(personId = e.personId)
+            )
         }
 
         is Event.ViewDeletedHealthTypesOfPerson -> {
-            navController.navigate("deletedHealthTypes/${e.id}")
+            navController.navigate(
+                Route.DeletedHealthTypes(personId = e.personId)
+            )
         }
 
         //
         is Event.WillEditHealthType -> {
-            navController.navigate("editHealthType/${e.id}/${e.personId}")
+            navController.navigate(
+                Route.EditHealthType(
+                    typeId = e.id,
+                    personId = e.personId,
+                )
+            )
         }
 
 
@@ -116,39 +133,65 @@ fun dispatchEvent(
 
         is Event.ClearDeletedHealthTypesOfPerson -> {
             coroutineScope.launch {
-                viewModel.clearDeletedHealthTypes(e.id)
+                viewModel.clearDeletedHealthTypes(e.personId)
             }
         }
 
         //
         is Event.WillAddHealthRecordOfType -> {
-            navController.navigate("addHealthRecord/${e.id}/${e.personId}")
+            navController.navigate(
+                Route.AddHealthRecord(
+                    typeId = e.typeId,
+                    personId = e.personId,
+                )
+            )
         }
 
         is Event.ViewHealthRecordsOfType -> {
             navController.navigate(
-                "healthRecords/${e.id}/${e.personId}" +
-                        "/${e.filter.startDate}/${e.filter.endDate}"
+                Route.HealthRecords(
+                    typeId = e.typeId,
+                    personId = e.personId,
+                    filter = e.filter,
+                )
             ) {
                 // Note: 记录过滤采用的是路由跳转并附带过滤参数，
                 // 因此，在退回时，需要直接退到初始路由上，避免逐级回退
-                popUpTo("healthTypes/${e.personId}") {
+                popUpTo(
+                    Route.HealthTypes(personId = e.personId)
+                ) {
                     inclusive = false
                 }
             }
         }
 
         is Event.ViewHealthRecordDetailsOfType -> {
-            navController.navigate("healthRecordDetails/${e.id}/${e.personId}")
+            navController.navigate(
+                Route.HealthRecordDetails(
+                    typeId = e.typeId,
+                    personId = e.personId,
+                )
+            )
         }
 
         is Event.ViewDeletedHealthRecordsOfType -> {
-            navController.navigate("deletedHealthRecords/${e.id}/${e.personId}")
+            navController.navigate(
+                Route.DeletedHealthRecords(
+                    typeId = e.typeId,
+                    personId = e.personId,
+                )
+            )
         }
 
         //
         is Event.WillEditHealthRecord -> {
-            navController.navigate("editHealthRecord/${e.id}/${e.typeId}/${e.personId}")
+            navController.navigate(
+                Route.EditHealthRecord(
+                    recordId = e.id,
+                    typeId = e.typeId,
+                    personId = e.personId,
+                )
+            )
         }
 
         is Event.SaveHealthRecord -> {
@@ -179,7 +222,7 @@ fun dispatchEvent(
 
         is Event.ClearDeletedHealthRecordsOfType -> {
             coroutineScope.launch {
-                viewModel.clearDeletedHealthRecords(e.id)
+                viewModel.clearDeletedHealthRecords(e.typeId)
             }
         }
     }

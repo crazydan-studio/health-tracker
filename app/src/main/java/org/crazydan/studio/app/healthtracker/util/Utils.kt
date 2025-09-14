@@ -36,11 +36,14 @@ fun getFullName(familyName: String, givenName: String): String {
     return "${familyName}${nameSeparator}${givenName}"
 }
 
-fun toEpochMillis(date: LocalDate, time: LocalTime? = null): Long {
+/** @param untilToDayEnd 在 [time] 未指定时，是否将 [time] 设定为 23:59:59.999 */
+fun toEpochMillis(date: LocalDate, time: LocalTime? = null, untilToDayEnd: Boolean = false): Long {
     val zoneId = ZoneId.systemDefault()
     val zonedDateTime = ZonedDateTime.of(
         date,
-        time ?: LocalTime.of(0, 0, 0, 0),
+        time ?: (
+                if (untilToDayEnd) LocalTime.of(23, 59, 59, 9999)
+                else LocalTime.of(0, 0, 0, 0)),
         zoneId,
     )
 

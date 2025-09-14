@@ -9,10 +9,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
@@ -31,6 +31,7 @@ import org.crazydan.studio.app.healthtracker.ui.screen.HealthPersonsScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.HealthRecordDetailsScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.HealthRecordsScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.HealthTypesScreen
+import kotlin.reflect.typeOf
 
 /**
  *
@@ -47,26 +48,31 @@ fun HealthTrackerApp() {
         dispatchEvent(e, viewModel, navController, coroutineScope)
     }
 
+    val typeMap = mapOf(
+        typeOf<HealthRecordFilter>() to HealthRecordFilterNavType
+    )
+
     NavHost(
         navController = navController,
-        startDestination = "healthPersons",
+        startDestination = Route.HealthPersons,
     ) {
-        composable("healthPersons") {
+        //
+        composable<Route.HealthPersons> {
             ShowHealthPersonsScreen(
                 viewModel = viewModel,
                 eventDispatch = eventDispatch,
             )
         }
-        composable("addHealthPerson") {
+        composable<Route.AddHealthPerson> {
             AddOrEditHealthPersonScreen(
                 eventDispatch = eventDispatch,
             )
         }
-        composable("editHealthPerson/{personId}") { backStackEntry ->
-            val personId = requireArg(backStackEntry, "personId").toLong()
+        composable<Route.EditHealthPerson> { backStackEntry ->
+            val route = backStackEntry.toRoute<Route.EditHealthPerson>()
 
             LaunchedEffectWithHealthPerson(
-                personId = personId,
+                personId = route.personId,
                 viewModel = viewModel,
             ) { person ->
                 AddOrEditHealthPersonScreen(
@@ -75,27 +81,28 @@ fun HealthTrackerApp() {
                 )
             }
         }
-        composable("deletedHealthPersons") {
+        composable<Route.DeletedHealthPersons> {
             ShowDeletedHealthPersonsScreen(
                 viewModel = viewModel,
                 eventDispatch = eventDispatch,
             )
         }
+
         //
-        composable("healthTypes/{personId}") { backStackEntry ->
-            val personId = requireArg(backStackEntry, "personId").toLong()
+        composable<Route.HealthTypes> { backStackEntry ->
+            val route = backStackEntry.toRoute<Route.HealthTypes>()
 
             ShowHealthTypesScreen(
-                personId = personId,
+                personId = route.personId,
                 viewModel = viewModel,
                 eventDispatch = eventDispatch,
             )
         }
-        composable("addHealthType/{personId}") { backStackEntry ->
-            val personId = requireArg(backStackEntry, "personId").toLong()
+        composable<Route.AddHealthType> { backStackEntry ->
+            val route = backStackEntry.toRoute<Route.AddHealthType>()
 
             LaunchedEffectWithHealthPerson(
-                personId = personId,
+                personId = route.personId,
                 viewModel = viewModel,
             ) { person ->
                 AddOrEditHealthTypeScreen(
@@ -104,13 +111,12 @@ fun HealthTrackerApp() {
                 )
             }
         }
-        composable("editHealthType/{typeId}/{personId}") { backStackEntry ->
-            val typeId = requireArg(backStackEntry, "typeId").toLong()
-            val personId = requireArg(backStackEntry, "personId").toLong()
+        composable<Route.EditHealthType> { backStackEntry ->
+            val route = backStackEntry.toRoute<Route.EditHealthType>()
 
             LaunchedEffectWithHealthType(
-                typeId = typeId,
-                personId = personId,
+                typeId = route.typeId,
+                personId = route.personId,
                 viewModel = viewModel,
             ) { type, person ->
                 AddOrEditHealthTypeScreen(
@@ -120,39 +126,34 @@ fun HealthTrackerApp() {
                 )
             }
         }
-        composable("deletedHealthTypes/{personId}") { backStackEntry ->
-            val personId = requireArg(backStackEntry, "personId").toLong()
+        composable<Route.DeletedHealthTypes> { backStackEntry ->
+            val route = backStackEntry.toRoute<Route.DeletedHealthTypes>()
 
             ShowDeletedHealthTypesScreen(
-                personId = personId,
+                personId = route.personId,
                 viewModel = viewModel,
                 eventDispatch = eventDispatch,
             )
         }
+
         //
-        composable("healthRecords/{typeId}/{personId}/{filterStartDate}/{filterEndDate}") { backStackEntry ->
-            val typeId = requireArg(backStackEntry, "typeId").toLong()
-            val personId = requireArg(backStackEntry, "personId").toLong()
-            val filter = HealthRecordFilter(
-                startDate = requireArg(backStackEntry, "filterStartDate").toLong(),
-                endDate = requireArg(backStackEntry, "filterEndDate").toLong(),
-            )
+        composable<Route.HealthRecords>(typeMap = typeMap) { backStackEntry ->
+            val route = backStackEntry.toRoute<Route.HealthRecords>()
 
             ShowHealthRecordsScreen(
-                typeId = typeId,
-                personId = personId,
+                typeId = route.typeId,
+                personId = route.personId,
+                filter = route.filter,
                 viewModel = viewModel,
-                filter = filter,
                 eventDispatch = eventDispatch,
             )
         }
-        composable("addHealthRecord/{typeId}/{personId}") { backStackEntry ->
-            val typeId = requireArg(backStackEntry, "typeId").toLong()
-            val personId = requireArg(backStackEntry, "personId").toLong()
+        composable<Route.AddHealthRecord> { backStackEntry ->
+            val route = backStackEntry.toRoute<Route.AddHealthRecord>()
 
             LaunchedEffectWithHealthRecord(
-                typeId = typeId,
-                personId = personId,
+                typeId = route.typeId,
+                personId = route.personId,
                 viewModel = viewModel,
             ) { _, type, person, tags ->
                 AddOrEditHealthRecordScreen(
@@ -163,15 +164,13 @@ fun HealthTrackerApp() {
                 )
             }
         }
-        composable("editHealthRecord/{recordId}/{typeId}/{personId}") { backStackEntry ->
-            val recordId = requireArg(backStackEntry, "recordId").toLong()
-            val typeId = requireArg(backStackEntry, "typeId").toLong()
-            val personId = requireArg(backStackEntry, "personId").toLong()
+        composable<Route.EditHealthRecord> { backStackEntry ->
+            val route = backStackEntry.toRoute<Route.EditHealthRecord>()
 
             LaunchedEffectWithHealthRecord(
-                recordId = recordId,
-                typeId = typeId,
-                personId = personId,
+                recordId = route.recordId,
+                typeId = route.typeId,
+                personId = route.personId,
                 viewModel = viewModel,
             ) { record, type, person, tags ->
                 AddOrEditHealthRecordScreen(
@@ -183,34 +182,27 @@ fun HealthTrackerApp() {
                 )
             }
         }
-        //
-        composable("healthRecordDetails/{typeId}/{personId}") { backStackEntry ->
-            val typeId = requireArg(backStackEntry, "typeId").toLong()
-            val personId = requireArg(backStackEntry, "personId").toLong()
+        composable<Route.HealthRecordDetails> { backStackEntry ->
+            val route = backStackEntry.toRoute<Route.HealthRecordDetails>()
 
             ShowHealthRecordDetailsScreen(
-                typeId = typeId,
-                personId = personId,
+                typeId = route.typeId,
+                personId = route.personId,
                 viewModel = viewModel,
                 eventDispatch = eventDispatch,
             )
         }
-        composable("deletedHealthRecords/{typeId}/{personId}") { backStackEntry ->
-            val typeId = requireArg(backStackEntry, "typeId").toLong()
-            val personId = requireArg(backStackEntry, "personId").toLong()
+        composable<Route.DeletedHealthRecords> { backStackEntry ->
+            val route = backStackEntry.toRoute<Route.DeletedHealthRecords>()
 
             ShowDeletedHealthRecordsScreen(
-                typeId = typeId,
-                personId = personId,
+                typeId = route.typeId,
+                personId = route.personId,
                 viewModel = viewModel,
                 eventDispatch = eventDispatch,
             )
         }
     }
-}
-
-private fun requireArg(backStackEntry: NavBackStackEntry, arg: String): String {
-    return backStackEntry.arguments!!.getString(arg)!!
 }
 
 @Composable

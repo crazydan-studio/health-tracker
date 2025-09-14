@@ -140,7 +140,7 @@ fun HealthRecordsScreen(
                                 healthType.personId,
                                 filter = HealthRecordFilter(
                                     startDate = healthRecordFilter.startDate,
-                                    endDate = toEpochMillis(it),
+                                    endDate = toEpochMillis(it, untilToDayEnd = true),
                                 ),
                             )
                         )
