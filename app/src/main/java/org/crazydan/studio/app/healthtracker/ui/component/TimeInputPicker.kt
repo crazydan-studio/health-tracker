@@ -1,6 +1,5 @@
 package org.crazydan.studio.app.healthtracker.ui.component
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,6 +28,7 @@ import java.time.format.DateTimeFormatter
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun TimeInputPicker(
+    modifier: Modifier = Modifier,
     value: LocalTime? = null,
     label: @Composable (() -> Unit)? = null,
     format: String = "HH:mm",
@@ -49,7 +49,7 @@ fun TimeInputPicker(
                 Icon(Icons.Default.Schedule, contentDescription = "选择时间")
             }
         },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         readOnly = true
     )
 

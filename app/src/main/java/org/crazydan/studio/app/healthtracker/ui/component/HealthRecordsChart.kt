@@ -41,9 +41,9 @@ enum class TimeFilter {
  */
 @Composable
 fun HealthRecordsChart(
+    modifier: Modifier = Modifier,
     healthType: HealthType,
     healthRecords: List<HealthRecord>,
-    modifier: Modifier = Modifier
 ) {
     val chartData = remember(healthRecords) {
         createChartData(healthType, healthRecords)
@@ -55,13 +55,13 @@ fun HealthRecordsChart(
     val bgColor = MaterialTheme.colorScheme.background
 
     ECharts(
+        modifier = modifier,
         useDarkTheme = isInDarkTheme(),
         option = chartOption.also {
             it.theme {
                 backgroundColor(rgba(bgColor))
             }
         },
-        modifier = modifier,
     )
 }
 
@@ -87,10 +87,11 @@ private fun createChartOption(
                 }
                 filterMode { filter }
                 window {
-                    // 定位到最近一周的数据
-                    val start = max(0, chartData.days.size - 7)
-                    val end = chartData.days.size
-                    range(start.idx, end.idx)
+//                    // 定位到最近一周的数据
+//                    val start = max(0, chartData.days.size - 7)
+//                    val end = chartData.days.size
+//                    range(start.idx, end.idx)
+                    range(0f.pct, 100f.pct)
                 }
             }
         }
@@ -171,7 +172,7 @@ private fun createChartOption(
                     markArea {
                         byYAxis {
                             value(seriesLimit.lower, seriesLimit.upper)
-                            name("${seriesLimit.lower}\n ~\n${seriesLimit.upper}")
+                            name("${seriesLimit.upper}\n ~\n${seriesLimit.lower}")
                             label {
                                 position { right }
                                 formatter("{b}")
@@ -218,7 +219,7 @@ private fun createChartOption(
                     dimension("x", "open", "close", "lowest", "highest") {
                         x("x")
                         y("open", "close", "lowest", "highest")
-                        tooltip("open" to "最早", "close" to "最晚", "lowest" to "最高", "highest" to "最低")
+                        tooltip("open" to "最早", "close" to "最晚", "lowest" to "最低", "highest" to "最高")
                     }
 
                     entry.value.onEachIndexed { index, value ->
@@ -279,7 +280,7 @@ private fun createChartOption(
                     markArea {
                         byYAxis {
                             value(seriesLimit.lower, seriesLimit.upper)
-                            name("${seriesLimit.lower}\n ~\n${seriesLimit.upper}")
+                            name("${seriesLimit.upper}\n ~\n${seriesLimit.lower}")
                             label {
                                 position { right }
                                 formatter("{b}")

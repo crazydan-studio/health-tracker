@@ -2,6 +2,7 @@ package org.crazydan.studio.app.healthtracker.ui
 
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
+import org.crazydan.studio.app.healthtracker.model.HealthRecordFilter
 import org.crazydan.studio.app.healthtracker.model.HealthType
 
 /**
@@ -11,7 +12,7 @@ import org.crazydan.studio.app.healthtracker.model.HealthType
  * @date 2025-09-01
  */
 sealed class Event {
-    class NavBack() : Event()
+    class NavBack(val route: String? = null) : Event()
 
     class WillAddHealthPerson() : Event()
     class WillEditHealthPerson(val id: Long) : Event()
@@ -34,7 +35,11 @@ sealed class Event {
     class UndeleteHealthType(val id: Long) : Event()
 
     class WillAddHealthRecordOfType(val id: Long, val personId: Long) : Event()
-    class ViewHealthRecordsOfType(val id: Long, val personId: Long) : Event()
+    class ViewHealthRecordsOfType(
+        val id: Long, val personId: Long,
+        val filter: HealthRecordFilter,
+    ) : Event()
+
     class ViewHealthRecordDetailsOfType(val id: Long, val personId: Long) : Event()
     class ViewDeletedHealthRecordsOfType(val id: Long, val personId: Long) : Event()
     class ClearDeletedHealthRecordsOfType(val id: Long) : Event()

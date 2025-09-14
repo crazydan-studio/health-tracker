@@ -1,6 +1,5 @@
 package org.crazydan.studio.app.healthtracker.ui.component
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,6 +27,7 @@ import java.time.format.DateTimeFormatter
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun DateInputPicker(
+    modifier: Modifier = Modifier,
     value: LocalDate? = null,
     label: @Composable (() -> Unit)? = null,
     format: String = "yyyy-MM-dd",
@@ -48,7 +48,7 @@ fun DateInputPicker(
                 Icon(Icons.Default.CalendarToday, contentDescription = "选择日期")
             }
         },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         readOnly = true
     )
 

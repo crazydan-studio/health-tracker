@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
+import org.crazydan.studio.app.healthtracker.model.HealthRecordFilter
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.HealthViewModel
 import org.crazydan.studio.app.healthtracker.ui.screen.AddOrEditHealthPersonScreen
@@ -129,14 +130,19 @@ fun HealthTrackerApp() {
             )
         }
         //
-        composable("healthRecords/{typeId}/{personId}") { backStackEntry ->
+        composable("healthRecords/{typeId}/{personId}/{filterStartDate}/{filterEndDate}") { backStackEntry ->
             val typeId = requireArg(backStackEntry, "typeId").toLong()
             val personId = requireArg(backStackEntry, "personId").toLong()
+            val filter = HealthRecordFilter(
+                startDate = requireArg(backStackEntry, "filterStartDate").toLong(),
+                endDate = requireArg(backStackEntry, "filterEndDate").toLong(),
+            )
 
             ShowHealthRecordsScreen(
                 typeId = typeId,
                 personId = personId,
                 viewModel = viewModel,
+                filter = filter,
                 eventDispatch = eventDispatch,
             )
         }
@@ -317,6 +323,7 @@ private fun ShowDeletedHealthTypesScreen(
 private fun ShowHealthRecordsScreen(
     typeId: Long,
     personId: Long,
+    filter: HealthRecordFilter,
     viewModel: HealthViewModel,
     eventDispatch: EventDispatch,
 ) {
@@ -328,7 +335,11 @@ private fun ShowHealthRecordsScreen(
         combine(
             viewModel.getHealthType(typeId),
             viewModel.getHealthPerson(personId),
-            viewModel.getHealthRecords(typeId),
+            viewModel.getHealthRecords(
+                typeId,
+                filter.startDate,
+                filter.endDate,
+            ),
         ) { type, person, records ->
             healthType = type
             healthPerson = person
@@ -341,6 +352,7 @@ private fun ShowHealthRecordsScreen(
         healthType = healthType,
         healthPerson = healthPerson,
         healthRecords = healthRecords,
+        healthRecordFilter = filter,
         eventDispatch = eventDispatch,
     )
 }
@@ -361,7 +373,7 @@ private fun ShowHealthRecordDetailsScreen(
         combine(
             viewModel.getHealthType(typeId),
             viewModel.getHealthPerson(personId),
-            viewModel.getHealthRecords(typeId),
+            viewModel.getHealthRecords(typeId, 0, 0),
             viewModel.countDeletedHealthRecords(typeId),
         ) { type, person, records, amount ->
             healthType = type

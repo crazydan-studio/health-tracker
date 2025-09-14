@@ -2,13 +2,12 @@ package org.crazydan.studio.app.healthtracker.ui.screen
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -27,13 +26,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
+import org.crazydan.studio.app.healthtracker.model.HealthRecordFilter
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.getPersonLabel
 import org.crazydan.studio.app.healthtracker.ui.Event
 import org.crazydan.studio.app.healthtracker.ui.EventDispatch
+import org.crazydan.studio.app.healthtracker.ui.component.DateInputPicker
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataLoadingScreen
 import org.crazydan.studio.app.healthtracker.ui.component.HealthRecordAverageCircle
 import org.crazydan.studio.app.healthtracker.ui.component.HealthRecordsChart
+import org.crazydan.studio.app.healthtracker.util.epochMillisToLocalDate
+import org.crazydan.studio.app.healthtracker.util.toEpochMillis
 
 /**
  *
@@ -46,6 +49,7 @@ fun HealthRecordsScreen(
     healthType: HealthType?,
     healthPerson: HealthPerson?,
     healthRecords: List<HealthRecord>,
+    healthRecordFilter: HealthRecordFilter,
     eventDispatch: EventDispatch,
 ) {
     if (healthPerson == null || healthType == null) {
@@ -97,20 +101,64 @@ fun HealthRecordsScreen(
             }
         }
     ) { padding ->
-        if (healthRecords.isEmpty()) {
-            Column(
+        Column(
+            modifier = Modifier.padding(padding)
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
             ) {
-                Text("暂无数据，请点击右下角按钮添加")
+                DateInputPicker(
+                    modifier = Modifier.weight(1f),
+                    value = epochMillisToLocalDate(healthRecordFilter.startDate),
+                    label = { Text("开始日期") },
+                    onValueChange = {
+                        eventDispatch(
+                            Event.ViewHealthRecordsOfType(
+                                healthType.id,
+                                healthType.personId,
+                                filter = HealthRecordFilter(
+                                    startDate = toEpochMillis(it),
+                                    endDate = healthRecordFilter.endDate,
+                                ),
+                            )
+                        )
+                    },
+                )
+
+                Spacer(modifier = Modifier.width(16.dp))
+                DateInputPicker(
+                    modifier = Modifier.weight(1f),
+                    value = epochMillisToLocalDate(healthRecordFilter.endDate),
+                    label = { Text("结束日期") },
+                    onValueChange = {
+                        eventDispatch(
+                            Event.ViewHealthRecordsOfType(
+                                healthType.id,
+                                healthType.personId,
+                                filter = HealthRecordFilter(
+                                    startDate = healthRecordFilter.startDate,
+                                    endDate = toEpochMillis(it),
+                                ),
+                            )
+                        )
+                    },
+                )
             }
-        } else {
-            Column(
-                modifier = Modifier.padding(padding)
-            ) {
+
+            if (healthRecords.isEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("暂无数据，请点击右下角按钮添加")
+                }
+            } else {
                 Row(
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier
@@ -135,17 +183,14 @@ fun HealthRecordsScreen(
                     }
                 }
 
-                Box(
+                HealthRecordsChart(
+                    healthType = healthType,
+                    healthRecords = healthRecords,
                     modifier = Modifier
+                        .weight(1f)
                         .fillMaxWidth()
-                        .fillMaxHeight()
-                ) {
-                    HealthRecordsChart(
-                        healthType = healthType,
-                        healthRecords = healthRecords,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
+                        .padding(bottom = 16.dp),
+                )
             }
         }
     }

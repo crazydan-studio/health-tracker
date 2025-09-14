@@ -121,12 +121,14 @@ fun AddOrEditHealthRecordScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
         DateInputPicker(
+            modifier = Modifier.fillMaxWidth(),
             value = timestampDate,
             label = { Text("采集日期") },
             onValueChange = { timestampDate = it },
         )
         Spacer(modifier = Modifier.height(16.dp))
         TimeInputPicker(
+            modifier = Modifier.fillMaxWidth(),
             value = timestampTime,
             label = { Text("采集时间") },
             onValueChange = { timestampTime = it },

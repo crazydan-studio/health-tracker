@@ -92,6 +92,7 @@ fun AddOrEditHealthPersonScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
         DateInputPicker(
+            modifier = Modifier.fillMaxWidth(),
             value = birthDate,
             label = { Text("出生日期") },
             onValueChange = { birthDate = it },
@@ -99,6 +100,7 @@ fun AddOrEditHealthPersonScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
         TimeInputPicker(
+            modifier = Modifier.fillMaxWidth(),
             value = birthTime,
             label = { Text("出生时间 (可选)") },
             onValueChange = { birthTime = it },

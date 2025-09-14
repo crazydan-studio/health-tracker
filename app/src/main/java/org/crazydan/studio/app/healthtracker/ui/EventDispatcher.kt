@@ -126,7 +126,16 @@ fun dispatchEvent(
         }
 
         is Event.ViewHealthRecordsOfType -> {
-            navController.navigate("healthRecords/${e.id}/${e.personId}")
+            navController.navigate(
+                "healthRecords/${e.id}/${e.personId}" +
+                        "/${e.filter.startDate}/${e.filter.endDate}"
+            ) {
+                // Note: 记录过滤采用的是路由跳转并附带过滤参数，
+                // 因此，在退回时，需要直接退到初始路由上，避免逐级回退
+                popUpTo("healthTypes/${e.personId}") {
+                    inclusive = false
+                }
+            }
         }
 
         is Event.ViewHealthRecordDetailsOfType -> {

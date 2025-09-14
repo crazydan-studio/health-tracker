@@ -6,6 +6,7 @@ import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.dao.converter.StringListConverter
+import kotlin.math.max
 
 /**
  *
@@ -73,7 +74,14 @@ class HealthRepository(
 
     fun getHealthRecordById(id: Long): Flow<HealthRecord?> = healthRecordDao.getById(id)
 
-    fun getHealthRecordsByTypeId(typeId: Long): Flow<List<HealthRecord>> = healthRecordDao.getByTypeId(typeId)
+    fun getHealthRecordsByTypeId(typeId: Long, startTimestamp: Long, endTimestamp: Long): Flow<List<HealthRecord>> =
+        healthRecordDao.getByTypeId(
+            typeId,
+            startTimestamp = max(0, startTimestamp),
+            endTimestamp =
+                if (endTimestamp > 0) endTimestamp
+                else Long.MAX_VALUE,
+        )
 
     fun getHealthRecordTagsByTypeId(typeId: Long): Flow<List<String>> {
         return healthRecordDao.getTagsByTypeId(typeId).map { list ->

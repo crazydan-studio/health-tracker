@@ -99,8 +99,8 @@ class HealthViewModel @Inject constructor(
         return repository.getHealthRecordById(id)
     }
 
-    fun getHealthRecords(typeId: Long): Flow<List<HealthRecord>> {
-        return repository.getHealthRecordsByTypeId(typeId)
+    fun getHealthRecords(typeId: Long, startTimestamp: Long, endTimestamp: Long): Flow<List<HealthRecord>> {
+        return repository.getHealthRecordsByTypeId(typeId, startTimestamp, endTimestamp)
     }
 
     fun getDeletedHealthRecords(typeId: Long): Flow<List<HealthRecord>> {
