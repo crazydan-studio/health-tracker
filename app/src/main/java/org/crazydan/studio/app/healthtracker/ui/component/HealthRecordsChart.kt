@@ -24,6 +24,7 @@ import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.ui.screen.PreviewSample
 import org.crazydan.studio.app.healthtracker.ui.theme.isInDarkTheme
 import org.crazydan.studio.app.healthtracker.util.formatEpochMillis
+import org.crazydan.studio.app.healthtracker.util.genCode
 import java.sql.Timestamp
 import java.util.Calendar
 import java.util.Date
@@ -208,50 +209,41 @@ private fun createChartOption(
     }
 
     option.series {
-        chartData.dots.forEach { entry ->
-            val seriesName = chartData.measures[entry.key]!!
-            val seriesLimit = chartData.measureLimits[entry.key]!!
+        chartData.points.forEach { pointMapEntry ->
+            val seriesName = chartData.measures[pointMapEntry.key]!!
+            val seriesLimit = chartData.measureLimits[pointMapEntry.key]!!
 
-            candlestick {
+            scatter {
                 name(seriesName)
+                colorBy { data }
+                symbol { size(4) }
 
                 data {
-                    dimension("x", "open", "close", "lowest", "highest") {
+                    dimension("x", "y") {
                         x("x")
-                        y("open", "close", "lowest", "highest")
-                        tooltip("open" to "最早", "close" to "最晚", "lowest" to "最低", "highest" to "最高")
+                        y("y")
                     }
 
-                    entry.value.onEachIndexed { index, value ->
-                        item(index, *value.toTypedArray()) {}
+                    pointMapEntry.value.onEachIndexed { index, list ->
+                        // 同一天的点，映射到相同的 x 坐标位置
+                        list.forEach { value ->
+                            item(index, value) {}
+                        }
                     }
                 }
 
                 markPoint {
                     byData {
-                        byDimension { max("highest") }
+                        byDimension { max("y") }
                     }
                     byData {
-                        byDimension { min("lowest") }
+                        symbol { rotate(180) }
+                        label { position { insideBottom } }
+                        byDimension { min("y") }
                     }
                 }
 
                 markLine {
-                    byData {
-                        symbol {
-                            shape { circle }
-                            size(10)
-                        }
-                        label { show(false) }
-
-                        start {
-                            byDimension { max("highest") }
-                        }
-                        end {
-                            byDimension { min("lowest") }
-                        }
-                    }
-
                     if (seriesLimit.lower == null || seriesLimit.upper == null) {
                         seriesLimit.lower?.let { value ->
                             byYAxis {
@@ -289,6 +281,58 @@ private fun createChartOption(
                     }
                 }
             }
+
+            val stackCode = genCode(8)
+            line {
+                id("line-stack-$stackCode-min")
+                name(seriesName)
+                smooth(true)
+                connectNulls(true)
+
+                symbol { shape { none } }
+                stack { name(stackCode) }
+                lineStyle { opacity(0.6f) }
+
+                data {
+                    dimension("x", "y") {
+                        x("x")
+                        y("y")
+                    }
+
+                    pointMapEntry.value.onEachIndexed { index, list ->
+                        val min = list.minOrNull()
+                        item(index, min) {}
+                    }
+                }
+            }
+            line {
+                id("line-stack-$stackCode-max")
+                name(seriesName)
+                smooth(true)
+                connectNulls(true)
+
+                symbol { shape { none } }
+                stack { name(stackCode) }
+                lineStyle { opacity(0.6f) }
+                areaStyle { opacity(0.6f) }
+
+                data {
+                    dimension("x", "y") {
+                        x("x")
+                        y("y")
+                    }
+
+                    // Note: 这里为前面同名 stack 之间的差值
+                    pointMapEntry.value.onEachIndexed { index, list ->
+                        val min = list.minOrNull()
+                        val max = list.maxOrNull()
+
+                        if (min != null && max != null) {
+                            item(index, max - min) {}
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -317,8 +361,8 @@ private fun createChartData(
     }
 
     val days = seriesMap.keys
-    val lines = mutableMapOf<String, List<Number?>>()
-    val dots = mutableMapOf<String, List<List<Number?>>>()
+    val lines = mutableMapOf<String, List<Float?>>()
+    val points = mutableMapOf<String, List<List<Float>>>()
     val measures =
         healthType.measures.ifEmpty {
             listOf(
@@ -341,20 +385,8 @@ private fun createChartData(
         val maxAmount = maxDataAmountMap.getOrDefault(code, 0)
         if (maxAmount > 1) {
             // 该指标同一天内含多个数据
-            dots.put(code, seriesMap.map { entry ->
-                val list = entry.value.getOrDefault(code, mutableListOf())
-
-                // 对应 K 线图：open，close，lowest，highest
-                if (list.isEmpty()) {
-                    listOf(null, null, null, null)
-                } else {
-                    val first = list.first()
-                    val last = list.last()
-                    val min = list.min()
-                    val max = list.max()
-
-                    listOf(first, last, min, max)
-                }
+            points.put(code, seriesMap.map { entry ->
+                entry.value.getOrDefault(code, listOf())
             })
         } else if (maxAmount == 1) {
             // 该指标同一天内仅含单个数据
@@ -374,7 +406,7 @@ private fun createChartData(
         measureLimits = measureLimitMap,
         days = days,
         lines = lines,
-        dots = dots,
+        points = points,
     )
 }
 
@@ -382,8 +414,8 @@ private data class ChartData(
     val measures: Map<String, String>,
     val measureLimits: Map<String, HealthLimit>,
     val days: Collection<String>,
-    val lines: Map<String, List<Number?>>,
-    val dots: Map<String, List<List<Number?>>>,
+    val lines: Map<String, List<Float?>>,
+    val points: Map<String, List<List<Float>>>,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

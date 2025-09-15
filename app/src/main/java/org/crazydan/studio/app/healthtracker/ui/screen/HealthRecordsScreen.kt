@@ -1,5 +1,6 @@
 package org.crazydan.studio.app.healthtracker.ui.screen
 
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -111,7 +112,9 @@ fun HealthRecordsScreen(
                     .padding(horizontal = 16.dp),
             ) {
                 DateInputPicker(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .focusable(false),
                     value = epochMillisToLocalDate(healthRecordFilter.startDate),
                     label = { Text("开始日期") },
                     onValueChange = {
@@ -130,7 +133,9 @@ fun HealthRecordsScreen(
 
                 Spacer(modifier = Modifier.width(16.dp))
                 DateInputPicker(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .focusable(false),
                     value = epochMillisToLocalDate(healthRecordFilter.endDate),
                     label = { Text("结束日期") },
                     onValueChange = {
