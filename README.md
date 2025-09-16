@@ -2,8 +2,7 @@
 
 简单实用的血压、血糖、体重等健康数据监测 App。
 
-<img height="300px" src="./docs/img/screenshot-1.png"/>
-<img height="300px" src="./docs/img/screenshot-2.png"/>
+<img height="300px" src="./docs/img/screenshot-1.png"/> <img height="300px" src="./docs/img/screenshot-2.png"/>
 
 ## 开发
 
