@@ -33,6 +33,15 @@ import org.crazydan.studio.app.healthtracker.ui.screen.HealthRecordsScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.HealthTypesScreen
 import kotlin.reflect.typeOf
 
+private val dispatcher = MessageDispatcher()
+fun dispatch(msg: Message) {
+    dispatcher.dispatch(msg)
+}
+
+fun dispatch(block: () -> Message) {
+    dispatch(block())
+}
+
 /**
  *
  * @author <a href="mailto:flytreeleft@crazydan.org">flytreeleft</a>
@@ -44,8 +53,8 @@ fun HealthTrackerApp() {
     val navController = rememberNavController()
     val coroutineScope = rememberCoroutineScope()
 
-    val eventDispatch = fun(e: Event) {
-        dispatchEvent(e, viewModel, navController, coroutineScope)
+    dispatcher.init { msg ->
+        dispatchMessage(msg, viewModel, navController, coroutineScope)
     }
 
     val typeMap = mapOf(
@@ -60,13 +69,10 @@ fun HealthTrackerApp() {
         composable<Route.HealthPersons> {
             ShowHealthPersonsScreen(
                 viewModel = viewModel,
-                eventDispatch = eventDispatch,
             )
         }
         composable<Route.AddHealthPerson> {
-            AddOrEditHealthPersonScreen(
-                eventDispatch = eventDispatch,
-            )
+            AddOrEditHealthPersonScreen()
         }
         composable<Route.EditHealthPerson> { backStackEntry ->
             val route = backStackEntry.toRoute<Route.EditHealthPerson>()
@@ -77,14 +83,12 @@ fun HealthTrackerApp() {
             ) { person ->
                 AddOrEditHealthPersonScreen(
                     editPerson = person,
-                    eventDispatch = eventDispatch,
                 )
             }
         }
         composable<Route.DeletedHealthPersons> {
             ShowDeletedHealthPersonsScreen(
                 viewModel = viewModel,
-                eventDispatch = eventDispatch,
             )
         }
 
@@ -95,7 +99,6 @@ fun HealthTrackerApp() {
             ShowHealthTypesScreen(
                 personId = route.personId,
                 viewModel = viewModel,
-                eventDispatch = eventDispatch,
             )
         }
         composable<Route.AddHealthType> { backStackEntry ->
@@ -107,7 +110,6 @@ fun HealthTrackerApp() {
             ) { person ->
                 AddOrEditHealthTypeScreen(
                     healthPerson = person,
-                    eventDispatch = eventDispatch,
                 )
             }
         }
@@ -122,7 +124,6 @@ fun HealthTrackerApp() {
                 AddOrEditHealthTypeScreen(
                     editType = type,
                     healthPerson = person,
-                    eventDispatch = eventDispatch,
                 )
             }
         }
@@ -132,7 +133,6 @@ fun HealthTrackerApp() {
             ShowDeletedHealthTypesScreen(
                 personId = route.personId,
                 viewModel = viewModel,
-                eventDispatch = eventDispatch,
             )
         }
 
@@ -145,7 +145,6 @@ fun HealthTrackerApp() {
                 personId = route.personId,
                 filter = route.filter,
                 viewModel = viewModel,
-                eventDispatch = eventDispatch,
             )
         }
         composable<Route.AddHealthRecord> { backStackEntry ->
@@ -160,7 +159,6 @@ fun HealthTrackerApp() {
                     healthPerson = person,
                     healthType = type,
                     healthRecordTags = tags,
-                    eventDispatch = eventDispatch,
                 )
             }
         }
@@ -178,7 +176,6 @@ fun HealthTrackerApp() {
                     healthPerson = person,
                     healthType = type,
                     healthRecordTags = tags,
-                    eventDispatch = eventDispatch,
                 )
             }
         }
@@ -189,7 +186,6 @@ fun HealthTrackerApp() {
                 typeId = route.typeId,
                 personId = route.personId,
                 viewModel = viewModel,
-                eventDispatch = eventDispatch,
             )
         }
         composable<Route.DeletedHealthRecords> { backStackEntry ->
@@ -199,7 +195,6 @@ fun HealthTrackerApp() {
                 typeId = route.typeId,
                 personId = route.personId,
                 viewModel = viewModel,
-                eventDispatch = eventDispatch,
             )
         }
     }
@@ -208,7 +203,6 @@ fun HealthTrackerApp() {
 @Composable
 private fun ShowHealthPersonsScreen(
     viewModel: HealthViewModel,
-    eventDispatch: EventDispatch,
 ) {
     var healthPersons by remember { mutableStateOf<List<HealthPerson>?>(null) }
     var deletedHealthPersonAmount by remember { mutableLongStateOf(0L) }
@@ -230,14 +224,12 @@ private fun ShowHealthPersonsScreen(
     HealthPersonsScreen(
         healthPersons = healthPersons,
         deletedPersonAmount = deletedHealthPersonAmount,
-        eventDispatch = eventDispatch,
     )
 }
 
 @Composable
 private fun ShowDeletedHealthPersonsScreen(
     viewModel: HealthViewModel,
-    eventDispatch: EventDispatch,
 ) {
     var healthPersons by remember { mutableStateOf<List<HealthPerson>?>(null) }
 
@@ -249,7 +241,6 @@ private fun ShowDeletedHealthPersonsScreen(
 
     DeletedHealthPersonsScreen(
         healthPersons = healthPersons,
-        eventDispatch = eventDispatch,
     )
 }
 
@@ -257,7 +248,6 @@ private fun ShowDeletedHealthPersonsScreen(
 private fun ShowHealthTypesScreen(
     personId: Long,
     viewModel: HealthViewModel,
-    eventDispatch: EventDispatch,
 ) {
     var healthPerson by remember { mutableStateOf<HealthPerson?>(null) }
     var healthTypes by remember { mutableStateOf<List<HealthType>>(emptyList()) }
@@ -280,7 +270,6 @@ private fun ShowHealthTypesScreen(
         healthPerson = healthPerson,
         healthTypes = healthTypes,
         deletedTypeAmount = deletedHealthTypeAmount,
-        eventDispatch = eventDispatch,
     )
 }
 
@@ -288,7 +277,6 @@ private fun ShowHealthTypesScreen(
 private fun ShowDeletedHealthTypesScreen(
     personId: Long,
     viewModel: HealthViewModel,
-    eventDispatch: EventDispatch,
 ) {
     var healthPerson by remember { mutableStateOf<HealthPerson?>(null) }
     var healthTypes by remember { mutableStateOf<List<HealthType>?>(null) }
@@ -307,7 +295,6 @@ private fun ShowDeletedHealthTypesScreen(
     DeletedHealthTypesScreen(
         healthPerson = healthPerson,
         healthTypes = healthTypes,
-        eventDispatch = eventDispatch,
     )
 }
 
@@ -317,7 +304,6 @@ private fun ShowHealthRecordsScreen(
     personId: Long,
     filter: HealthRecordFilter,
     viewModel: HealthViewModel,
-    eventDispatch: EventDispatch,
 ) {
     var healthType by remember { mutableStateOf<HealthType?>(null) }
     var healthPerson by remember { mutableStateOf<HealthPerson?>(null) }
@@ -341,7 +327,6 @@ private fun ShowHealthRecordsScreen(
         healthPerson = healthPerson,
         healthRecords = healthRecords,
         healthRecordFilter = filter,
-        eventDispatch = eventDispatch,
     )
 }
 
@@ -350,7 +335,6 @@ private fun ShowHealthRecordDetailsScreen(
     typeId: Long,
     personId: Long,
     viewModel: HealthViewModel,
-    eventDispatch: EventDispatch,
 ) {
     var healthType by remember { mutableStateOf<HealthType?>(null) }
     var healthPerson by remember { mutableStateOf<HealthPerson?>(null) }
@@ -377,7 +361,6 @@ private fun ShowHealthRecordDetailsScreen(
         healthType = healthType,
         healthRecords = healthRecords,
         deletedRecordAmount = deletedRecordAmount,
-        eventDispatch = eventDispatch,
     )
 }
 
@@ -386,7 +369,6 @@ private fun ShowDeletedHealthRecordsScreen(
     typeId: Long,
     personId: Long,
     viewModel: HealthViewModel,
-    eventDispatch: EventDispatch,
 ) {
     var healthType by remember { mutableStateOf<HealthType?>(null) }
     var healthPerson by remember { mutableStateOf<HealthPerson?>(null) }
@@ -409,7 +391,6 @@ private fun ShowDeletedHealthRecordsScreen(
         healthPerson = healthPerson,
         healthType = healthType,
         healthRecords = healthRecords,
-        eventDispatch = eventDispatch,
     )
 }
 

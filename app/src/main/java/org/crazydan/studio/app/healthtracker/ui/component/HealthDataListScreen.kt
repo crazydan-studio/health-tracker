@@ -22,6 +22,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import org.crazydan.studio.app.healthtracker.ui.Message
+import org.crazydan.studio.app.healthtracker.ui.dispatch
 
 /**
  *
@@ -34,9 +36,9 @@ fun <T> HealthDataListScreen(
     title: @Composable () -> Unit,
     deletedAmount: Long,
     dataList: List<T>,
-    onAddData: (() -> Unit)? = null,
-    onViewDeleted: () -> Unit,
-    onNavigateBack: (() -> Unit)? = null,
+    onAddData: (() -> Message)? = null,
+    onViewDeleted: () -> Message,
+    onNavigateBack: (() -> Message)? = null,
     content: @Composable (T) -> Unit,
 ) {
     Scaffold(
@@ -45,14 +47,18 @@ fun <T> HealthDataListScreen(
                 title = title,
                 navigationIcon = {
                     onNavigateBack?.let {
-                        IconButton(onClick = it) {
+                        IconButton(onClick = {
+                            dispatch(it)
+                        }) {
                             Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
                         }
                     }
                 },
                 actions = {
                     if (deletedAmount > 0) {
-                        TextButton(onClick = onViewDeleted) {
+                        TextButton(onClick = {
+                            dispatch(onViewDeleted)
+                        }) {
                             Icon(Icons.Default.Recycling, contentDescription = "回收站")
                             Badge {
                                 val text = if (deletedAmount > 99) "99+" else deletedAmount.toString()
@@ -65,7 +71,9 @@ fun <T> HealthDataListScreen(
         },
         floatingActionButton = {
             onAddData?.let {
-                FloatingActionButton(onClick = it) {
+                FloatingActionButton(onClick = {
+                    dispatch(it)
+                }) {
                     Icon(Icons.Default.Add, contentDescription = "添加数据")
                 }
             }

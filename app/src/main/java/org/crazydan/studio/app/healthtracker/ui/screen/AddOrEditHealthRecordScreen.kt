@@ -29,8 +29,7 @@ import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.getMeasureNameByCode
-import org.crazydan.studio.app.healthtracker.ui.Event
-import org.crazydan.studio.app.healthtracker.ui.EventDispatch
+import org.crazydan.studio.app.healthtracker.ui.Message
 import org.crazydan.studio.app.healthtracker.ui.component.AddOrEditHealthDataScreen
 import org.crazydan.studio.app.healthtracker.ui.component.DateInputPicker
 import org.crazydan.studio.app.healthtracker.ui.component.TagsEditor
@@ -52,7 +51,6 @@ fun AddOrEditHealthRecordScreen(
     healthType: HealthType?,
     healthPerson: HealthPerson?,
     healthRecordTags: List<String>,
-    eventDispatch: EventDispatch,
 ) {
     if (healthPerson == null || healthType == null) {
         return
@@ -99,7 +97,7 @@ fun AddOrEditHealthRecordScreen(
                 (if (inAddMode) "添加" else "编辑") + "${healthType.name}记录"
             )
         },
-        onNavigateBack = { eventDispatch(Event.NavBack()) },
+        onNavigateBack = { Message.NavBack() },
         canSave = {
             value.toFloatOrNull() != null
                     && (healthType.measures.isEmpty()
@@ -118,9 +116,9 @@ fun AddOrEditHealthRecordScreen(
             )
 
             if (record.id == 0L) {
-                eventDispatch(Event.SaveHealthRecord(record))
+                Message.SaveHealthRecord(record)
             } else {
-                eventDispatch(Event.UpdateHealthRecord(record))
+                Message.UpdateHealthRecord(record)
             }
         },
     ) {

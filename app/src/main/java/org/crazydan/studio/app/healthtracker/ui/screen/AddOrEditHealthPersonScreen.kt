@@ -17,8 +17,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
-import org.crazydan.studio.app.healthtracker.ui.Event
-import org.crazydan.studio.app.healthtracker.ui.EventDispatch
+import org.crazydan.studio.app.healthtracker.ui.Message
 import org.crazydan.studio.app.healthtracker.ui.component.AddOrEditHealthDataScreen
 import org.crazydan.studio.app.healthtracker.ui.component.DateInputPicker
 import org.crazydan.studio.app.healthtracker.ui.component.TimeInputPicker
@@ -34,7 +33,6 @@ import org.crazydan.studio.app.healthtracker.util.toEpochMillis
 @Composable
 fun AddOrEditHealthPersonScreen(
     editPerson: HealthPerson? = null,
-    eventDispatch: EventDispatch,
 ) {
     val inAddMode = remember(editPerson) { editPerson == null }
     val focusRequester = remember { FocusRequester() }
@@ -60,7 +58,7 @@ fun AddOrEditHealthPersonScreen(
                 (if (inAddMode) "添加" else "编辑") + "人员信息"
             )
         },
-        onNavigateBack = { eventDispatch(Event.NavBack()) },
+        onNavigateBack = { Message.NavBack() },
         canSave = {
             familyName.isNotEmpty() && givenName.isNotEmpty() && birthDate != null
         },
@@ -74,9 +72,9 @@ fun AddOrEditHealthPersonScreen(
             )
 
             if (person.id == 0L) {
-                eventDispatch(Event.SaveHealthPerson(person))
+                Message.SaveHealthPerson(person)
             } else {
-                eventDispatch(Event.UpdateHealthPerson(person))
+                Message.UpdateHealthPerson(person)
             }
         },
     ) {

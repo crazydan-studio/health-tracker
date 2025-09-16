@@ -6,8 +6,7 @@ import androidx.compose.runtime.Composable
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.getPersonLabel
-import org.crazydan.studio.app.healthtracker.ui.Event
-import org.crazydan.studio.app.healthtracker.ui.EventDispatch
+import org.crazydan.studio.app.healthtracker.ui.Message
 import org.crazydan.studio.app.healthtracker.ui.component.DeletedHealthDataScreen
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCardActions
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataLoadingScreen
@@ -22,7 +21,6 @@ import org.crazydan.studio.app.healthtracker.ui.component.HealthDataLoadingScree
 fun DeletedHealthTypesScreen(
     healthPerson: HealthPerson?,
     healthTypes: List<HealthType>?,
-    eventDispatch: EventDispatch,
 ) {
     if (healthPerson == null || healthTypes == null) {
         HealthDataLoadingScreen()
@@ -37,17 +35,17 @@ fun DeletedHealthTypesScreen(
         },
         dataList = healthTypes,
         onClearAll = {
-            eventDispatch(Event.ClearDeletedHealthTypesOfPerson(healthPerson.id))
+            Message.ClearDeletedHealthTypesOfPerson(healthPerson.id)
         },
         onNavigateBack = {
-            eventDispatch(Event.NavBack())
+            Message.NavBack()
         },
     ) { type ->
         HealthTypeCard(
             type = type,
             actions = HealthDataCardActions(
                 onUndelete = {
-                    eventDispatch(Event.UndeleteHealthType(type.id))
+                    Message.UndeleteHealthType(type.id)
                 },
             ),
         )

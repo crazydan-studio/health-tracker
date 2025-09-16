@@ -22,12 +22,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
+import org.crazydan.studio.app.healthtracker.ui.Message
+import org.crazydan.studio.app.healthtracker.ui.dispatch
 
 class HealthDataCardActions(
-    val onEdit: (() -> Unit)? = null,
-    val onView: (() -> Unit)? = null,
-    val onDelete: (() -> Unit)? = null,
-    val onUndelete: (() -> Unit)? = null,
+    val onEdit: (() -> Message)? = null,
+    val onView: (() -> Message)? = null,
+    val onDelete: (() -> Message)? = null,
+    val onUndelete: (() -> Message)? = null,
 )
 
 /**
@@ -47,7 +49,11 @@ fun HealthDataCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .clickable(onClick = { actions.onView?.invoke() })
+            .clickable(onClick = {
+                actions.onView?.let {
+                    dispatch(it)
+                }
+            })
     ) {
         Column(
             modifier = Modifier
@@ -66,14 +72,18 @@ fun HealthDataCard(
                 actions.onDelete?.let { action ->
                     TextButton(
                         modifier = Modifier.alpha(0.4f),
-                        onClick = action
+                        onClick = {
+                            dispatch(action)
+                        }
                     ) {
                         Icon(Icons.Default.Delete, contentDescription = "删除")
                         Text(text = "删除")
                     }
                 }
                 actions.onUndelete?.let { action ->
-                    TextButton(onClick = action) {
+                    TextButton(onClick = {
+                        dispatch(action)
+                    }) {
                         Icon(Icons.Default.Restore, contentDescription = "还原")
                         Text(text = "还原")
                     }
@@ -81,7 +91,9 @@ fun HealthDataCard(
 
                 actions.onEdit?.let { action ->
                     Spacer(modifier = Modifier.width(8.dp))
-                    TextButton(onClick = action) {
+                    TextButton(onClick = {
+                        dispatch(action)
+                    }) {
                         Icon(Icons.Default.Edit, contentDescription = "编辑")
                         Text(text = "编辑")
                     }

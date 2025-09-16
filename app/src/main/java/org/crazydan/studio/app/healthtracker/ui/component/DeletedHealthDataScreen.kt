@@ -26,6 +26,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import org.crazydan.studio.app.healthtracker.ui.Message
+import org.crazydan.studio.app.healthtracker.ui.dispatch
 
 /**
  *
@@ -37,8 +39,8 @@ import androidx.compose.ui.draw.alpha
 fun <T> DeletedHealthDataScreen(
     title: @Composable () -> Unit,
     dataList: List<T>,
-    onClearAll: (() -> Unit),
-    onNavigateBack: (() -> Unit),
+    onClearAll: (() -> Message),
+    onNavigateBack: (() -> Message),
     content: @Composable (T) -> Unit,
 ) {
     var showConfirmDialog by remember { mutableStateOf(false) }
@@ -48,7 +50,9 @@ fun <T> DeletedHealthDataScreen(
             TopAppBar(
                 title = title,
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = {
+                        dispatch(onNavigateBack)
+                    }) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
                     }
                 },
@@ -96,7 +100,8 @@ fun <T> DeletedHealthDataScreen(
                 Button(
                     modifier = Modifier.alpha(0.5f),
                     onClick = {
-                        onClearAll()
+                        dispatch(onClearAll)
+
                         showConfirmDialog = false
                     }
                 ) {

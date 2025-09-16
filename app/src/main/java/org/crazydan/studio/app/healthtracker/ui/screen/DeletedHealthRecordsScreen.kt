@@ -7,8 +7,7 @@ import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.getPersonLabel
-import org.crazydan.studio.app.healthtracker.ui.Event
-import org.crazydan.studio.app.healthtracker.ui.EventDispatch
+import org.crazydan.studio.app.healthtracker.ui.Message
 import org.crazydan.studio.app.healthtracker.ui.component.DeletedHealthDataScreen
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCardActions
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataLoadingScreen
@@ -24,7 +23,6 @@ fun DeletedHealthRecordsScreen(
     healthPerson: HealthPerson?,
     healthType: HealthType?,
     healthRecords: List<HealthRecord>?,
-    eventDispatch: EventDispatch,
 ) {
     if (healthPerson == null || healthType == null || healthRecords == null) {
         HealthDataLoadingScreen()
@@ -39,10 +37,10 @@ fun DeletedHealthRecordsScreen(
         },
         dataList = healthRecords,
         onClearAll = {
-            eventDispatch(Event.ClearDeletedHealthRecordsOfType(healthType.id))
+            Message.ClearDeletedHealthRecordsOfType(healthType.id)
         },
         onNavigateBack = {
-            eventDispatch(Event.NavBack())
+            Message.NavBack()
         },
     ) { record ->
         HealthRecordCard(
@@ -50,7 +48,7 @@ fun DeletedHealthRecordsScreen(
             record = record,
             actions = HealthDataCardActions(
                 onUndelete = {
-                    eventDispatch(Event.UndeleteHealthRecord(record.id))
+                    Message.UndeleteHealthRecord(record.id)
                 },
             ),
         )

@@ -12,8 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.crazydan.studio.app.healthtracker.R
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
-import org.crazydan.studio.app.healthtracker.ui.Event
-import org.crazydan.studio.app.healthtracker.ui.EventDispatch
+import org.crazydan.studio.app.healthtracker.ui.Message
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCard
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCardActions
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataListScreen
@@ -31,7 +30,6 @@ import org.crazydan.studio.app.healthtracker.util.getFullName
 fun HealthPersonsScreen(
     healthPersons: List<HealthPerson>?,
     deletedPersonAmount: Long,
-    eventDispatch: EventDispatch,
 ) {
     if (healthPersons == null) {
         HealthDataLoadingScreen()
@@ -47,23 +45,23 @@ fun HealthPersonsScreen(
             )
         },
         onAddData = {
-            eventDispatch(Event.WillAddHealthPerson())
+            Message.WillAddHealthPerson()
         },
         onViewDeleted = {
-            eventDispatch(Event.ViewDeletedHealthPersons())
+            Message.ViewDeletedHealthPersons()
         },
     ) { person ->
         HealthPersonCard(
             person = person,
             actions = HealthDataCardActions(
                 onEdit = {
-                    eventDispatch(Event.WillEditHealthPerson(person.id))
+                    Message.WillEditHealthPerson(person.id)
                 },
                 onDelete = {
-                    eventDispatch(Event.DeleteHealthPerson(person.id))
+                    Message.DeleteHealthPerson(person.id)
                 },
                 onView = {
-                    eventDispatch(Event.ViewHealthTypesOfPerson(person.id))
+                    Message.ViewHealthTypesOfPerson(person.id)
                 },
             ),
         )

@@ -30,12 +30,12 @@ import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthRecordFilter
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.getPersonLabel
-import org.crazydan.studio.app.healthtracker.ui.Event
-import org.crazydan.studio.app.healthtracker.ui.EventDispatch
+import org.crazydan.studio.app.healthtracker.ui.Message
 import org.crazydan.studio.app.healthtracker.ui.component.DateInputPicker
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataLoadingScreen
 import org.crazydan.studio.app.healthtracker.ui.component.HealthRecordAverageCircle
 import org.crazydan.studio.app.healthtracker.ui.component.HealthRecordsChart
+import org.crazydan.studio.app.healthtracker.ui.dispatch
 import org.crazydan.studio.app.healthtracker.util.epochMillisToLocalDate
 import org.crazydan.studio.app.healthtracker.util.toEpochMillis
 
@@ -51,7 +51,6 @@ fun HealthRecordsScreen(
     healthPerson: HealthPerson?,
     healthRecords: List<HealthRecord>,
     healthRecordFilter: HealthRecordFilter,
-    eventDispatch: EventDispatch,
 ) {
     if (healthPerson == null || healthType == null) {
         HealthDataLoadingScreen()
@@ -68,7 +67,7 @@ fun HealthRecordsScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        eventDispatch(Event.NavBack())
+                        dispatch(Message.NavBack())
                     }) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
                     }
@@ -76,8 +75,8 @@ fun HealthRecordsScreen(
                 actions = {
                     if (healthRecords.isNotEmpty()) {
                         IconButton(onClick = {
-                            eventDispatch(
-                                Event.ViewHealthRecordDetailsOfType(
+                            dispatch(
+                                Message.ViewHealthRecordDetailsOfType(
                                     healthType.id,
                                     healthType.personId
                                 )
@@ -91,8 +90,8 @@ fun HealthRecordsScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                eventDispatch(
-                    Event.WillAddHealthRecordOfType(
+                dispatch(
+                    Message.WillAddHealthRecordOfType(
                         healthType.id,
                         healthType.personId
                     )
@@ -118,8 +117,8 @@ fun HealthRecordsScreen(
                     value = epochMillisToLocalDate(healthRecordFilter.startDate),
                     label = { Text("开始日期") },
                     onValueChange = {
-                        eventDispatch(
-                            Event.ViewHealthRecordsOfType(
+                        dispatch(
+                            Message.ViewHealthRecordsOfType(
                                 healthType.id,
                                 healthType.personId,
                                 filter = HealthRecordFilter(
@@ -139,8 +138,8 @@ fun HealthRecordsScreen(
                     value = epochMillisToLocalDate(healthRecordFilter.endDate),
                     label = { Text("结束日期") },
                     onValueChange = {
-                        eventDispatch(
-                            Event.ViewHealthRecordsOfType(
+                        dispatch(
+                            Message.ViewHealthRecordsOfType(
                                 healthType.id,
                                 healthType.personId,
                                 filter = HealthRecordFilter(

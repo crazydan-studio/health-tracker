@@ -19,6 +19,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.crazydan.studio.app.healthtracker.ui.Message
+import org.crazydan.studio.app.healthtracker.ui.dispatch
 
 /**
  *
@@ -32,8 +34,8 @@ fun AddOrEditHealthDataScreen(
     // Note: 需采用函数方式，直接传值会因为变量更新导致视图重新布局，
     // 进而使得填写过程中将其他输入重置的问题
     canSave: () -> Boolean,
-    onSave: () -> Unit,
-    onNavigateBack: () -> Unit,
+    onSave: () -> Message,
+    onNavigateBack: () -> Message,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Scaffold(
@@ -41,13 +43,15 @@ fun AddOrEditHealthDataScreen(
             TopAppBar(
                 title = title,
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = {
+                        dispatch(onNavigateBack)
+                    }) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
                     }
                 },
                 actions = {
                     Button(
-                        onClick = onSave,
+                        onClick = { dispatch(onSave) },
                         enabled = canSave(),
                     ) {
                         Icon(Icons.Default.Save, contentDescription = "保存")

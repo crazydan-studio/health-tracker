@@ -20,8 +20,7 @@ import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.getMeasureNameByCode
 import org.crazydan.studio.app.healthtracker.model.getPersonLabel
-import org.crazydan.studio.app.healthtracker.ui.Event
-import org.crazydan.studio.app.healthtracker.ui.EventDispatch
+import org.crazydan.studio.app.healthtracker.ui.Message
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCard
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCardActions
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataListScreen
@@ -40,7 +39,6 @@ fun HealthRecordDetailsScreen(
     healthPerson: HealthPerson?,
     healthRecords: List<HealthRecord>,
     deletedRecordAmount: Long,
-    eventDispatch: EventDispatch,
 ) {
     if (healthPerson == null || healthType == null) {
         HealthDataLoadingScreen()
@@ -54,30 +52,26 @@ fun HealthRecordDetailsScreen(
             Text(getPersonLabel(healthType.name + "记录", healthPerson))
         },
         onViewDeleted = {
-            eventDispatch(
-                Event.ViewDeletedHealthRecordsOfType(
-                    healthType.id,
-                    healthType.personId
-                )
+            Message.ViewDeletedHealthRecordsOfType(
+                healthType.id,
+                healthType.personId
             )
         },
-        onNavigateBack = { eventDispatch(Event.NavBack()) },
+        onNavigateBack = { Message.NavBack() },
     ) { record ->
         HealthRecordCard(
             type = healthType,
             record = record,
             actions = HealthDataCardActions(
                 onEdit = {
-                    eventDispatch(
-                        Event.WillEditHealthRecord(
-                            record.id,
-                            record.typeId,
-                            record.personId
-                        )
+                    Message.WillEditHealthRecord(
+                        record.id,
+                        record.typeId,
+                        record.personId
                     )
                 },
                 onDelete = {
-                    eventDispatch(Event.DeleteHealthRecord(record.id))
+                    Message.DeleteHealthRecord(record.id)
                 },
             ),
         )
@@ -135,8 +129,8 @@ private fun HealthRecordCardPreview() {
         type = PreviewSample().createHealthType(),
         record = PreviewSample().createHealthRecord(),
         actions = HealthDataCardActions(
-            onEdit = {},
-            onDelete = {},
+            onEdit = { Message.NavBack() },
+            onDelete = { Message.NavBack() },
         ),
     )
 }

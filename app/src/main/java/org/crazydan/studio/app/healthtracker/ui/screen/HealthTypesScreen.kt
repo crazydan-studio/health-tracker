@@ -13,8 +13,7 @@ import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecordFilter
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.getPersonLabel
-import org.crazydan.studio.app.healthtracker.ui.Event
-import org.crazydan.studio.app.healthtracker.ui.EventDispatch
+import org.crazydan.studio.app.healthtracker.ui.Message
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCard
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCardActions
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataListScreen
@@ -33,7 +32,6 @@ fun HealthTypesScreen(
     healthPerson: HealthPerson?,
     healthTypes: List<HealthType>,
     deletedTypeAmount: Long,
-    eventDispatch: EventDispatch,
 ) {
     if (healthPerson == null) {
         HealthDataLoadingScreen()
@@ -49,42 +47,34 @@ fun HealthTypesScreen(
             )
         },
         onAddData = {
-            eventDispatch(
-                Event.WillAddHealthTypeOfPerson(healthPerson.id)
-            )
+            Message.WillAddHealthTypeOfPerson(healthPerson.id)
         },
         onViewDeleted = {
-            eventDispatch(
-                Event.ViewDeletedHealthTypesOfPerson(healthPerson.id)
-            )
+            Message.ViewDeletedHealthTypesOfPerson(healthPerson.id)
         },
-        onNavigateBack = { eventDispatch(Event.NavBack()) },
+        onNavigateBack = { Message.NavBack() },
     ) { type ->
         HealthTypeCard(
             type = type,
             actions = HealthDataCardActions(
                 onEdit = {
-                    eventDispatch(
-                        Event.WillEditHealthType(
-                            type.id,
-                            type.personId
-                        )
+                    Message.WillEditHealthType(
+                        type.id,
+                        type.personId
                     )
                 },
                 onDelete = {
-                    eventDispatch(Event.DeleteHealthType(type.id))
+                    Message.DeleteHealthType(type.id)
                 },
                 onView = {
                     val now = LocalDate.now()
-                    eventDispatch(
-                        Event.ViewHealthRecordsOfType(
-                            type.id,
-                            type.personId,
-                            filter = HealthRecordFilter(
-                                startDate = toEpochMillis(now.minusDays(7)),
-                                endDate = toEpochMillis(now, untilToDayEnd = true),
-                            ),
-                        )
+                    Message.ViewHealthRecordsOfType(
+                        type.id,
+                        type.personId,
+                        filter = HealthRecordFilter(
+                            startDate = toEpochMillis(now.minusDays(7)),
+                            endDate = toEpochMillis(now, untilToDayEnd = true),
+                        ),
                     )
                 },
             ),
@@ -125,8 +115,8 @@ private fun HealthTypeCardPreview() {
     HealthTypeCard(
         type = PreviewSample().createHealthType(),
         actions = HealthDataCardActions(
-            onEdit = {},
-            onDelete = {},
+            onEdit = { Message.NavBack() },
+            onDelete = { Message.NavBack() },
         ),
     )
 }
