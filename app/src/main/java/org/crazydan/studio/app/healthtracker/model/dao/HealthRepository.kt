@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
+import org.crazydan.studio.app.healthtracker.model.HealthRecordFilter
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.dao.converter.StringListConverter
 import kotlin.math.max
@@ -74,12 +75,12 @@ class HealthRepository(
 
     fun getHealthRecordById(id: Long): Flow<HealthRecord?> = healthRecordDao.getById(id)
 
-    fun getHealthRecordsByTypeId(typeId: Long, startTimestamp: Long, endTimestamp: Long): Flow<List<HealthRecord>> =
+    fun getHealthRecordsByTypeId(typeId: Long, filter: HealthRecordFilter?): Flow<List<HealthRecord>> =
         healthRecordDao.getByTypeId(
             typeId,
-            startTimestamp = max(0, startTimestamp),
+            startTimestamp = max(0, filter?.startDate ?: 0),
             endTimestamp =
-                if (endTimestamp > 0) endTimestamp
+                if (filter != null && filter.endDate > 0) filter.endDate
                 else Long.MAX_VALUE,
         )
 

@@ -2,7 +2,7 @@ package org.crazydan.studio.app.healthtracker.ui
 
 import androidx.navigation.NavController
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
 import org.crazydan.studio.app.healthtracker.model.HealthViewModel
 
 /**
@@ -44,33 +44,33 @@ fun dispatchEvent(
         }
 
         is Event.SaveHealthPerson -> {
-            coroutineScope.launch {
+            coroutineScope.async {
                 viewModel.addHealthPerson(e.data)
-                goback()
             }
+            goback()
         }
 
         is Event.UpdateHealthPerson -> {
-            coroutineScope.launch {
+            coroutineScope.async {
                 viewModel.updateHealthPerson(e.data)
-                goback()
             }
+            goback()
         }
 
         is Event.DeleteHealthPerson -> {
-            coroutineScope.launch {
+            coroutineScope.async {
                 viewModel.deleteHealthPerson(e.id)
             }
         }
 
         is Event.UndeleteHealthPerson -> {
-            coroutineScope.launch {
+            coroutineScope.async {
                 viewModel.undeleteHealthPerson(e.id)
             }
         }
 
         is Event.ClearDeletedHealthPersons -> {
-            coroutineScope.launch {
+            coroutineScope.async {
                 viewModel.clearDeletedHealthPersons()
             }
         }
@@ -106,33 +106,33 @@ fun dispatchEvent(
 
 
         is Event.SaveHealthType -> {
-            coroutineScope.launch {
+            coroutineScope.async {
                 viewModel.addHealthType(e.data)
-                goback()
             }
+            goback()
         }
 
         is Event.UpdateHealthType -> {
-            coroutineScope.launch {
+            coroutineScope.async {
                 viewModel.updateHealthType(e.data)
-                goback()
             }
+            goback()
         }
 
         is Event.DeleteHealthType -> {
-            coroutineScope.launch {
+            coroutineScope.async {
                 viewModel.deleteHealthType(e.id)
             }
         }
 
         is Event.UndeleteHealthType -> {
-            coroutineScope.launch {
+            coroutineScope.async {
                 viewModel.undeleteHealthType(e.id)
             }
         }
 
         is Event.ClearDeletedHealthTypesOfPerson -> {
-            coroutineScope.launch {
+            coroutineScope.async {
                 viewModel.clearDeletedHealthTypes(e.personId)
             }
         }
@@ -195,33 +195,33 @@ fun dispatchEvent(
         }
 
         is Event.SaveHealthRecord -> {
-            coroutineScope.launch {
+            coroutineScope.async {
                 viewModel.addHealthRecord(e.data)
-                goback()
             }
+            goback()
         }
 
         is Event.UpdateHealthRecord -> {
-            coroutineScope.launch {
+            coroutineScope.async {
                 viewModel.updateHealthRecord(e.data)
-                goback()
             }
+            goback()
         }
 
         is Event.DeleteHealthRecord -> {
-            coroutineScope.launch {
+            coroutineScope.async {
                 viewModel.deleteHealthRecord(e.id)
             }
         }
 
         is Event.UndeleteHealthRecord -> {
-            coroutineScope.launch {
+            coroutineScope.async {
                 viewModel.undeleteHealthRecord(e.id)
             }
         }
 
         is Event.ClearDeletedHealthRecordsOfType -> {
-            coroutineScope.launch {
+            coroutineScope.async {
                 viewModel.clearDeletedHealthRecords(e.typeId)
             }
         }

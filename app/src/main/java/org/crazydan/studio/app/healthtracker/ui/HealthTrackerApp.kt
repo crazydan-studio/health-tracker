@@ -327,11 +327,7 @@ private fun ShowHealthRecordsScreen(
         combine(
             viewModel.getHealthType(typeId),
             viewModel.getHealthPerson(personId),
-            viewModel.getHealthRecords(
-                typeId,
-                filter.startDate,
-                filter.endDate,
-            ),
+            viewModel.getHealthRecords(typeId, filter),
         ) { type, person, records ->
             healthType = type
             healthPerson = person
@@ -365,7 +361,7 @@ private fun ShowHealthRecordDetailsScreen(
         combine(
             viewModel.getHealthType(typeId),
             viewModel.getHealthPerson(personId),
-            viewModel.getHealthRecords(typeId, 0, 0),
+            viewModel.getHealthRecords(typeId),
             viewModel.countDeletedHealthRecords(typeId),
         ) { type, person, records, amount ->
             healthType = type
