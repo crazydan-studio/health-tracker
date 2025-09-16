@@ -14,7 +14,7 @@
   git submodule update
   ```
 
-- 目前包含的 ECharts 仅包含图标 `Line`、`Scatter`，
+- 目前定制的 ECharts 库仅包含图表 `Line`、`Scatter`，
   若需要重新[定制 ECharts](https://echarts.apache.org/en/builder.html)，
   则需将定制的 `echarts.min.js` 覆盖 `/app/src/main/assets/echarts/echarts.min.js`
   > 更多说明详见 [echarts-android](https://github.com/crazydan-studio/echarts-android)
