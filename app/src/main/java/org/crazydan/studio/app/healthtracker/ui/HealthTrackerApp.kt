@@ -33,9 +33,9 @@ import org.crazydan.studio.app.healthtracker.ui.screen.HealthRecordsScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.HealthTypesScreen
 import kotlin.reflect.typeOf
 
-private val dispatcher = MessageDispatcher()
+private var dispatcher: (Message) -> Unit = {}
 fun dispatch(msg: Message) {
-    dispatcher.dispatch(msg)
+    dispatcher(msg)
 }
 
 fun dispatch(block: () -> Message) {
@@ -53,7 +53,7 @@ fun HealthTrackerApp() {
     val navController = rememberNavController()
     val coroutineScope = rememberCoroutineScope()
 
-    dispatcher.init { msg ->
+    dispatcher = { msg ->
         dispatchMessage(msg, viewModel, navController, coroutineScope)
     }
 

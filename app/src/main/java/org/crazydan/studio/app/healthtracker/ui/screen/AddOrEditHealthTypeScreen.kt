@@ -97,11 +97,7 @@ fun AddOrEditHealthTypeScreen(
                 measures = measures.toList(),
             )
 
-            if (type.id == 0L) {
-                Message.SaveHealthType(type)
-            } else {
-                Message.UpdateHealthType(type)
-            }
+            Message.SaveHealthType(type)
         },
     ) {
         // 基本信息

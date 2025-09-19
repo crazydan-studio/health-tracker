@@ -5,23 +5,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import org.crazydan.studio.app.healthtracker.model.HealthViewModel
 
-typealias MessageDispatch = (Message) -> Unit
-
 /**
  *
  * @author <a href="mailto:flytreeleft@crazydan.org">flytreeleft</a>
  * @date 2025-09-02
  */
-class MessageDispatcher {
-    private var caller: MessageDispatch = {}
-
-    internal fun dispatch(msg: Message) = caller.invoke(msg)
-
-    internal fun init(value: MessageDispatch) {
-        caller = value
-    }
-}
-
 fun dispatchMessage(
     msg: Message,
     viewModel: HealthViewModel,
@@ -57,14 +45,7 @@ fun dispatchMessage(
 
         is Message.SaveHealthPerson -> {
             coroutineScope.async {
-                viewModel.addHealthPerson(msg.data)
-            }
-            goback()
-        }
-
-        is Message.UpdateHealthPerson -> {
-            coroutineScope.async {
-                viewModel.updateHealthPerson(msg.data)
+                viewModel.saveHealthPerson(msg.data)
             }
             goback()
         }
@@ -118,14 +99,7 @@ fun dispatchMessage(
 
         is Message.SaveHealthType -> {
             coroutineScope.async {
-                viewModel.addHealthType(msg.data)
-            }
-            goback()
-        }
-
-        is Message.UpdateHealthType -> {
-            coroutineScope.async {
-                viewModel.updateHealthType(msg.data)
+                viewModel.saveHealthType(msg.data)
             }
             goback()
         }
@@ -207,14 +181,7 @@ fun dispatchMessage(
 
         is Message.SaveHealthRecord -> {
             coroutineScope.async {
-                viewModel.addHealthRecord(msg.data)
-            }
-            goback()
-        }
-
-        is Message.UpdateHealthRecord -> {
-            coroutineScope.async {
-                viewModel.updateHealthRecord(msg.data)
+                viewModel.saveHealthRecord(msg.data)
             }
             goback()
         }

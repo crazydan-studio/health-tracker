@@ -20,9 +20,12 @@ class HealthRepository(
     private val healthRecordDao: HealthRecordDao,
 ) {
     // HealthPerson operations
-    suspend fun insertHealthPerson(healthPerson: HealthPerson): Long = healthPersonDao.insert(healthPerson)
-
-    suspend fun updateHealthPerson(healthPerson: HealthPerson) = healthPersonDao.update(healthPerson)
+    suspend fun saveHealthPerson(healthPerson: HealthPerson) =
+        if (healthPerson.id == 0L) {
+            healthPersonDao.insert(healthPerson)
+        } else {
+            healthPersonDao.update(healthPerson)
+        }
 
     suspend fun deleteHealthPerson(id: Long) = healthPersonDao.delete(id)
 
@@ -43,9 +46,12 @@ class HealthRepository(
     suspend fun clearHealthRecordsOfDeletedHealthPersons() = healthPersonDao.clearRecordsOfDeleted()
 
     // HealthType operations
-    suspend fun insertHealthType(healthType: HealthType): Long = healthTypeDao.insert(healthType)
-
-    suspend fun updateHealthType(healthType: HealthType) = healthTypeDao.update(healthType)
+    suspend fun saveHealthType(healthType: HealthType) =
+        if (healthType.id == 0L) {
+            healthTypeDao.insert(healthType)
+        } else {
+            healthTypeDao.update(healthType)
+        }
 
     suspend fun deleteHealthType(id: Long) = healthTypeDao.delete(id)
 
@@ -65,9 +71,12 @@ class HealthRepository(
     suspend fun clearHealthRecordsOfDeletedHealthTypes(personId: Long) = healthTypeDao.clearRecordsOfDeleted(personId)
 
     // HealthRecord operations
-    suspend fun insertHealthRecord(healthRecord: HealthRecord): Long = healthRecordDao.insert(healthRecord)
-
-    suspend fun updateHealthRecord(healthRecord: HealthRecord) = healthRecordDao.update(healthRecord)
+    suspend fun saveHealthRecord(healthRecord: HealthRecord) =
+        if (healthRecord.id == 0L) {
+            healthRecordDao.insert(healthRecord)
+        } else {
+            healthRecordDao.update(healthRecord)
+        }
 
     suspend fun deleteHealthRecord(id: Long) = healthRecordDao.delete(id)
 

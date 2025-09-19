@@ -28,12 +28,8 @@ class HealthViewModel @Inject constructor(
         return repository.getDeletedHealthPersons()
     }
 
-    suspend fun addHealthPerson(healthPerson: HealthPerson): Long {
-        return repository.insertHealthPerson(healthPerson)
-    }
-
-    suspend fun updateHealthPerson(healthPerson: HealthPerson) {
-        repository.updateHealthPerson(healthPerson)
+    suspend fun saveHealthPerson(healthPerson: HealthPerson) {
+        repository.saveHealthPerson(healthPerson)
     }
 
     fun countDeletedHealthPersons(): Flow<Long> {
@@ -68,12 +64,8 @@ class HealthViewModel @Inject constructor(
         return repository.getDeletedHealthTypesByPersonId(personId)
     }
 
-    suspend fun addHealthType(healthType: HealthType): Long {
-        return repository.insertHealthType(healthType)
-    }
-
-    suspend fun updateHealthType(healthType: HealthType) {
-        repository.updateHealthType(healthType)
+    suspend fun saveHealthType(healthType: HealthType) {
+        repository.saveHealthType(healthType)
     }
 
     fun countDeletedHealthTypes(personId: Long): Flow<Long> {
@@ -111,12 +103,8 @@ class HealthViewModel @Inject constructor(
         return repository.getHealthRecordTagsByTypeId(typeId)
     }
 
-    suspend fun addHealthRecord(healthRecord: HealthRecord): Long {
-        return repository.insertHealthRecord(healthRecord)
-    }
-
-    suspend fun updateHealthRecord(healthRecord: HealthRecord) {
-        repository.updateHealthRecord(healthRecord)
+    suspend fun saveHealthRecord(healthRecord: HealthRecord) {
+        repository.saveHealthRecord(healthRecord)
     }
 
     fun countDeletedHealthRecords(typeId: Long): Flow<Long> {

@@ -115,11 +115,7 @@ fun AddOrEditHealthRecordScreen(
                 createdAt = System.currentTimeMillis(),
             )
 
-            if (record.id == 0L) {
-                Message.SaveHealthRecord(record)
-            } else {
-                Message.UpdateHealthRecord(record)
-            }
+            Message.SaveHealthRecord(record)
         },
     ) {
         OutlinedTextField(

@@ -18,7 +18,6 @@ sealed class Message {
     class WillAddHealthPerson() : Message()
     class WillEditHealthPerson(val id: Long) : Message()
     class SaveHealthPerson(val data: HealthPerson) : Message()
-    class UpdateHealthPerson(val data: HealthPerson) : Message()
     class DeleteHealthPerson(val id: Long) : Message()
     class UndeleteHealthPerson(val id: Long) : Message()
     class ViewDeletedHealthPersons() : Message()
@@ -32,7 +31,6 @@ sealed class Message {
     // HealthType
     class WillEditHealthType(val id: Long, val personId: Long) : Message()
     class SaveHealthType(val data: HealthType) : Message()
-    class UpdateHealthType(val data: HealthType) : Message()
     class DeleteHealthType(val id: Long) : Message()
     class UndeleteHealthType(val id: Long) : Message()
 
@@ -53,7 +51,6 @@ sealed class Message {
     ) : Message()
 
     class SaveHealthRecord(val data: HealthRecord) : Message()
-    class UpdateHealthRecord(val data: HealthRecord) : Message()
     class DeleteHealthRecord(val id: Long) : Message()
     class UndeleteHealthRecord(val id: Long) : Message()
 }

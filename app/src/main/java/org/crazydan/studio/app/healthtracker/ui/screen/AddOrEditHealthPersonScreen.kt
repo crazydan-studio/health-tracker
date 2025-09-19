@@ -71,11 +71,7 @@ fun AddOrEditHealthPersonScreen(
                 birthday = toEpochMillis(birthDate!!, birthTime)
             )
 
-            if (person.id == 0L) {
-                Message.SaveHealthPerson(person)
-            } else {
-                Message.UpdateHealthPerson(person)
-            }
+            Message.SaveHealthPerson(person)
         },
     ) {
         OutlinedTextField(
