@@ -212,8 +212,7 @@ private fun createChartBase(
                             data.push({
                                 name: first.seriesName,
                                 color: first.color,
-                                value: s.length == 1 ? first.value : null,
-                                data: s.length > 1 ? s : null
+                                data: s
                             }); 
                         });
                         //console.log(JSON.stringify(data));
@@ -327,7 +326,18 @@ private fun configChartLineSeries(
                     }
 
                     entry.value.onEachIndexed { index, ti ->
-                        item(index, ti?.value) {}
+                        item(index, ti?.value, ti?.time) {}
+                    }
+                }
+
+                markPoint {
+                    byData {
+                        byDimension { max("y") }
+                    }
+                    byData {
+                        symbol { rotate(180) }
+                        label { position { insideBottom } }
+                        byDimension { min("y") }
                     }
                 }
 
