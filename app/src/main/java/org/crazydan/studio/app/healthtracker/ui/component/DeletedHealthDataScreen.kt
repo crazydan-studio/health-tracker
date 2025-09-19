@@ -26,6 +26,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.stringResource
+import org.crazydan.studio.app.healthtracker.R
 import org.crazydan.studio.app.healthtracker.ui.Message
 import org.crazydan.studio.app.healthtracker.ui.dispatch
 
@@ -53,7 +55,11 @@ fun <T> DeletedHealthDataScreen(
                     IconButton(onClick = {
                         dispatch(onNavigateBack)
                     }) {
-                        Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
+                        Icon(
+                            Icons.AutoMirrored.Default.ArrowBack,
+                            contentDescription =
+                                stringResource(R.string.btn_back),
+                        )
                     }
                 },
             )
@@ -61,7 +67,11 @@ fun <T> DeletedHealthDataScreen(
         floatingActionButton = {
             if (dataList.isNotEmpty()) {
                 FloatingActionButton(onClick = { showConfirmDialog = true }) {
-                    Icon(Icons.Default.DeleteForever, contentDescription = "清空")
+                    Icon(
+                        Icons.Default.DeleteForever,
+                        contentDescription =
+                            stringResource(R.string.btn_clear),
+                    )
                 }
             }
         },
@@ -74,7 +84,7 @@ fun <T> DeletedHealthDataScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("回收站为空")
+                Text(stringResource(R.string.msg_empty_trash))
             }
         } else {
             LazyColumn(
@@ -92,9 +102,9 @@ fun <T> DeletedHealthDataScreen(
     if (showConfirmDialog) {
         AlertDialog(
             onDismissRequest = { showConfirmDialog = false },
-            title = { Text("操作确认") },
+            title = { Text(stringResource(R.string.title_confirm_operation)) },
             text = {
-                Text("清空后，数据将被永久删除，无法恢复！若要继续该操作，请点击「确认」按钮，否则，请点击「取消」按钮。")
+                Text(stringResource(R.string.msg_clear_trash_warning))
             },
             confirmButton = {
                 Button(
@@ -105,12 +115,12 @@ fun <T> DeletedHealthDataScreen(
                         showConfirmDialog = false
                     }
                 ) {
-                    Text("确认")
+                    Text(stringResource(R.string.btn_confirm))
                 }
             },
             dismissButton = {
                 Button(onClick = { showConfirmDialog = false }) {
-                    Text("取消")
+                    Text(stringResource(R.string.btn_cancel))
                 }
             }
         )

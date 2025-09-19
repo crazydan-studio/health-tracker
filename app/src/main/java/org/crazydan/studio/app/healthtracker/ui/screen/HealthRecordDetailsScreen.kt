@@ -13,8 +13,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.crazydan.studio.app.healthtracker.R
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
@@ -49,7 +51,13 @@ fun HealthRecordDetailsScreen(
         deletedAmount = deletedRecordAmount,
         dataList = healthRecords,
         title = {
-            Text(getPersonLabel(healthType.name + "记录", healthPerson))
+            Text(
+                stringResource(
+                    R.string.title_health_record_details,
+                    getPersonLabel(healthPerson),
+                    healthType.name,
+                )
+            )
         },
         onViewDeleted = {
             Message.ViewDeletedHealthRecordsOfType(
@@ -91,11 +99,17 @@ fun HealthRecordCard(
         Text(text = label, style = MaterialTheme.typography.headlineSmall)
 
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "采集时间: $timestamp")
+        Text(
+            text = stringResource(R.string.label_health_record_field_timestamp) +
+                    ": $timestamp"
+        )
 
         if (record.measure.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "采集指标: ${getMeasureNameByCode(type, record.measure)}")
+            Text(
+                text = stringResource(R.string.label_health_record_field_measure) +
+                        ": ${getMeasureNameByCode(type, record.measure)}"
+            )
         }
 
         if (record.tags.isNotEmpty()) {

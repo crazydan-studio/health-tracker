@@ -18,7 +18,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import org.crazydan.studio.app.healthtracker.R
 import org.crazydan.studio.app.healthtracker.ui.Message
 import org.crazydan.studio.app.healthtracker.ui.dispatch
 
@@ -46,7 +48,11 @@ fun AddOrEditHealthDataScreen(
                     IconButton(onClick = {
                         dispatch(onNavigateBack)
                     }) {
-                        Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
+                        Icon(
+                            Icons.AutoMirrored.Default.ArrowBack,
+                            contentDescription =
+                                stringResource(R.string.btn_back),
+                        )
                     }
                 },
                 actions = {
@@ -54,8 +60,12 @@ fun AddOrEditHealthDataScreen(
                         onClick = { dispatch(onSave) },
                         enabled = canSave(),
                     ) {
-                        Icon(Icons.Default.Save, contentDescription = "保存")
-                        Text("保存")
+                        Icon(
+                            Icons.Default.Save,
+                            contentDescription =
+                                stringResource(R.string.btn_save),
+                        )
+                        Text(stringResource(R.string.btn_save))
                     }
                 }
             )

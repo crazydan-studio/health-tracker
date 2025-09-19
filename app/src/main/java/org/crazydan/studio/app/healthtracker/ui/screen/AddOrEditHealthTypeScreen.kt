@@ -28,13 +28,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import org.crazydan.studio.app.healthtracker.R
 import org.crazydan.studio.app.healthtracker.model.HealthLimit
 import org.crazydan.studio.app.healthtracker.model.HealthMeasure
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.genMeasureCode
+import org.crazydan.studio.app.healthtracker.model.getPersonLabel
 import org.crazydan.studio.app.healthtracker.ui.Message
 import org.crazydan.studio.app.healthtracker.ui.component.AddOrEditHealthDataScreen
 
@@ -77,7 +80,16 @@ fun AddOrEditHealthTypeScreen(
     AddOrEditHealthDataScreen(
         title = {
             Text(
-                (if (inAddMode) "添加" else "编辑") + "健康类型"
+                if (inAddMode)
+                    stringResource(
+                        R.string.title_add_health_type,
+                        getPersonLabel(healthPerson),
+                    )
+                else
+                    stringResource(
+                        R.string.title_edit_health_type,
+                        getPersonLabel(healthPerson),
+                    ),
             )
         },
         onNavigateBack = { Message.NavBack() },
@@ -85,31 +97,38 @@ fun AddOrEditHealthTypeScreen(
             name.isNotEmpty() && unit.isNotEmpty()
         },
         onSave = {
-            val type = HealthType(
-                id = editType?.id ?: 0,
-                personId = healthPerson.id,
-                name = name,
-                unit = unit,
-                limit = HealthLimit(
-                    upper = upperLimit.toFloatOrNull(),
-                    lower = lowerLimit.toFloatOrNull(),
-                ),
-                measures = measures.toList(),
+            Message.SaveHealthType(
+                HealthType(
+                    id = editType?.id ?: 0,
+                    personId = healthPerson.id,
+                    name = name,
+                    unit = unit,
+                    limit = HealthLimit(
+                        upper = upperLimit.toFloatOrNull(),
+                        lower = lowerLimit.toFloatOrNull(),
+                    ),
+                    measures = measures.toList(),
+                )
             )
-
-            Message.SaveHealthType(type)
         },
     ) {
         // 基本信息
         Card {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("基本信息", style = MaterialTheme.typography.headlineSmall)
+                Text(
+                    stringResource(R.string.label_health_type_fields_basic),
+                    style = MaterialTheme.typography.headlineSmall
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it.trim() },
-                    label = { Text("类型名称") },
+                    label = {
+                        Text(
+                            stringResource(R.string.label_health_type_field_name)
+                        )
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(focusRequester)
@@ -119,7 +138,11 @@ fun AddOrEditHealthTypeScreen(
                 OutlinedTextField(
                     value = unit,
                     onValueChange = { unit = it.trim() },
-                    label = { Text("单位") },
+                    label = {
+                        Text(
+                            stringResource(R.string.label_health_type_field_unit)
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -131,7 +154,11 @@ fun AddOrEditHealthTypeScreen(
                     OutlinedTextField(
                         value = lowerLimit,
                         onValueChange = { lowerLimit = it },
-                        label = { Text("下限值 (可选)") },
+                        label = {
+                            Text(
+                                stringResource(R.string.label_health_type_field_limit_lower)
+                            )
+                        },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f),
                     )
@@ -139,7 +166,11 @@ fun AddOrEditHealthTypeScreen(
                     OutlinedTextField(
                         value = upperLimit,
                         onValueChange = { upperLimit = it },
-                        label = { Text("上限值 (可选)") },
+                        label = {
+                            Text(
+                                stringResource(R.string.label_health_type_field_limit_upper)
+                            )
+                        },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f),
                     )
@@ -155,12 +186,15 @@ fun AddOrEditHealthTypeScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text("采集指标", style = MaterialTheme.typography.headlineSmall)
+                    Text(
+                        stringResource(R.string.label_health_type_field_measures),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
                     TextButton(onClick = {
                         editMeasure = emptyMeasure()
                         showEditMeasureDialog = true
                     }) {
-                        Text("添加")
+                        Text(stringResource(R.string.btn_add))
                     }
                 }
 
@@ -178,7 +212,7 @@ fun AddOrEditHealthTypeScreen(
                             TextButton(
                                 onClick = { measures.removeAt(index) }
                             ) {
-                                Text("删除")
+                                Text(stringResource(R.string.btn_delete))
                             }
                             TextButton(
                                 onClick = {
@@ -186,7 +220,7 @@ fun AddOrEditHealthTypeScreen(
                                     showEditMeasureDialog = true
                                 }
                             ) {
-                                Text("修改")
+                                Text(stringResource(R.string.btn_edit))
                             }
                         }
                     }
@@ -230,8 +264,8 @@ private fun EditHealthMeasureDialog(
         title = {
             Text(
                 if (measure.code.isEmpty())
-                    "添加采集指标"
-                else "编辑采集指标"
+                    stringResource(R.string.title_add_health_type_measure)
+                else stringResource(R.string.title_edit_health_type_measure)
             )
         },
         confirmButton = {
@@ -257,12 +291,12 @@ private fun EditHealthMeasureDialog(
                                 || upperLimit.toFloatOrNull() != null
                         ),
             ) {
-                Text("保存")
+                Text(stringResource(R.string.btn_save))
             }
         },
         dismissButton = {
             Button(onClick = onClose) {
-                Text("取消")
+                Text(stringResource(R.string.btn_cancel))
             }
         },
         text = {
@@ -270,7 +304,11 @@ private fun EditHealthMeasureDialog(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it.trim() },
-                    label = { Text("指标名称") },
+                    label = {
+                        Text(
+                            stringResource(R.string.label_health_type_field_measure_name)
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth(),
                 )
 
@@ -282,7 +320,11 @@ private fun EditHealthMeasureDialog(
                     OutlinedTextField(
                         value = lowerLimit,
                         onValueChange = { lowerLimit = it },
-                        label = { Text("下限值") },
+                        label = {
+                            Text(
+                                stringResource(R.string.label_health_type_field_measure_limit_lower)
+                            )
+                        },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f),
                     )
@@ -290,7 +332,11 @@ private fun EditHealthMeasureDialog(
                     OutlinedTextField(
                         value = upperLimit,
                         onValueChange = { upperLimit = it },
-                        label = { Text("上限值") },
+                        label = {
+                            Text(
+                                stringResource(R.string.label_health_type_field_measure_limit_upper)
+                            )
+                        },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f),
                     )

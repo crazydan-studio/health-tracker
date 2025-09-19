@@ -22,13 +22,16 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.marosseleng.compose.material3.datetimepickers.time.domain.noSeconds
+import org.crazydan.studio.app.healthtracker.R
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.getMeasureNameByCode
+import org.crazydan.studio.app.healthtracker.model.getPersonLabel
 import org.crazydan.studio.app.healthtracker.ui.Message
 import org.crazydan.studio.app.healthtracker.ui.component.AddOrEditHealthDataScreen
 import org.crazydan.studio.app.healthtracker.ui.component.DateInputPicker
@@ -94,7 +97,18 @@ fun AddOrEditHealthRecordScreen(
     AddOrEditHealthDataScreen(
         title = {
             Text(
-                (if (inAddMode) "添加" else "编辑") + "${healthType.name}记录"
+                if (inAddMode)
+                    stringResource(
+                        R.string.title_add_health_record,
+                        getPersonLabel(healthPerson),
+                        healthType.name,
+                    )
+                else
+                    stringResource(
+                        R.string.title_edit_health_record,
+                        getPersonLabel(healthPerson),
+                        healthType.name,
+                    ),
             )
         },
         onNavigateBack = { Message.NavBack() },
@@ -121,7 +135,14 @@ fun AddOrEditHealthRecordScreen(
         OutlinedTextField(
             value = value,
             onValueChange = { value = it },
-            label = { Text("采集值 (${healthType.unit})") },
+            label = {
+                Text(
+                    stringResource(
+                        R.string.label_health_record_field_value,
+                        healthType.unit,
+                    )
+                )
+            },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier
                 .fillMaxWidth()
@@ -132,14 +153,14 @@ fun AddOrEditHealthRecordScreen(
         DateInputPicker(
             modifier = Modifier.fillMaxWidth(),
             value = timestampDate,
-            label = { Text("采集日期") },
+            label = { Text(stringResource(R.string.label_health_record_field_timestamp_date)) },
             onValueChange = { timestampDate = it },
         )
         Spacer(modifier = Modifier.height(16.dp))
         TimeInputPicker(
             modifier = Modifier.fillMaxWidth(),
             value = timestampTime,
-            label = { Text("采集时间") },
+            label = { Text(stringResource(R.string.label_health_record_field_timestamp_time)) },
             onValueChange = { timestampTime = it },
         )
 
@@ -154,7 +175,7 @@ fun AddOrEditHealthRecordScreen(
                     value = getMeasureNameByCode(healthType, measureCode),
                     readOnly = true,
                     onValueChange = { },
-                    label = { Text("采集指标") },
+                    label = { Text(stringResource(R.string.label_health_record_field_measure)) },
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = rangeExpanded)
                     },

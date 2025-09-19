@@ -28,14 +28,10 @@ data class HealthPerson(
     val birthday: Long,
 )
 
-fun getPersonLabel(prefix: String?, person: HealthPerson?): String {
-    val label = person?.let {
-        if (person.label.isNullOrBlank()) {
-            getFullName(it.familyName, it.givenName)
-        } else {
-            person.label
-        }
+fun getPersonLabel(person: HealthPerson): String {
+    return if (person.label.isNullOrBlank()) {
+        getFullName(person.familyName, person.givenName)
+    } else {
+        person.label
     }
-
-    return prefix?.let { "$it (${label ?: "未知"})" } ?: ""
 }

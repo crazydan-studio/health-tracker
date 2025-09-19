@@ -21,7 +21,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import org.crazydan.studio.app.healthtracker.R
 import org.crazydan.studio.app.healthtracker.ui.Message
 import org.crazydan.studio.app.healthtracker.ui.dispatch
 
@@ -76,16 +78,26 @@ fun HealthDataCard(
                             dispatch(action)
                         }
                     ) {
-                        Icon(Icons.Default.Delete, contentDescription = "删除")
-                        Text(text = "删除")
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription =
+                                stringResource(R.string.btn_delete),
+                        )
+                        Text(text = stringResource(R.string.btn_delete))
                     }
                 }
                 actions.onUndelete?.let { action ->
                     TextButton(onClick = {
                         dispatch(action)
                     }) {
-                        Icon(Icons.Default.Restore, contentDescription = "还原")
-                        Text(text = "还原")
+                        Icon(
+                            Icons.Default.Restore,
+                            contentDescription =
+                                stringResource(R.string.btn_undelete),
+                        )
+                        Text(
+                            text = stringResource(R.string.btn_undelete)
+                        )
                     }
                 }
 
@@ -94,8 +106,12 @@ fun HealthDataCard(
                     TextButton(onClick = {
                         dispatch(action)
                     }) {
-                        Icon(Icons.Default.Edit, contentDescription = "编辑")
-                        Text(text = "编辑")
+                        Icon(
+                            Icons.Default.Edit,
+                            contentDescription =
+                                stringResource(R.string.btn_edit),
+                        )
+                        Text(text = stringResource(R.string.btn_edit))
                     }
                 }
             }

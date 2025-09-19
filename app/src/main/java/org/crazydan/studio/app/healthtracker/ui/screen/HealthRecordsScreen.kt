@@ -24,7 +24,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import org.crazydan.studio.app.healthtracker.R
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthRecordFilter
@@ -62,14 +64,22 @@ fun HealthRecordsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        getPersonLabel(healthType.name, healthPerson)
+                        stringResource(
+                            R.string.title_health_records,
+                            getPersonLabel(healthPerson),
+                            healthType.name,
+                        )
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = {
                         dispatch(Message.NavBack())
                     }) {
-                        Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
+                        Icon(
+                            Icons.AutoMirrored.Default.ArrowBack,
+                            contentDescription =
+                                stringResource(R.string.btn_back),
+                        )
                     }
                 },
                 actions = {
@@ -82,7 +92,11 @@ fun HealthRecordsScreen(
                                 )
                             )
                         }) {
-                            Icon(Icons.Default.TableView, contentDescription = "查看详情")
+                            Icon(
+                                Icons.Default.TableView,
+                                contentDescription =
+                                    stringResource(R.string.btn_details),
+                            )
                         }
                     }
                 }
@@ -97,7 +111,11 @@ fun HealthRecordsScreen(
                     )
                 )
             }) {
-                Icon(Icons.Default.Add, contentDescription = "添加")
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription =
+                        stringResource(R.string.btn_add),
+                )
             }
         }
     ) { padding ->
@@ -115,7 +133,7 @@ fun HealthRecordsScreen(
                         .weight(1f)
                         .focusable(false),
                     value = epochMillisToLocalDate(healthRecordFilter.startDate),
-                    label = { Text("开始日期") },
+                    label = { Text(stringResource(R.string.label_health_record_filter_start_date)) },
                     onValueChange = {
                         dispatch(
                             Message.ViewHealthRecordsOfType(
@@ -136,7 +154,7 @@ fun HealthRecordsScreen(
                         .weight(1f)
                         .focusable(false),
                     value = epochMillisToLocalDate(healthRecordFilter.endDate),
-                    label = { Text("结束日期") },
+                    label = { Text(stringResource(R.string.label_health_record_filter_end_date)) },
                     onValueChange = {
                         dispatch(
                             Message.ViewHealthRecordsOfType(
@@ -152,6 +170,8 @@ fun HealthRecordsScreen(
                 )
             }
 
+            // TODO 按标签过滤：多选并做 and 运算
+
             if (healthRecords.isEmpty()) {
                 Column(
                     modifier = Modifier
@@ -160,7 +180,7 @@ fun HealthRecordsScreen(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("暂无数据，请点击右下角按钮添加")
+                    Text(stringResource(R.string.msg_no_data_to_add))
                 }
             } else {
                 Row(
@@ -172,7 +192,10 @@ fun HealthRecordsScreen(
                     if (healthType.measures.isNotEmpty()) {
                         healthType.measures.forEach { measure ->
                             HealthRecordAverageCircle(
-                                label = "<${measure.name}>均值",
+                                label = stringResource(
+                                    R.string.label_health_record_stats_average,
+                                    measure.name
+                                ),
                                 measure = measure,
                                 records = healthRecords,
                                 modifier = Modifier.padding(16.dp)
@@ -180,7 +203,10 @@ fun HealthRecordsScreen(
                         }
                     } else {
                         HealthRecordAverageCircle(
-                            label = "<${healthType.name}>均值",
+                            label = stringResource(
+                                R.string.label_health_record_stats_average,
+                                healthType.name
+                            ),
                             records = healthRecords,
                             modifier = Modifier.padding(16.dp),
                         )

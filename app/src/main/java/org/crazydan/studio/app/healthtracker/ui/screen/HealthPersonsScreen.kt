@@ -82,7 +82,10 @@ fun HealthPersonCard(
         Text(text = label, style = MaterialTheme.typography.headlineSmall)
 
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "年龄: ${calculateAge(person.birthday)}")
+        Text(
+            text = stringResource(R.string.label_health_person_field_age) +
+                    ": ${calculateAge(person.birthday)}"
+        )
     }
 }
 

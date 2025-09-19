@@ -26,10 +26,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.crazydan.studio.app.healthtracker.R
 
 /**
  *
@@ -39,7 +41,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun HealthDataLoadingScreen(
     modifier: Modifier = Modifier,
-    message: String = "数据加载中..."
+    message: String = stringResource(R.string.msg_data_loading)
 ) {
     Box(
         modifier = modifier.fillMaxSize(),

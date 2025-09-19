@@ -15,7 +15,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import org.crazydan.studio.app.healthtracker.R
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.ui.Message
 import org.crazydan.studio.app.healthtracker.ui.component.AddOrEditHealthDataScreen
@@ -55,7 +57,10 @@ fun AddOrEditHealthPersonScreen(
     AddOrEditHealthDataScreen(
         title = {
             Text(
-                (if (inAddMode) "添加" else "编辑") + "人员信息"
+                if (inAddMode)
+                    stringResource(R.string.title_add_health_person)
+                else
+                    stringResource(R.string.title_edit_health_person),
             )
         },
         onNavigateBack = { Message.NavBack() },
@@ -77,7 +82,7 @@ fun AddOrEditHealthPersonScreen(
         OutlinedTextField(
             value = label,
             onValueChange = { label = it.trim() },
-            label = { Text("称呼") },
+            label = { Text(stringResource(R.string.label_health_person_field_label)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .focusRequester(focusRequester)
@@ -87,7 +92,7 @@ fun AddOrEditHealthPersonScreen(
         OutlinedTextField(
             value = familyName,
             onValueChange = { familyName = it.trim() },
-            label = { Text("姓") },
+            label = { Text(stringResource(R.string.label_health_person_field_family_name)) },
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -95,7 +100,7 @@ fun AddOrEditHealthPersonScreen(
         OutlinedTextField(
             value = givenName,
             onValueChange = { givenName = it.trim() },
-            label = { Text("名") },
+            label = { Text(stringResource(R.string.label_health_person_field_given_name)) },
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -103,7 +108,7 @@ fun AddOrEditHealthPersonScreen(
         DateInputPicker(
             modifier = Modifier.fillMaxWidth(),
             value = birthDate,
-            label = { Text("出生日期") },
+            label = { Text(stringResource(R.string.label_health_person_field_birth_day)) },
             onValueChange = { birthDate = it },
         )
 
@@ -111,7 +116,7 @@ fun AddOrEditHealthPersonScreen(
         TimeInputPicker(
             modifier = Modifier.fillMaxWidth(),
             value = birthTime,
-            label = { Text("出生时间 (可选)") },
+            label = { Text(stringResource(R.string.label_health_person_field_birth_time)) },
             onValueChange = { birthTime = it },
         )
     }

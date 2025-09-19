@@ -7,8 +7,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.crazydan.studio.app.healthtracker.R
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
 import org.crazydan.studio.app.healthtracker.model.HealthRecordFilter
 import org.crazydan.studio.app.healthtracker.model.HealthType
@@ -43,7 +45,10 @@ fun HealthTypesScreen(
         dataList = healthTypes,
         title = {
             Text(
-                getPersonLabel("健康数据", healthPerson)
+                stringResource(
+                    R.string.title_health_types,
+                    getPersonLabel(healthPerson),
+                )
             )
         },
         onAddData = {
@@ -91,16 +96,26 @@ fun HealthTypeCard(
         Text(text = type.name, style = MaterialTheme.typography.headlineSmall)
 
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "单位: ${type.unit}")
+        Text(
+            text = stringResource(R.string.label_health_type_field_unit)
+                    + ": ${type.unit}"
+        )
 
         if (type.limit.lower != null || type.limit.upper != null) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "限制范围: ${type.limit} ${type.unit}")
+            Text(
+                text = stringResource(R.string.label_health_type_field_limit)
+                        + ": ${type.limit} ${type.unit}"
+            )
         }
 
         if (type.measures.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "采集指标:", style = MaterialTheme.typography.labelMedium)
+            Text(
+                text = stringResource(R.string.label_health_type_field_measures)
+                        + ":",
+                style = MaterialTheme.typography.labelMedium
+            )
 
             type.measures.forEach { measure ->
                 Text(text = "  ${measure.name}: ${measure.limit} ${type.unit}")

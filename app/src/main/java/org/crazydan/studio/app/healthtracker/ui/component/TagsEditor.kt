@@ -30,8 +30,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import org.crazydan.studio.app.healthtracker.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,7 +102,7 @@ private fun TagAddView(
                 OutlinedTextField(
                     value = inputTag,
                     onValueChange = { inputTag = it.trim() },
-                    placeholder = { Text("输入标签...") },
+                    placeholder = { Text(stringResource(R.string.placeholder_tag_value)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(
@@ -112,14 +114,14 @@ private fun TagAddView(
                 IconButton(onClick = onClose) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "取消",
+                        contentDescription = stringResource(R.string.btn_cancel),
                     )
                 }
 
                 IconButton(onClick = onDone) {
                     Icon(
                         imageVector = Icons.Default.Done,
-                        contentDescription = "确认",
+                        contentDescription = stringResource(R.string.btn_confirm),
                         tint = MaterialTheme.colorScheme.primary,
                     )
                 }
@@ -173,7 +175,7 @@ private fun TagsView(
                 trailingIcon = {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "移除标签",
+                        contentDescription = stringResource(R.string.btn_delete_tag),
                         modifier = Modifier.size(16.dp)
                     )
                 },
@@ -187,11 +189,11 @@ private fun TagsView(
 
         AssistChip(
             onClick = onAdd,
-            label = { Text("添加标签") },
+            label = { Text(stringResource(R.string.btn_add_tag)) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "添加标签",
+                    contentDescription = stringResource(R.string.btn_add_tag),
                     modifier = Modifier.size(16.dp)
                 )
             }

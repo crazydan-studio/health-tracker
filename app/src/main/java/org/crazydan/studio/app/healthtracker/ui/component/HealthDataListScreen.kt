@@ -22,6 +22,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import org.crazydan.studio.app.healthtracker.R
 import org.crazydan.studio.app.healthtracker.ui.Message
 import org.crazydan.studio.app.healthtracker.ui.dispatch
 
@@ -50,7 +52,10 @@ fun <T> HealthDataListScreen(
                         IconButton(onClick = {
                             dispatch(it)
                         }) {
-                            Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "返回")
+                            Icon(
+                                Icons.AutoMirrored.Default.ArrowBack,
+                                contentDescription = stringResource(R.string.btn_back),
+                            )
                         }
                     }
                 },
@@ -59,7 +64,11 @@ fun <T> HealthDataListScreen(
                         TextButton(onClick = {
                             dispatch(onViewDeleted)
                         }) {
-                            Icon(Icons.Default.Recycling, contentDescription = "回收站")
+                            Icon(
+                                Icons.Default.Recycling,
+                                contentDescription =
+                                    stringResource(R.string.btn_trash),
+                            )
                             Badge {
                                 val text = if (deletedAmount > 99) "99+" else deletedAmount.toString()
                                 Text(text)
@@ -74,7 +83,11 @@ fun <T> HealthDataListScreen(
                 FloatingActionButton(onClick = {
                     dispatch(it)
                 }) {
-                    Icon(Icons.Default.Add, contentDescription = "添加数据")
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription =
+                            stringResource(R.string.btn_add),
+                    )
                 }
             }
         },
@@ -87,7 +100,7 @@ fun <T> HealthDataListScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("暂无数据，请点击右下角按钮添加")
+                Text(stringResource(R.string.msg_no_data_to_add))
             }
         } else {
             LazyColumn(
