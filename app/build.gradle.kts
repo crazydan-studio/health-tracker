@@ -82,6 +82,21 @@ android {
         includeInBundle = false
         // >>>>>
     }
+
+    applicationVariants.all {
+        val variant = this
+        val projectName = rootProject.name.replace(Regex("\\s+"), "_")
+        val buildType = variant.buildType.name
+        val versionName = variant.versionName
+
+        // 统一设置 apk 的打包名称
+        if (buildType != "debug") {
+            variant.outputs.all {
+                val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
+                output.outputFileName = "${projectName}-${versionName}.apk"
+            }
+        }
+    }
 }
 
 dependencies {
