@@ -184,15 +184,23 @@ private fun createChartBase(
                     function (params) {
                         var title = params[0].name;
                         var series = {};
+                        var seriesColors = {};
                         params.forEach(function(param) {
                             var key = param.componentIndex;
                             var list = series[key];
                             if (!list) {
                                 list = series[key] = [];
                             }
+                            
+                            var id = param.seriesId || '';
+                            var refId = id.substr(id.indexOf(':') + 1);
+                            if (id.indexOf('line-stack-') < 0) {
+                                refId = id;
+                            }
+                            seriesColors[refId] = param.color;
+                            
                             list.push({
-                                id: param.seriesId,
-                                color: param.color,
+                                id: id,
                                 seriesName: param.seriesName,
                                 name: param.value[2] || param.seriesName,
                                 value: (function(v) {
@@ -205,14 +213,20 @@ private fun createChartBase(
                         Object.keys(series).forEach(function(key) {
                             var s = series[key];
                             var first = s[0];
-                            if (first.id.indexOf('line-stack-') >= 0) {
+                            if (first.id.indexOf('line-stack-') >= 0  //
+                                || (s.length == 1 && first.value == '-') //
+                            ) {
                                 return;
                             }
                         
+                            var color = seriesColors[first.id];
                             data.push({
                                 name: first.seriesName,
-                                color: first.color,
-                                data: s
+                                color: color,
+                                data: s.map(function(item) {
+                                    item.color = color;
+                                    return item;
+                                })
                             }); 
                         });
                         //console.log(JSON.stringify(data));
@@ -311,10 +325,12 @@ private fun configChartLineSeries(
 ) {
     option.series {
         chartData.lines.forEach { entry ->
+            val seriesId = genCode(8)
             val seriesName = chartData.measures[entry.key]!!
             val seriesLimit = chartData.measureLimits[entry.key]!!
 
             line {
+                id(seriesId)
                 name(seriesName)
                 smooth(true)
                 connectNulls(true)
@@ -389,10 +405,12 @@ private fun configChartPointSeries(
 ) {
     option.series {
         chartData.points.forEach { pointMapEntry ->
+            val seriesId = genCode(8)
             val seriesName = chartData.measures[pointMapEntry.key]!!
             val seriesLimit = chartData.measureLimits[pointMapEntry.key]!!
 
             scatter {
+                id(seriesId)
                 name(seriesName)
                 colorBy { data }
                 symbol { size(4) }
@@ -463,9 +481,9 @@ private fun configChartPointSeries(
                 }
             }
 
-            val stackCode = genCode(8)
+            val stackCode = "stack:$seriesId"
             line {
-                id("line-stack-$stackCode-min")
+                id("line-stack-min:$seriesId")
                 name(seriesName)
                 smooth(true)
                 connectNulls(true)
@@ -487,7 +505,7 @@ private fun configChartPointSeries(
                 }
             }
             line {
-                id("line-stack-$stackCode-max")
+                id("line-stack-max:$seriesId")
                 name(seriesName)
                 smooth(true)
                 connectNulls(true)
