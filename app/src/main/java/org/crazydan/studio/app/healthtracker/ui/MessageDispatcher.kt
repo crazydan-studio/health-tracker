@@ -3,9 +3,14 @@ package org.crazydan.studio.app.healthtracker.ui
 import androidx.navigation.NavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
+import org.crazydan.studio.app.healthtracker.model.HealthRecordFilter
 import org.crazydan.studio.app.healthtracker.model.HealthViewModel
 import org.crazydan.studio.app.healthtracker.util.epochMillisToLocalDate
 import org.crazydan.studio.app.healthtracker.util.toEpochMillis
+import java.time.LocalDate
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  *
@@ -141,20 +146,12 @@ fun dispatchMessage(
         }
 
         is Message.ViewHealthRecordsOfType -> {
-            navController.navigate(
-                Route.HealthRecords(
-                    typeId = msg.typeId,
-                    personId = msg.personId,
-                    filter = msg.filter,
+            coroutineScope.async {
+                dispatchViewHealthRecordsOfType(
+                    msg = msg,
+                    viewModel = viewModel,
+                    navController = navController,
                 )
-            ) {
-                // Note: 记录过滤采用的是路由跳转并附带过滤参数，
-                // 因此，在退回时，需要直接退到初始路由上，避免逐级回退
-                popUpTo(
-                    Route.HealthTypes(personId = msg.personId)
-                ) {
-                    inclusive = false
-                }
             }
         }
 
@@ -219,6 +216,50 @@ fun dispatchMessage(
             coroutineScope.async {
                 viewModel.clearDeletedHealthRecords(msg.typeId)
             }
+        }
+    }
+}
+
+private suspend fun dispatchViewHealthRecordsOfType(
+    msg: Message.ViewHealthRecordsOfType,
+    viewModel: HealthViewModel,
+    navController: NavController,
+) {
+    var filter: HealthRecordFilter? = msg.filter
+
+    if (msg.latest7Days) {
+        val result = viewModel.getHealthRecordLatest7DaysFilter(msg.typeId).first()
+
+        val now = LocalDate.now()
+        var start = toEpochMillis(now.minusDays(7))
+        var end = toEpochMillis(now, untilToDayEnd = true)
+
+        if (result.startDate > 0) {
+            start = min(result.startDate, start)
+        }
+        if (result.endDate > 0) {
+            end = max(result.endDate, end)
+        }
+
+        filter = HealthRecordFilter(
+            startDate = start,
+            endDate = end,
+        )
+    }
+
+    navController.navigate(
+        Route.HealthRecords(
+            typeId = msg.typeId,
+            personId = msg.personId,
+            filter = filter!!,
+        )
+    ) {
+        // Note: 记录过滤采用的是路由跳转并附带过滤参数，
+        // 因此，在退回时，需要直接退到初始路由上，避免逐级回退
+        popUpTo(
+            Route.HealthTypes(personId = msg.personId)
+        ) {
+            inclusive = false
         }
     }
 }

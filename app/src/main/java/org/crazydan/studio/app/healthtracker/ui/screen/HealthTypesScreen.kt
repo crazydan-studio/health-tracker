@@ -12,7 +12,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.crazydan.studio.app.healthtracker.R
 import org.crazydan.studio.app.healthtracker.model.HealthPerson
-import org.crazydan.studio.app.healthtracker.model.HealthRecordFilter
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.model.getPersonLabel
 import org.crazydan.studio.app.healthtracker.ui.Message
@@ -20,8 +19,6 @@ import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCard
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCardActions
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataListScreen
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataLoadingScreen
-import org.crazydan.studio.app.healthtracker.util.toEpochMillis
-import java.time.LocalDate
 
 /**
  *
@@ -64,22 +61,18 @@ fun HealthTypesScreen(
             actions = HealthDataCardActions(
                 onEdit = {
                     Message.WillEditHealthType(
-                        type.id,
-                        type.personId
+                        id = type.id,
+                        personId = type.personId,
                     )
                 },
                 onDelete = {
                     Message.DeleteHealthType(type.id)
                 },
                 onView = {
-                    val now = LocalDate.now()
                     Message.ViewHealthRecordsOfType(
-                        type.id,
-                        type.personId,
-                        filter = HealthRecordFilter(
-                            startDate = toEpochMillis(now.minusDays(7)),
-                            endDate = toEpochMillis(now, untilToDayEnd = true),
-                        ),
+                        typeId = type.id,
+                        personId = type.personId,
+                        latest7Days = true,
                     )
                 },
             ),

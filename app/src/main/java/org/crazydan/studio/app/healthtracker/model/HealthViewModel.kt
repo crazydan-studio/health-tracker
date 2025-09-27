@@ -122,4 +122,7 @@ class HealthViewModel @Inject constructor(
     suspend fun clearDeletedHealthRecords(typeId: Long) {
         repository.clearDeletedHealthRecords(typeId)
     }
+
+    fun getHealthRecordLatest7DaysFilter(typeId: Long): Flow<HealthRecordFilter> =
+        repository.getHealthRecordLatest7DaysFilterByTypeId(typeId)
 }

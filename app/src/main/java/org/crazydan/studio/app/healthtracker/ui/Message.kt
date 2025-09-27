@@ -37,7 +37,9 @@ sealed class Message {
     class WillAddHealthRecordOfType(val typeId: Long, val personId: Long) : Message()
     class ViewHealthRecordsOfType(
         val typeId: Long, val personId: Long,
-        val filter: HealthRecordFilter,
+        val filter: HealthRecordFilter? = null,
+        /** 查看最近 7 天的数据 */
+        val latest7Days: Boolean = false,
     ) : Message()
 
     class ViewHealthRecordDetailsOfType(val typeId: Long, val personId: Long) : Message()

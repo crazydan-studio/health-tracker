@@ -7,6 +7,7 @@ import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 import org.crazydan.studio.app.healthtracker.model.HEALTH_RECORD_TABLE_NAME
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
+import org.crazydan.studio.app.healthtracker.model.HealthRecordFilter
 
 /**
  *
@@ -55,4 +56,25 @@ interface HealthRecordDao {
 
     @Query("SELECT DISTINCT tags FROM $HEALTH_RECORD_TABLE_NAME WHERE typeId = :typeId")
     fun getTagsByTypeId(typeId: Long): Flow<List<String>>
+
+    // Note: date 等函数是按 UTC 时区进行时间转换的，
+    // 为降低复杂性，需尽可能返回数据时间本身，避免对结果做时间转换
+    @Query(
+        """
+        SELECT
+            min(t_) as startDate,
+            max(t_) as endDate
+        FROM (
+            SELECT
+                date(timestamp / 1000, 'unixepoch') AS d_
+                , max(timestamp) AS t_
+            FROM $HEALTH_RECORD_TABLE_NAME
+            WHERE typeId = :typeId AND deleted = 0
+            GROUP BY d_
+            ORDER BY d_ DESC
+            LIMIT 7
+        )
+    """
+    )
+    fun getLatest7DaysFilterByTypeId(typeId: Long): Flow<HealthRecordFilter>
 }

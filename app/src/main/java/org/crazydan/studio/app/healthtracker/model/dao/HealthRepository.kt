@@ -59,16 +59,20 @@ class HealthRepository(
 
     fun getHealthTypeById(id: Long): Flow<HealthType?> = healthTypeDao.getById(id)
 
-    fun getHealthTypesByPersonId(personId: Long): Flow<List<HealthType>> = healthTypeDao.getByPersonId(personId)
+    fun getHealthTypesByPersonId(personId: Long): Flow<List<HealthType>> =
+        healthTypeDao.getByPersonId(personId)
 
     fun getDeletedHealthTypesByPersonId(personId: Long): Flow<List<HealthType>> =
         healthTypeDao.getDeletedByPersonId(personId)
 
-    fun countDeletedHealthTypesByPersonId(personId: Long): Flow<Long> = healthTypeDao.countDeletedByPersonId(personId)
+    fun countDeletedHealthTypesByPersonId(personId: Long): Flow<Long> =
+        healthTypeDao.countDeletedByPersonId(personId)
 
-    suspend fun clearDeletedHealthTypes(personId: Long) = healthTypeDao.clearDeleted(personId)
+    suspend fun clearDeletedHealthTypes(personId: Long) =
+        healthTypeDao.clearDeleted(personId)
 
-    suspend fun clearHealthRecordsOfDeletedHealthTypes(personId: Long) = healthTypeDao.clearRecordsOfDeleted(personId)
+    suspend fun clearHealthRecordsOfDeletedHealthTypes(personId: Long) =
+        healthTypeDao.clearRecordsOfDeleted(personId)
 
     // HealthRecord operations
     suspend fun saveHealthRecord(healthRecord: HealthRecord) =
@@ -108,7 +112,12 @@ class HealthRepository(
     fun getDeletedHealthRecordsByTypeId(typeId: Long): Flow<List<HealthRecord>> =
         healthRecordDao.getDeletedByTypeId(typeId)
 
-    fun countDeletedHealthRecordsByTypeId(typeId: Long): Flow<Long> = healthRecordDao.countDeletedByTypeId(typeId)
+    fun countDeletedHealthRecordsByTypeId(typeId: Long): Flow<Long> =
+        healthRecordDao.countDeletedByTypeId(typeId)
 
-    suspend fun clearDeletedHealthRecords(typeId: Long) = healthRecordDao.clearDeleted(typeId)
+    suspend fun clearDeletedHealthRecords(typeId: Long) =
+        healthRecordDao.clearDeleted(typeId)
+
+    fun getHealthRecordLatest7DaysFilterByTypeId(typeId: Long): Flow<HealthRecordFilter> =
+        healthRecordDao.getLatest7DaysFilterByTypeId(typeId)
 }
