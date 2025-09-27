@@ -4,6 +4,8 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import org.crazydan.studio.app.healthtracker.model.HealthViewModel
+import org.crazydan.studio.app.healthtracker.util.epochMillisToLocalDate
+import org.crazydan.studio.app.healthtracker.util.toEpochMillis
 
 /**
  *
@@ -16,8 +18,14 @@ fun dispatchMessage(
     navController: NavController,
     coroutineScope: CoroutineScope,
 ) {
-    val goback = fun() {
+    fun goback(extras: Map<String, Any>? = null) {
         navController.popBackStack()
+
+        // 向回退的目标路由附加额外参数
+        extras?.forEach { (key, value) ->
+            // Note: currentBackStackEntry.arguments 为 immutableArgs 的副本，对其修改是无效的
+            navController.currentBackStackEntry?.savedStateHandle?.set(key, value)
+        }
     }
 
     when (msg) {
@@ -183,7 +191,16 @@ fun dispatchMessage(
             coroutineScope.async {
                 viewModel.saveHealthRecord(msg.data)
             }
-            goback()
+
+            var extras: Map<String, Any>? = null
+            // Note: 仅针对新增数据附加过滤查询所需要包含的日期
+            if (msg.data.id == 0L) {
+                val date = epochMillisToLocalDate(msg.data.timestamp)
+                extras = mapOf(
+                    "filterIncludedDate" to toEpochMillis(date!!)
+                )
+            }
+            goback(extras)
         }
 
         is Message.DeleteHealthRecord -> {

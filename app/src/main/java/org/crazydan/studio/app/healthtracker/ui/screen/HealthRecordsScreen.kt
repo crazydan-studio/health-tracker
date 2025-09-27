@@ -106,8 +106,8 @@ fun HealthRecordsScreen(
             FloatingActionButton(onClick = {
                 dispatch(
                     Message.WillAddHealthRecordOfType(
-                        healthType.id,
-                        healthType.personId
+                        typeId = healthType.id,
+                        personId = healthType.personId,
                     )
                 )
             }) {
@@ -137,8 +137,8 @@ fun HealthRecordsScreen(
                     onValueChange = {
                         dispatch(
                             Message.ViewHealthRecordsOfType(
-                                healthType.id,
-                                healthType.personId,
+                                typeId = healthType.id,
+                                personId = healthType.personId,
                                 filter = HealthRecordFilter(
                                     startDate = toEpochMillis(it),
                                     endDate = healthRecordFilter.endDate,
@@ -158,8 +158,8 @@ fun HealthRecordsScreen(
                     onValueChange = {
                         dispatch(
                             Message.ViewHealthRecordsOfType(
-                                healthType.id,
-                                healthType.personId,
+                                typeId = healthType.id,
+                                personId = healthType.personId,
                                 filter = HealthRecordFilter(
                                     startDate = healthRecordFilter.startDate,
                                     endDate = toEpochMillis(it, untilToDayEnd = true),

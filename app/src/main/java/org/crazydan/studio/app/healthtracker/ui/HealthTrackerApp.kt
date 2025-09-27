@@ -42,6 +42,10 @@ fun dispatch(block: () -> Message) {
     dispatch(block())
 }
 
+private val navTypeMap = mapOf(
+    typeOf<HealthRecordFilter>() to HealthRecordFilterNavType
+)
+
 /**
  *
  * @author <a href="mailto:flytreeleft@crazydan.org">flytreeleft</a>
@@ -56,10 +60,6 @@ fun HealthTrackerApp() {
     dispatcher = { msg ->
         dispatchMessage(msg, viewModel, navController, coroutineScope)
     }
-
-    val typeMap = mapOf(
-        typeOf<HealthRecordFilter>() to HealthRecordFilterNavType
-    )
 
     NavHost(
         navController = navController,
@@ -137,13 +137,14 @@ fun HealthTrackerApp() {
         }
 
         //
-        composable<Route.HealthRecords>(typeMap = typeMap) { backStackEntry ->
+        composable<Route.HealthRecords>(typeMap = navTypeMap) { backStackEntry ->
             val route = backStackEntry.toRoute<Route.HealthRecords>()
+            val includeDate = backStackEntry.savedStateHandle.get<Long>("filterIncludedDate")
 
             ShowHealthRecordsScreen(
                 typeId = route.typeId,
                 personId = route.personId,
-                filter = route.filter,
+                filter = route.filter.includeDate(includeDate),
                 viewModel = viewModel,
             )
         }

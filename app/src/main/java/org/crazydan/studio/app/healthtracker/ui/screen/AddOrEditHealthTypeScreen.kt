@@ -291,7 +291,7 @@ private fun EditHealthMeasureDialog(
                                 || upperLimit.toFloatOrNull() != null
                         ),
             ) {
-                Text(stringResource(R.string.btn_save))
+                Text(stringResource(R.string.btn_confirm))
             }
         },
         dismissButton = {
