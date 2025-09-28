@@ -1,6 +1,7 @@
 package org.crazydan.studio.app.healthtracker.model
 
 import kotlinx.serialization.Serializable
+import org.crazydan.studio.app.healthtracker.util.subEpochMillisToDay
 import kotlin.math.max
 import kotlin.math.min
 
@@ -22,7 +23,12 @@ data class HealthRecordFilter(
         if (date == null) this
         else
             copy(
-                startDate = min(startDate, date),
-                endDate = max(endDate, date),
+                startDate = subEpochMillisToDay(
+                    min(startDate, date)
+                ),
+                endDate = subEpochMillisToDay(
+                    max(endDate, date),
+                    toDayEnd = true
+                ),
             )
 }

@@ -6,11 +6,9 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import org.crazydan.studio.app.healthtracker.model.HealthRecordFilter
 import org.crazydan.studio.app.healthtracker.model.HealthViewModel
-import org.crazydan.studio.app.healthtracker.util.epochMillisToLocalDate
+import org.crazydan.studio.app.healthtracker.util.subEpochMillisToDay
 import org.crazydan.studio.app.healthtracker.util.toEpochMillis
 import java.time.LocalDate
-import kotlin.math.max
-import kotlin.math.min
 
 /**
  *
@@ -192,9 +190,8 @@ fun dispatchMessage(
             var extras: Map<String, Any>? = null
             // Note: 仅针对新增数据附加过滤查询所需要包含的日期
             if (msg.data.id == 0L) {
-                val date = epochMillisToLocalDate(msg.data.timestamp)
                 extras = mapOf(
-                    "filterIncludedDate" to toEpochMillis(date!!)
+                    "filterIncludedDate" to msg.data.timestamp
                 )
             }
             goback(extras)
@@ -232,13 +229,13 @@ private suspend fun dispatchViewHealthRecordsOfType(
 
         val now = LocalDate.now()
         var start = toEpochMillis(now.minusDays(7))
-        var end = toEpochMillis(now, untilToDayEnd = true)
+        var end = toEpochMillis(now, toDayEnd = true)
 
-        if (result.startDate > 0) {
-            start = min(result.startDate, start)
+        if (result.startDate > 0 && result.startDate < start) {
+            start = subEpochMillisToDay(result.startDate)
         }
-        if (result.endDate > 0) {
-            end = max(result.endDate, end)
+        if (result.endDate > 0 && result.endDate > end) {
+            end = subEpochMillisToDay(result.endDate, toDayEnd = true)
         }
 
         filter = HealthRecordFilter(

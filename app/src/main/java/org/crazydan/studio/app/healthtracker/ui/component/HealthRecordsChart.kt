@@ -10,6 +10,7 @@ import org.crazydan.studio.app.healthtracker.model.HealthLimit
 import org.crazydan.studio.app.healthtracker.model.HealthMeasure
 import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
+import org.crazydan.studio.app.healthtracker.ui.component.ChartData.TimeItem
 import org.crazydan.studio.app.healthtracker.ui.theme.isInDarkTheme
 import org.crazydan.studio.app.healthtracker.util.formatEpochMillis
 import org.crazydan.studio.app.healthtracker.util.genCode
@@ -51,7 +52,7 @@ private fun createChartData(
     records: List<HealthRecord>,
 ): ChartData {
     val maxDataAmountMap = mutableMapOf<String, Int>()
-    val seriesMap = mutableMapOf<String, MutableMap<String, MutableList<ChartData.TimeItem>>>()
+    val seriesMap = mutableMapOf<String, MutableMap<String, MutableList<TimeItem>>>()
     records.asReversed().forEach { record ->
         val measure = record.measure
         val datePattern = "yyyy-MM-dd"
@@ -66,7 +67,7 @@ private fun createChartData(
         }
 
         list.add(
-            ChartData.TimeItem(
+            TimeItem(
                 time = time,
                 value = record.value,
             )
@@ -77,8 +78,8 @@ private fun createChartData(
     }
 
     val days = seriesMap.keys
-    val lines = mutableMapOf<String, List<ChartData.TimeItem?>>()
-    val points = mutableMapOf<String, List<List<ChartData.TimeItem>>>()
+    val lines = mutableMapOf<String, List<TimeItem?>>()
+    val points = mutableMapOf<String, List<List<TimeItem>>>()
     val measures =
         healthType.measures.ifEmpty {
             listOf(
@@ -154,15 +155,27 @@ private fun createChartOption(
         chartData = chartData,
     )
 
-    configChartLineSeries(
-        option = option,
-        chartData = chartData,
-    )
+    // Note: 需确保图例的顺序保持不变
+    chartData.measures.entries.sortedBy { it.value }.forEach { entry ->
+        val measureCode = entry.key
 
-    configChartPointSeries(
-        option = option,
-        chartData = chartData,
-    )
+        chartData.lines[measureCode]?.let {
+            configChartLineSeries(
+                option = option,
+                measureCode = measureCode,
+                measureData = it,
+                chartData = chartData,
+            )
+        }
+        chartData.points[measureCode]?.let {
+            configChartPointSeries(
+                option = option,
+                measureCode = measureCode,
+                measureData = it,
+                chartData = chartData,
+            )
+        }
+    }
 
     return option
 }
@@ -321,75 +334,75 @@ private fun configChartGrid(
 
 private fun configChartLineSeries(
     option: ECharts.Option,
+    measureCode: String,
+    measureData: List<TimeItem?>,
     chartData: ChartData,
 ) {
     option.series {
-        chartData.lines.forEach { entry ->
-            val seriesId = genCode(8)
-            val seriesName = chartData.measures[entry.key]!!
-            val seriesLimit = chartData.measureLimits[entry.key]!!
+        val seriesId = genCode(8)
+        val seriesName = chartData.measures[measureCode]!!
+        val seriesLimit = chartData.measureLimits[measureCode]!!
 
-            line {
-                id(seriesId)
-                name(seriesName)
-                smooth(true)
-                connectNulls(true)
+        line {
+            id(seriesId)
+            name(seriesName)
+            smooth(true)
+            connectNulls(true)
 
-                data {
-                    dimension("x", "y") {
-                        x("x")
-                        y("y")
-                    }
-
-                    entry.value.onEachIndexed { index, ti ->
-                        item(index, ti?.value, ti?.time) {}
-                    }
+            data {
+                dimension("x", "y") {
+                    x("x")
+                    y("y")
                 }
 
-                markPoint {
-                    byData {
-                        byDimension { max("y") }
-                    }
-                    byData {
-                        symbol { rotate(180) }
-                        label { position { insideBottom } }
-                        byDimension { min("y") }
+                measureData.onEachIndexed { index, ti ->
+                    item(index, ti?.value, ti?.time) {}
+                }
+            }
+
+            markPoint {
+                byData {
+                    byDimension { max("y") }
+                }
+                byData {
+                    symbol { rotate(180) }
+                    label { position { insideBottom } }
+                    byDimension { min("y") }
+                }
+            }
+
+            if (seriesLimit.lower != null && seriesLimit.upper != null) {
+                markArea {
+                    style { opacity(0.1f) }
+
+                    byYAxis {
+                        value(seriesLimit.lower, seriesLimit.upper)
+                        name("${seriesLimit.upper}\n ~\n${seriesLimit.lower}")
+                        label {
+                            position { right }
+                            formatter("{b}")
+                        }
                     }
                 }
-
-                if (seriesLimit.lower != null && seriesLimit.upper != null) {
-                    markArea {
-                        style { opacity(0.1f) }
-
+            } else if (seriesLimit.lower != null || seriesLimit.upper != null) {
+                markLine {
+                    seriesLimit.lower?.let { value ->
                         byYAxis {
-                            value(seriesLimit.lower, seriesLimit.upper)
-                            name("${seriesLimit.upper}\n ~\n${seriesLimit.lower}")
+                            value(value)
+                            name("$value ⤓")
                             label {
-                                position { right }
+                                position { end }
                                 formatter("{b}")
                             }
                         }
                     }
-                } else if (seriesLimit.lower != null || seriesLimit.upper != null) {
-                    markLine {
-                        seriesLimit.lower?.let { value ->
-                            byYAxis {
-                                value(value)
-                                name("$value ⤓")
-                                label {
-                                    position { end }
-                                    formatter("{b}")
-                                }
-                            }
-                        }
-                        seriesLimit.upper?.let { value ->
-                            byYAxis {
-                                value(value)
-                                name("$value ⤒")
-                                label {
-                                    position { end }
-                                    formatter("{b}")
-                                }
+                    seriesLimit.upper?.let { value ->
+                        byYAxis {
+                            value(value)
+                            name("$value ⤒")
+                            label {
+                                position { end }
+                                formatter("{b}")
                             }
                         }
                     }
@@ -401,79 +414,64 @@ private fun configChartLineSeries(
 
 private fun configChartPointSeries(
     option: ECharts.Option,
+    measureCode: String,
+    measureData: List<List<TimeItem>>,
     chartData: ChartData,
 ) {
     option.series {
-        chartData.points.forEach { pointMapEntry ->
-            val seriesId = genCode(8)
-            val seriesName = chartData.measures[pointMapEntry.key]!!
-            val seriesLimit = chartData.measureLimits[pointMapEntry.key]!!
+        val seriesId = genCode(8)
+        val seriesName = chartData.measures[measureCode]!!
+        val seriesLimit = chartData.measureLimits[measureCode]!!
 
-            scatter {
-                id(seriesId)
-                name(seriesName)
-                colorBy { data }
-                symbol { size(4) }
+        scatter {
+            id(seriesId)
+            name(seriesName)
+            colorBy { data }
+            symbol { size(4) }
 
-                data {
-                    dimension("x", "y") {
-                        x("x")
-                        y("y")
-                    }
-
-                    pointMapEntry.value.onEachIndexed { index, list ->
-                        // 同一天的点，映射到相同的 x 坐标位置
-                        list.forEach { ti ->
-                            item(index, ti.value, ti.time) {}
-                        }
-                    }
+            data {
+                dimension("x", "y") {
+                    x("x")
+                    y("y")
                 }
 
-                markPoint {
-                    byData {
-                        byDimension { max("y") }
-                    }
-                    byData {
-                        symbol { rotate(180) }
-                        label { position { insideBottom } }
-                        byDimension { min("y") }
+                measureData.onEachIndexed { index, list ->
+                    // 同一天的点，映射到相同的 x 坐标位置
+                    list.forEach { ti ->
+                        item(index, ti.value, ti.time) {}
                     }
                 }
+            }
 
-                markLine {
-                    if (seriesLimit.lower == null || seriesLimit.upper == null) {
-                        seriesLimit.lower?.let { value ->
-                            byYAxis {
-                                value(value)
-                                name("$value ⤓")
-                                label {
-                                    position { end }
-                                    formatter("{b}")
-                                }
-                            }
-                        }
-                        seriesLimit.upper?.let { value ->
-                            byYAxis {
-                                value(value)
-                                name("$value ⤒")
-                                label {
-                                    position { end }
-                                    formatter("{b}")
-                                }
-                            }
-                        }
-                    }
+            markPoint {
+                byData {
+                    byDimension { max("y") }
                 }
+                byData {
+                    symbol { rotate(180) }
+                    label { position { insideBottom } }
+                    byDimension { min("y") }
+                }
+            }
 
-                if (seriesLimit.lower != null && seriesLimit.upper != null) {
-                    markArea {
-                        style { opacity(0.1f) }
-
+            markLine {
+                if (seriesLimit.lower == null || seriesLimit.upper == null) {
+                    seriesLimit.lower?.let { value ->
                         byYAxis {
-                            value(seriesLimit.lower, seriesLimit.upper)
-                            name("${seriesLimit.upper}\n ~\n${seriesLimit.lower}")
+                            value(value)
+                            name("$value ⤓")
                             label {
-                                position { right }
+                                position { end }
+                                formatter("{b}")
+                            }
+                        }
+                    }
+                    seriesLimit.upper?.let { value ->
+                        byYAxis {
+                            value(value)
+                            name("$value ⤒")
+                            label {
+                                position { end }
                                 formatter("{b}")
                             }
                         }
@@ -481,54 +479,69 @@ private fun configChartPointSeries(
                 }
             }
 
-            val stackCode = "stack:$seriesId"
-            line {
-                id("line-stack-min:$seriesId")
-                name(seriesName)
-                smooth(true)
-                connectNulls(true)
+            if (seriesLimit.lower != null && seriesLimit.upper != null) {
+                markArea {
+                    style { opacity(0.1f) }
 
-                symbol { shape { none } }
-                stack { name(stackCode) }
-                lineStyle { opacity(0.6f) }
-
-                data {
-                    dimension("x", "y") {
-                        x("x")
-                        y("y")
-                    }
-
-                    pointMapEntry.value.onEachIndexed { index, list ->
-                        val min = list.minOfOrNull { it.value }
-                        item(index, min) {}
+                    byYAxis {
+                        value(seriesLimit.lower, seriesLimit.upper)
+                        name("${seriesLimit.upper}\n ~\n${seriesLimit.lower}")
+                        label {
+                            position { right }
+                            formatter("{b}")
+                        }
                     }
                 }
             }
-            line {
-                id("line-stack-max:$seriesId")
-                name(seriesName)
-                smooth(true)
-                connectNulls(true)
+        }
 
-                symbol { shape { none } }
-                stack { name(stackCode) }
-                lineStyle { opacity(0.6f) }
-                areaStyle { opacity(0.6f) }
+        val stackCode = "stack:$seriesId"
+        line {
+            id("line-stack-min:$seriesId")
+            name(seriesName)
+            smooth(true)
+            connectNulls(true)
 
-                data {
-                    dimension("x", "y") {
-                        x("x")
-                        y("y")
-                    }
+            symbol { shape { none } }
+            stack { name(stackCode) }
+            lineStyle { opacity(0.6f) }
 
-                    // Note: 这里为前面同名 stack 之间的差值
-                    pointMapEntry.value.onEachIndexed { index, list ->
-                        val min = list.minOfOrNull { it.value }
-                        val max = list.maxOfOrNull { it.value }
+            data {
+                dimension("x", "y") {
+                    x("x")
+                    y("y")
+                }
 
-                        if (min != null && max != null) {
-                            item(index, max - min) {}
-                        }
+                measureData.onEachIndexed { index, list ->
+                    val min = list.minOfOrNull { it.value }
+                    item(index, min) {}
+                }
+            }
+        }
+        line {
+            id("line-stack-max:$seriesId")
+            name(seriesName)
+            smooth(true)
+            connectNulls(true)
+
+            symbol { shape { none } }
+            stack { name(stackCode) }
+            lineStyle { opacity(0.6f) }
+            areaStyle { opacity(0.6f) }
+
+            data {
+                dimension("x", "y") {
+                    x("x")
+                    y("y")
+                }
+
+                // Note: 这里为前面同名 stack 之间的差值
+                measureData.onEachIndexed { index, list ->
+                    val min = list.minOfOrNull { it.value }
+                    val max = list.maxOfOrNull { it.value }
+
+                    if (min != null && max != null) {
+                        item(index, max - min) {}
                     }
                 }
             }

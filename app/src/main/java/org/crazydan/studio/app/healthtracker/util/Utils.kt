@@ -36,13 +36,21 @@ fun getFullName(familyName: String, givenName: String): String {
     return "${familyName}${nameSeparator}${givenName}"
 }
 
-/** @param untilToDayEnd 在 [time] 未指定时，是否将 [time] 设定为 23:59:59.999 */
-fun toEpochMillis(date: LocalDate, time: LocalTime? = null, untilToDayEnd: Boolean = false): Long {
+fun genCode(length: Int): String {
+    val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
+
+    return (1..length)
+        .map { allowedChars.random(Random) }
+        .joinToString("")
+}
+
+/** @param toDayEnd 在 [time] 未指定时，是否将 [time] 设定为 23:59:59.999 */
+fun toEpochMillis(date: LocalDate, time: LocalTime? = null, toDayEnd: Boolean = false): Long {
     val zoneId = ZoneId.systemDefault()
     val zonedDateTime = ZonedDateTime.of(
         date,
         time ?: (
-                if (untilToDayEnd) LocalTime.of(23, 59, 59, 9999)
+                if (toDayEnd) LocalTime.of(23, 59, 59, 999_000_000)
                 else LocalTime.of(0, 0, 0, 0)),
         zoneId,
     )
@@ -78,10 +86,31 @@ fun formatEpochMillis(millis: Long, format: String): String {
     return dateFormat.format(Date(millis))
 }
 
-fun genCode(length: Int): String {
-    val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
 
-    return (1..length)
-        .map { allowedChars.random(Random) }
-        .joinToString("")
+/**
+ * 截取毫秒值为整天
+ *
+ * @param toDayEnd 是否取当天的结束时间
+ */
+fun subEpochMillisToDay(millis: Long, toDayEnd: Boolean = false): Long {
+    if (millis <= 0) {
+        return millis
+    }
+
+    val instant = Instant.ofEpochMilli(millis)
+    val zoneId = ZoneId.systemDefault()
+    val date = instant.atZone(zoneId).toLocalDate()
+
+    val dayStart = date.atStartOfDay(zoneId)
+
+    return (
+            if (toDayEnd)
+                dayStart
+                    .plusDays(1)
+                    .minusNanos(1_000_000) // 减去1毫秒
+            else
+                dayStart
+            )
+        .toInstant()
+        .toEpochMilli()
 }
