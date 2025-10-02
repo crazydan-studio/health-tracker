@@ -12,47 +12,53 @@ import org.crazydan.studio.app.healthtracker.model.HealthType
  * @date 2025-09-01
  */
 sealed class Message {
-    class NavBack() : Message()
+    data object NavBack : Message()
+
+    // Sync
+    data object WillSyncHealthData : Message()
 
     // HealthPerson
-    class WillAddHealthPerson() : Message()
-    class WillEditHealthPerson(val id: Long) : Message()
-    class SaveHealthPerson(val data: HealthPerson) : Message()
-    class DeleteHealthPerson(val id: Long) : Message()
-    class UndeleteHealthPerson(val id: Long) : Message()
-    class ViewDeletedHealthPersons() : Message()
-    class ClearDeletedHealthPersons() : Message()
+    data object WillAddHealthPerson : Message()
+    data class WillEditHealthPerson(val id: Long) : Message()
+    data class SaveHealthPerson(val data: HealthPerson) : Message()
+    data class DeleteHealthPerson(val id: Long) : Message()
+    data class UndeleteHealthPerson(val id: Long) : Message()
+    data object ViewDeletedHealthPersons : Message()
+    data object ClearDeletedHealthPersons : Message()
 
-    class WillAddHealthTypeOfPerson(val personId: Long) : Message()
-    class ViewHealthTypesOfPerson(val personId: Long) : Message()
-    class ViewDeletedHealthTypesOfPerson(val personId: Long) : Message()
-    class ClearDeletedHealthTypesOfPerson(val personId: Long) : Message()
+    data class WillAddHealthTypeOfPerson(val personId: Long) : Message()
+    data class ViewHealthTypesOfPerson(val personId: Long) : Message()
+    data class ViewDeletedHealthTypesOfPerson(val personId: Long) : Message()
+    data class ClearDeletedHealthTypesOfPerson(val personId: Long) : Message()
 
     // HealthType
-    class WillEditHealthType(val id: Long, val personId: Long) : Message()
-    class SaveHealthType(val data: HealthType) : Message()
-    class DeleteHealthType(val id: Long) : Message()
-    class UndeleteHealthType(val id: Long) : Message()
+    data class WillEditHealthType(val id: Long, val personId: Long) : Message()
+    data class SaveHealthType(val data: HealthType) : Message()
+    data class DeleteHealthType(val id: Long) : Message()
+    data class UndeleteHealthType(val id: Long) : Message()
 
-    class WillAddHealthRecordOfType(val typeId: Long, val personId: Long) : Message()
-    class ViewHealthRecordsOfType(
+    data class WillAddHealthRecordOfType(
+        val typeId: Long, val personId: Long
+    ) : Message()
+
+    data class ViewHealthRecordsOfType(
         val typeId: Long, val personId: Long,
         val filter: HealthRecordFilter? = null,
         /** 查看最近 7 天的数据 */
         val latest7Days: Boolean = false,
     ) : Message()
 
-    class ViewHealthRecordDetailsOfType(val typeId: Long, val personId: Long) : Message()
-    class ViewDeletedHealthRecordsOfType(val typeId: Long, val personId: Long) : Message()
-    class ClearDeletedHealthRecordsOfType(val typeId: Long) : Message()
+    data class ViewHealthRecordDetailsOfType(val typeId: Long, val personId: Long) : Message()
+    data class ViewDeletedHealthRecordsOfType(val typeId: Long, val personId: Long) : Message()
+    data class ClearDeletedHealthRecordsOfType(val typeId: Long) : Message()
 
     // HealthRecord
-    class WillEditHealthRecord(
+    data class WillEditHealthRecord(
         val id: Long,
         val typeId: Long, val personId: Long,
     ) : Message()
 
-    class SaveHealthRecord(val data: HealthRecord) : Message()
-    class DeleteHealthRecord(val id: Long) : Message()
-    class UndeleteHealthRecord(val id: Long) : Message()
+    data class SaveHealthRecord(val data: HealthRecord) : Message()
+    data class DeleteHealthRecord(val id: Long) : Message()
+    data class UndeleteHealthRecord(val id: Long) : Message()
 }

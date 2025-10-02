@@ -50,6 +50,7 @@ fun HealthRecordDetailsScreen(
     HealthDataListScreen(
         deletedAmount = deletedRecordAmount,
         dataList = healthRecords,
+        dataKey = { it.id },
         title = {
             Text(
                 stringResource(
@@ -65,7 +66,7 @@ fun HealthRecordDetailsScreen(
                 healthType.personId
             )
         },
-        onNavigateBack = { Message.NavBack() },
+        onNavigateBack = { Message.NavBack },
     ) { record ->
         HealthRecordCard(
             type = healthType,
@@ -143,8 +144,8 @@ private fun HealthRecordCardPreview() {
         type = PreviewSample().createHealthType(),
         record = PreviewSample().createHealthRecord(),
         actions = HealthDataCardActions(
-            onEdit = { Message.NavBack() },
-            onDelete = { Message.NavBack() },
+            onEdit = { Message.NavBack },
+            onDelete = { Message.NavBack },
         ),
     )
 }

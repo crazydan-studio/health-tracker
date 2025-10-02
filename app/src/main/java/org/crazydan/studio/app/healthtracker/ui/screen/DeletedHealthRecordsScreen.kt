@@ -45,9 +45,7 @@ fun DeletedHealthRecordsScreen(
         onClearAll = {
             Message.ClearDeletedHealthRecordsOfType(healthType.id)
         },
-        onNavigateBack = {
-            Message.NavBack()
-        },
+        onNavigateBack = { Message.NavBack },
     ) { record ->
         HealthRecordCard(
             type = healthType,

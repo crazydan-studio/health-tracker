@@ -92,7 +92,7 @@ fun AddOrEditHealthTypeScreen(
                     ),
             )
         },
-        onNavigateBack = { Message.NavBack() },
+        onNavigateBack = { Message.NavBack },
         canSave = {
             name.isNotEmpty() && unit.isNotEmpty()
         },

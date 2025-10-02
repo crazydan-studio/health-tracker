@@ -72,8 +72,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        }
     }
     dependenciesInfo {
         // <<<< 可重复构建不能在发布包中包含依赖信息：
@@ -118,17 +120,32 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)
 
-    //implementation("com.patrykandpatrick.vico:compose-m3:2.1.3")
-    //implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
-    //implementation("com.github.AAChartModel:AAChartCore-Kotlin:7.4.0")
-    implementation(project(":echarts"))
-
+    //
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
+
+    //implementation("com.patrykandpatrick.vico:compose-m3:2.1.3")
+    //implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    //implementation("com.github.AAChartModel:AAChartCore-Kotlin:7.4.0")
+    implementation(project(":echarts"))
+
+    // CameraX
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+    // ML Kit 二维码扫描
+    implementation(libs.barcode.scanning)
+    // Coil 图片加载
+    implementation(libs.coil.compose)
+    // Accompanist 权限
+    implementation(libs.accompanist.permissions)
+    // 系统 UI 控制器
+    implementation(libs.accompanist.systemuicontroller)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

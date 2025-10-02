@@ -111,7 +111,7 @@ fun AddOrEditHealthRecordScreen(
                     ),
             )
         },
-        onNavigateBack = { Message.NavBack() },
+        onNavigateBack = { Message.NavBack },
         canSave = {
             value.toFloatOrNull() != null
                     && (healthType.measures.isEmpty()

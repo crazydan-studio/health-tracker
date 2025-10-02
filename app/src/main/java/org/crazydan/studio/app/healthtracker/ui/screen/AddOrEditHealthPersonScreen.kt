@@ -63,7 +63,7 @@ fun AddOrEditHealthPersonScreen(
                     stringResource(R.string.title_edit_health_person),
             )
         },
-        onNavigateBack = { Message.NavBack() },
+        onNavigateBack = { Message.NavBack },
         canSave = {
             familyName.isNotEmpty() && givenName.isNotEmpty() && birthDate != null
         },

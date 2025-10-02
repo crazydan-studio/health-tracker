@@ -60,14 +60,39 @@
     <string name="btn_clear">清空</string>
     <string name="btn_confirm">确认</string>
     <string name="btn_trash">回收站</string>
+    <string name="btn_sync_data">数据同步</string>
     <string name="btn_details">查看详情</string>
     <string name="btn_select_time">选择时间</string>
     <string name="btn_select_date">选择日期</string>
+    <string name="btn_retry">重试</string>
+    <string name="btn_grant_permission">授予权限</string>
 
     <string name="msg_no_data_to_add">暂无数据，请点击右下角按钮添加</string>
     <string name="msg_empty_trash">回收站为空</string>
-    <string name="msg_data_loading">数据加载中...</string>
+    <string name="msg_data_loading">数据加载中…</string>
     <string name="msg_clear_trash_warning">
         清空后，数据将被永久删除，无法恢复！若要继续该操作，请点击「确认」按钮，否则，请点击「取消」按钮。
+    </string>
+
+    <string name="title_camera_start_failed">
+        摄像头启动失败
+    </string>
+    <string name="title_camera_denied">
+        需要摄像头权限
+    </string>
+    <string name="msg_no_detected_camera">
+        未检测到摄像头
+    </string>
+    <string name="msg_no_back_camera">
+        未检测到后置摄像头
+    </string>
+    <string name="msg_no_front_camera">
+        未检测到前置摄像头
+    </string>
+    <string name="msg_initializing_camera">
+        正在启动摄像头…
+    </string>
+    <string name="msg_allow_to_use_camera">
+        请为本应用授予摄像头权限，以支持当前功能的正常使用
     </string>
 </resources>

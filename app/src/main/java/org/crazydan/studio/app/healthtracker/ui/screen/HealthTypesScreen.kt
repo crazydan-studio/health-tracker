@@ -40,6 +40,7 @@ fun HealthTypesScreen(
     HealthDataListScreen(
         deletedAmount = deletedTypeAmount,
         dataList = healthTypes,
+        dataKey = { it.id },
         title = {
             Text(
                 stringResource(
@@ -54,7 +55,7 @@ fun HealthTypesScreen(
         onViewDeleted = {
             Message.ViewDeletedHealthTypesOfPerson(healthPerson.id)
         },
-        onNavigateBack = { Message.NavBack() },
+        onNavigateBack = { Message.NavBack },
     ) { type ->
         HealthTypeCard(
             type = type,
@@ -123,8 +124,8 @@ private fun HealthTypeCardPreview() {
     HealthTypeCard(
         type = PreviewSample().createHealthType(),
         actions = HealthDataCardActions(
-            onEdit = { Message.NavBack() },
-            onDelete = { Message.NavBack() },
+            onEdit = { Message.NavBack },
+            onDelete = { Message.NavBack },
         ),
     )
 }

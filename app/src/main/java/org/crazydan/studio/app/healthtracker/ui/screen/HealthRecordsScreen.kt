@@ -73,7 +73,7 @@ fun HealthRecordsScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        dispatch(Message.NavBack())
+                        dispatch(Message.NavBack)
                     }) {
                         Icon(
                             Icons.AutoMirrored.Default.ArrowBack,

@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Recycling
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.Badge
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -38,7 +39,9 @@ fun <T> HealthDataListScreen(
     title: @Composable () -> Unit,
     deletedAmount: Long,
     dataList: List<T>,
+    dataKey: (item: T) -> Any,
     onAddData: (() -> Message)? = null,
+    onSyncData: (() -> Message)? = null,
     onViewDeleted: () -> Message,
     onNavigateBack: (() -> Message)? = null,
     content: @Composable (T) -> Unit,
@@ -75,6 +78,18 @@ fun <T> HealthDataListScreen(
                             }
                         }
                     }
+
+                    onSyncData?.let { sync ->
+                        TextButton(onClick = {
+                            dispatch(sync)
+                        }) {
+                            Icon(
+                                Icons.Default.Sync,
+                                contentDescription =
+                                    stringResource(R.string.btn_sync_data),
+                            )
+                        }
+                    }
                 }
             )
         },
@@ -108,7 +123,7 @@ fun <T> HealthDataListScreen(
                     .padding(padding)
                     .fillMaxSize()
             ) {
-                items(dataList) { data ->
+                items(dataList, key = dataKey) { data ->
                     content(data)
                 }
             }

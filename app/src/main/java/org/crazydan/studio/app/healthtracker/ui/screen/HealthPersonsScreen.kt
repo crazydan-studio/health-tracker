@@ -39,16 +39,20 @@ fun HealthPersonsScreen(
     HealthDataListScreen(
         deletedAmount = deletedPersonAmount,
         dataList = healthPersons,
+        dataKey = { it.id },
         title = {
             Text(
                 stringResource(R.string.app_name)
             )
         },
         onAddData = {
-            Message.WillAddHealthPerson()
+            Message.WillAddHealthPerson
+        },
+        onSyncData = {
+            Message.WillSyncHealthData
         },
         onViewDeleted = {
-            Message.ViewDeletedHealthPersons()
+            Message.ViewDeletedHealthPersons
         },
     ) { person ->
         HealthPersonCard(

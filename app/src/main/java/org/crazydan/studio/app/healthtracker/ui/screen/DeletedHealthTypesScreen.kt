@@ -42,9 +42,7 @@ fun DeletedHealthTypesScreen(
         onClearAll = {
             Message.ClearDeletedHealthTypesOfPerson(healthPerson.id)
         },
-        onNavigateBack = {
-            Message.NavBack()
-        },
+        onNavigateBack = { Message.NavBack },
     ) { type ->
         HealthTypeCard(
             type = type,

@@ -13,6 +13,12 @@ import org.crazydan.studio.app.healthtracker.model.HealthRecordFilter
  */
 sealed class Route {
 
+    // <<<<<<<<<<< Sync
+    @Serializable
+    data object SyncHealthData : Route()
+
+    // >>>>>>>>>>>>
+
     // <<<<<<<<<<< HealthPerson
     @Serializable
     data object HealthPersons : Route()

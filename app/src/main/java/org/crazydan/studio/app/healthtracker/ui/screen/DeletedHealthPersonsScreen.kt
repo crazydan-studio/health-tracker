@@ -34,11 +34,9 @@ fun DeletedHealthPersonsScreen(
         },
         dataList = healthPersons,
         onClearAll = {
-            Message.ClearDeletedHealthPersons()
+            Message.ClearDeletedHealthPersons
         },
-        onNavigateBack = {
-            Message.NavBack()
-        },
+        onNavigateBack = { Message.NavBack },
     ) { person ->
         HealthPersonCard(
             person = person,
