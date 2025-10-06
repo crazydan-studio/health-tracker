@@ -14,9 +14,6 @@ import org.crazydan.studio.app.healthtracker.model.HealthType
 sealed class Message {
     data object NavBack : Message()
 
-    // Sync
-    data object WillSyncHealthData : Message()
-
     // HealthPerson
     data object WillAddHealthPerson : Message()
     data class WillEditHealthPerson(val id: Long) : Message()

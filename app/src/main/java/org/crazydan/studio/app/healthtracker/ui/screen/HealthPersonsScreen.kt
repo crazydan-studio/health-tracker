@@ -48,9 +48,6 @@ fun HealthPersonsScreen(
         onAddData = {
             Message.WillAddHealthPerson
         },
-        onSyncData = {
-            Message.WillSyncHealthData
-        },
         onViewDeleted = {
             Message.ViewDeletedHealthPersons
         },

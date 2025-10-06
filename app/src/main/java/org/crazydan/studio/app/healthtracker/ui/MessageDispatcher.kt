@@ -36,12 +36,6 @@ fun dispatchMessage(
             goback()
         }
 
-        is Message.WillSyncHealthData -> {
-            navController.navigate(
-                Route.SyncHealthData
-            )
-        }
-
         is Message.WillAddHealthPerson -> {
             navController.navigate(
                 Route.AddHealthPerson

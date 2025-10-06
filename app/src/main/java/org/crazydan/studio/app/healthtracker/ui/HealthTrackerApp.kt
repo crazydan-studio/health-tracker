@@ -31,7 +31,6 @@ import org.crazydan.studio.app.healthtracker.ui.screen.HealthPersonsScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.HealthRecordDetailsScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.HealthRecordsScreen
 import org.crazydan.studio.app.healthtracker.ui.screen.HealthTypesScreen
-import org.crazydan.studio.app.healthtracker.ui.screen.SyncHealthDataScreen
 import kotlin.reflect.typeOf
 
 private var dispatcher: (Message) -> Unit = {}
@@ -66,11 +65,6 @@ fun HealthTrackerApp() {
         navController = navController,
         startDestination = Route.HealthPersons,
     ) {
-        //
-        composable<Route.SyncHealthData> {
-            SyncHealthDataScreen()
-        }
-
         //
         composable<Route.HealthPersons> {
             ShowHealthPersonsScreen(
