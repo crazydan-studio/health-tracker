@@ -12,6 +12,7 @@ import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.ui.component.ChartData.TimeItem
 import org.crazydan.studio.app.healthtracker.ui.theme.isInDarkTheme
+import org.crazydan.studio.app.healthtracker.util.formatEpochMillis
 import org.crazydan.studio.app.healthtracker.util.genCode
 
 /**
@@ -184,6 +185,20 @@ private fun configChartGrid(
     healthType: HealthType,
     chartData: ChartData,
 ) {
+    val dateRanges = mutableMapOf<String, MutableList<Long>>()
+    chartData.lines.map { it.value }.fold(mutableListOf<Long>()) { acc, items ->
+        acc.addAll(items.map { it.datetime })
+        acc
+    }.also {
+        it.sort()
+    }.forEach { datetime ->
+        val date = formatEpochMillis(datetime, "yyyy-MM-dd")
+
+        dateRanges.computeIfAbsent(date) {
+            mutableListOf()
+        }.add(datetime)
+    }
+
     option.grid {
         showBorder(false)
         margin {
@@ -195,6 +210,41 @@ private fun configChartGrid(
             type { time() }
             label {
                 rotate(-30f)
+            }
+
+            // 标记天的范围
+            dateRanges.entries.forEachIndexed { index, entry ->
+                val ranges = entry.value
+
+                if (ranges.size == 1) {
+                    markLine {
+                        label { show(false) }
+                        style {
+                            type { solid }
+                            width(8)
+
+                            val colors = listOf(
+                                rgba(115, 192, 222, 0.03f),
+                                rgba(0, 0, 0, 0f),
+                            )
+                            color(colors[index % colors.size])
+                        }
+
+                        value(ranges.first())
+                    }
+                } else {
+                    markArea {
+                        style {
+                            val colors = listOf(
+                                rgba(115, 192, 222, 0.03f),
+                                rgba(0, 0, 0, 0f),
+                            )
+                            color(colors[index % colors.size])
+                        }
+
+                        value(ranges.first(), ranges.last())
+                    }
+                }
             }
         }
         yAxis {
