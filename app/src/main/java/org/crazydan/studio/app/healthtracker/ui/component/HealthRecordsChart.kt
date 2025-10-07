@@ -215,6 +215,11 @@ private fun configChartGrid(
             // 标记天的范围
             dateRanges.entries.forEachIndexed { index, entry ->
                 val ranges = entry.value
+                val colors = listOf(
+                    rgba(115, 192, 222, 0.03f),
+                    rgba(0, 0, 0, 0f),
+                )
+                val c = colors[index % colors.size]
 
                 if (ranges.size == 1) {
                     markLine {
@@ -222,12 +227,7 @@ private fun configChartGrid(
                         style {
                             type { solid }
                             width(8)
-
-                            val colors = listOf(
-                                rgba(115, 192, 222, 0.03f),
-                                rgba(0, 0, 0, 0f),
-                            )
-                            color(colors[index % colors.size])
+                            color(c)
                         }
 
                         value(ranges.first())
@@ -235,11 +235,7 @@ private fun configChartGrid(
                 } else {
                     markArea {
                         style {
-                            val colors = listOf(
-                                rgba(115, 192, 222, 0.03f),
-                                rgba(0, 0, 0, 0f),
-                            )
-                            color(colors[index % colors.size])
+                            color(c)
                         }
 
                         value(ranges.first(), ranges.last())
