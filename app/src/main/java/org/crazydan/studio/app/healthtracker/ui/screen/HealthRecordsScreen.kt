@@ -170,8 +170,6 @@ fun HealthRecordsScreen(
                 )
             }
 
-            // TODO 按标签过滤：多选并做 and 运算
-
             if (healthRecords.isEmpty()) {
                 Column(
                     modifier = Modifier

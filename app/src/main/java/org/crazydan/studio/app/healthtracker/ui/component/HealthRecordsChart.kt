@@ -12,9 +12,7 @@ import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.ui.component.ChartData.TimeItem
 import org.crazydan.studio.app.healthtracker.ui.theme.isInDarkTheme
-import org.crazydan.studio.app.healthtracker.util.formatEpochMillis
 import org.crazydan.studio.app.healthtracker.util.genCode
-import kotlin.math.max
 
 /**
  *
@@ -51,37 +49,25 @@ private fun createChartData(
     healthType: HealthType,
     records: List<HealthRecord>,
 ): ChartData {
-    val maxDataAmountMap = mutableMapOf<String, Int>()
-    val seriesMap = mutableMapOf<String, MutableMap<String, MutableList<TimeItem>>>()
+    // <measure code, [item, ...]>
+    val seriesMap = mutableMapOf<String, MutableList<TimeItem>>()
+    // Note: records 是按 timestamp 降序排序的，这里需将其调整为升序
     records.asReversed().forEach { record ->
         val measure = record.measure
-        val datePattern = "yyyy-MM-dd"
-        val datetime = formatEpochMillis(record.timestamp, "$datePattern HH:mm")
-        val date = datetime.substring(0, datePattern.length)
-        val time = datetime.substring(datePattern.length + 1)
 
-        val list = seriesMap.computeIfAbsent(date) {
-            mutableMapOf()
-        }.computeIfAbsent(measure) {
+        seriesMap.computeIfAbsent(measure) {
             mutableListOf()
-        }
-
-        list.add(
+        }.add(
             TimeItem(
-                time = time,
+                datetime = record.timestamp,
                 value = record.value,
             )
         )
-
-        maxDataAmountMap.computeIfAbsent(measure) { 0 }
-        maxDataAmountMap.computeIfPresent(measure) { k, v -> max(v, list.size) }
     }
 
-    val days = seriesMap.keys
-    val lines = mutableMapOf<String, List<TimeItem?>>()
-    val points = mutableMapOf<String, List<List<TimeItem>>>()
     val measures =
         healthType.measures.ifEmpty {
+            // Note: 对于无测量指标的数据，采用匿名指标做数据映射
             listOf(
                 HealthMeasure(
                     code = "",
@@ -98,45 +84,26 @@ private fun createChartData(
         val code = measure.code
         measureNameMap.put(code, name)
         measureLimitMap.put(code, measure.limit)
-
-        val maxAmount = maxDataAmountMap.getOrDefault(code, 0)
-        if (maxAmount > 1) {
-            // 该指标同一天内含多个数据
-            points.put(code, seriesMap.map { entry ->
-                entry.value.getOrDefault(code, listOf())
-            })
-        } else if (maxAmount == 1) {
-            // 该指标同一天内仅含单个数据
-            lines.put(code, seriesMap.map { entry ->
-                entry.value
-                    .getOrDefault(code, mutableListOf())
-                    .firstOrNull()
-            })
-        } else {
-            // 该指标无数据
-            lines.put(code, listOf())
-        }
     }
 
     return ChartData(
         measures = measureNameMap,
         measureLimits = measureLimitMap,
-        days = days,
-        lines = lines,
-        points = points,
+        lines = seriesMap,
     )
 }
 
 private data class ChartData(
+    // <measure code, measure name>
     val measures: Map<String, String>,
+    // <measure code, limit>
     val measureLimits: Map<String, HealthLimit>,
-    val days: Collection<String>,
-    val lines: Map<String, List<TimeItem?>>,
-    val points: Map<String, List<List<TimeItem>>>,
+    // <measure code, [item, ...]>
+    val lines: Map<String, List<TimeItem>>,
 ) {
 
     data class TimeItem(
-        val time: String,
+        val datetime: Long,
         val value: Float,
     )
 }
@@ -147,6 +114,7 @@ private fun createChartOption(
 ): ECharts.Option {
     val option = createChartBase(
         healthType = healthType,
+        chartData = chartData,
     )
 
     configChartGrid(
@@ -167,14 +135,6 @@ private fun createChartOption(
                 chartData = chartData,
             )
         }
-        chartData.points[measureCode]?.let {
-            configChartPointSeries(
-                option = option,
-                measureCode = measureCode,
-                measureData = it,
-                chartData = chartData,
-            )
-        }
     }
 
     return option
@@ -182,6 +142,7 @@ private fun createChartOption(
 
 private fun createChartBase(
     healthType: HealthType,
+    chartData: ChartData,
 ): ECharts.Option {
     val option = ECharts.option {
         tooltip {
@@ -191,63 +152,6 @@ private fun createChartBase(
             }
             triggerBy { axis }
             axisPointer { type { cross } }
-
-            formatter(
-                """
-                    function (params) {
-                        var title = params[0].name;
-                        var series = {};
-                        var seriesColors = {};
-                        params.forEach(function(param) {
-                            var key = param.componentIndex;
-                            var list = series[key];
-                            if (!list) {
-                                list = series[key] = [];
-                            }
-                            
-                            var id = param.seriesId || '';
-                            var refId = id.substr(id.indexOf(':') + 1);
-                            if (id.indexOf('line-stack-') < 0) {
-                                refId = id;
-                            }
-                            seriesColors[refId] = param.color;
-                            
-                            list.push({
-                                id: id,
-                                seriesName: param.seriesName,
-                                name: param.value[2] || param.seriesName,
-                                value: (function(v) {
-                                    return v ? v.toFixed(2) + ' ${healthType.unit}' : '-';
-                                })(param.value[1])
-                            });
-                        });
-                        
-                        var data = [];
-                        Object.keys(series).forEach(function(key) {
-                            var s = series[key];
-                            var first = s[0];
-                            if (first.id.indexOf('line-stack-') >= 0  //
-                                || (s.length == 1 && first.value == '-') //
-                            ) {
-                                return;
-                            }
-                        
-                            var color = seriesColors[first.id];
-                            data.push({
-                                name: first.seriesName,
-                                color: color,
-                                data: s.map(function(item) {
-                                    item.color = color;
-                                    return item;
-                                })
-                            }); 
-                        });
-                        //console.log(JSON.stringify(data));
-                        var html = createTooltip_v1(title, data);
-                        return html;
-                    }
-            """.trimIndent()
-            )
         }
 
         legend {
@@ -257,16 +161,15 @@ private fun createChartBase(
 
         dataZoom {
             slider {
+                // Note: 数据数量小于 2 时，缩放区域的位置会发生漂移，对此，直接不显示
+                show(chartData.lines.map { it.value.size }.max() > 1)
+
                 margin {
                     //top(90f.pct)
                     left(10f.pct)
                 }
                 filterMode { filter }
                 window {
-//                    // 定位到最近一周的数据
-//                    val start = max(0, chartData.days.size - 7)
-//                    val end = chartData.days.size
-//                    range(start.idx, end.idx)
                     range(0f.pct, 100f.pct)
                 }
             }
@@ -289,18 +192,9 @@ private fun configChartGrid(
         }
 
         xAxis {
-            type {
-                category {
-                    data {
-                        chartData.days.map {
-                            item(it) {}
-                        }
-                    }
-                }
-            }
-            axisTick {
-                show(true)
-                alignWithLabel(true)
+            type { time() }
+            label {
+                rotate(-30f)
             }
         }
         yAxis {
@@ -335,7 +229,7 @@ private fun configChartGrid(
 private fun configChartLineSeries(
     option: ECharts.Option,
     measureCode: String,
-    measureData: List<TimeItem?>,
+    measureData: List<TimeItem>,
     chartData: ChartData,
 ) {
     option.series {
@@ -355,8 +249,8 @@ private fun configChartLineSeries(
                     y("y")
                 }
 
-                measureData.onEachIndexed { index, ti ->
-                    item(index, ti?.value, ti?.time) {}
+                measureData.forEach {
+                    item(it.datetime, it.value) {}
                 }
             }
 
@@ -373,7 +267,7 @@ private fun configChartLineSeries(
 
             if (seriesLimit.lower != null && seriesLimit.upper != null) {
                 markArea {
-                    style { opacity(0.1f) }
+                    style { opacity(0.3f) }
 
                     byYAxis {
                         value(seriesLimit.lower, seriesLimit.upper)
@@ -438,7 +332,7 @@ private fun configChartPointSeries(
                 measureData.onEachIndexed { index, list ->
                     // 同一天的点，映射到相同的 x 坐标位置
                     list.forEach { ti ->
-                        item(index, ti.value, ti.time) {}
+                        item(index, ti.value) {}
                     }
                 }
             }
