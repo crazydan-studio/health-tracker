@@ -152,7 +152,21 @@ private fun createChartBase(
                 top()
             }
             triggerBy { axis }
-            axisPointer { type { cross } }
+            axisPointer {
+                type { cross }
+                label {
+                    formatter(
+                        """
+                        function (params) {
+                            if (params.axisDimension == 'y') {
+                                return params.value.toFixed(2);
+                            }
+                            return echarts.format.formatTime('yyyy-MM-dd hh:mm', params.value);
+                        }
+                    """.trimIndent()
+                    )
+                }
+            }
         }
 
         legend {
