@@ -80,6 +80,15 @@ fun epochMillisToLocalDateTime(millis: Long?): ZonedDateTime? {
     return instant.atZone(zoneId)
 }
 
+/** 格式化："年-月-日" */
+const val Pattern_yyyy_MM_dd = "yyyy-MM-dd"
+
+/** 格式化："24小时:分" */
+const val Pattern_HH_mm = "HH:mm"
+
+/** 格式化："年-月-日 24小时:分" */
+const val Pattern_yyyy_MM_dd_HH_mm = "$Pattern_yyyy_MM_dd $Pattern_HH_mm"
+
 fun formatEpochMillis(millis: Long, format: String): String {
     val dateFormat = SimpleDateFormat(format, Locale.getDefault())
 

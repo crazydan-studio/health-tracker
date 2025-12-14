@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.marosseleng.compose.material3.datetimepickers.date.ui.dialog.DatePickerDialog
 import org.crazydan.studio.app.healthtracker.R
+import org.crazydan.studio.app.healthtracker.util.Pattern_yyyy_MM_dd
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -30,7 +31,7 @@ fun DateInputPicker(
     modifier: Modifier = Modifier,
     value: LocalDate? = null,
     label: @Composable (() -> Unit)? = null,
-    format: String = "yyyy-MM-dd",
+    format: String = Pattern_yyyy_MM_dd,
     onValueChange: ((LocalDate) -> Unit)? = null,
 ) {
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }

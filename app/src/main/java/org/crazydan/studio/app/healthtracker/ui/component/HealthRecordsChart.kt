@@ -12,8 +12,16 @@ import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.ui.component.ChartData.TimeItem
 import org.crazydan.studio.app.healthtracker.ui.theme.isInDarkTheme
+import org.crazydan.studio.app.healthtracker.util.Pattern_yyyy_MM_dd
+import org.crazydan.studio.app.healthtracker.util.Pattern_yyyy_MM_dd_HH_mm
 import org.crazydan.studio.app.healthtracker.util.formatEpochMillis
 import org.crazydan.studio.app.healthtracker.util.genCode
+import kotlin.math.floor
+
+private const val Dimension_x = "x"
+private const val Dimension_y = "y"
+private const val Dimension_x_label = "x-label"
+private const val Dimension_tags = "tags"
 
 /**
  *
@@ -50,18 +58,28 @@ private fun createChartData(
     healthType: HealthType,
     records: List<HealthRecord>,
 ): ChartData {
+    val dateRanges = mutableMapOf<String, Int>()
     // <measure code, [item, ...]>
     val seriesMap = mutableMapOf<String, MutableList<TimeItem>>()
     // Note: records 是按 timestamp 降序排序的，这里需将其调整为升序
     records.asReversed().forEach { record ->
         val measure = record.measure
+        val date = formatEpochMillis(record.timestamp, Pattern_yyyy_MM_dd)
+        val dateCount = dateRanges.getOrDefault(date, 0)
+        dateRanges.put(date, dateCount + 1)
+
+        val xLabel = formatEpochMillis(record.timestamp, Pattern_yyyy_MM_dd_HH_mm)
 
         seriesMap.computeIfAbsent(measure) {
             mutableListOf()
         }.add(
             TimeItem(
-                datetime = record.timestamp,
+                date = date,
+                indexInDate = dateCount,
+                indexInDateRange = dateRanges.size - 1,
+                xLabel = xLabel,
                 value = record.value,
+                tags = record.tags,
             )
         )
     }
@@ -90,6 +108,7 @@ private fun createChartData(
     return ChartData(
         measures = measureNameMap,
         measureLimits = measureLimitMap,
+        dateRanges = dateRanges,
         lines = seriesMap,
     )
 }
@@ -99,13 +118,22 @@ private data class ChartData(
     val measures: Map<String, String>,
     // <measure code, limit>
     val measureLimits: Map<String, HealthLimit>,
+    // <'2025-01-02', 4>
+    val dateRanges: Map<String, Int>,
     // <measure code, [item, ...]>
     val lines: Map<String, List<TimeItem>>,
 ) {
 
     data class TimeItem(
-        val datetime: Long,
+        /** 日期 */
+        val date: String,
+        /** 在同一天中的数据列表中的序号 */
+        val indexInDate: Int,
+        val indexInDateRange: Int,
+        /** 对应的 x 轴的标签 */
+        val xLabel: String,
         val value: Float,
+        val tags: List<String>,
     )
 }
 
@@ -156,17 +184,46 @@ private fun createChartBase(
                 type { cross }
                 label {
                     formatter(
+                        // console.log(JSON.stringify(params));
+                        // return echarts.format.formatTime('yyyy-MM-dd hh:mm', params.value);
                         """
                         function (params) {
-                            if (params.axisDimension == 'y') {
+                            if (params.axisDimension == '${Dimension_y}') {
                                 return params.value.toFixed(2);
+                            } else if (params.axisDimension == '${Dimension_x}') {
+                                var index = params.seriesData[0].dimensionNames.indexOf('${Dimension_x_label}');
+                                return params.seriesData[0].value[index];
                             }
-                            return echarts.format.formatTime('yyyy-MM-dd hh:mm', params.value);
+                            return '';
                         }
                     """.trimIndent()
                     )
                 }
             }
+
+            formatter(
+                """
+                    function (params) {
+                        var title = params[0].axisValueLabel || params[0].name;
+                        var data = params.map(function (param) {
+                            return {
+                                name: param.seriesName,
+                                color: param.color,
+                                value: (function (v) {
+                                    return v ? v.toFixed(2) + ' ${healthType.unit}' : '-';
+                                })(param.value[param.encode.y[0]]),
+                                tags: (param.value[param.dimensionNames.indexOf('${Dimension_tags}')] || '')
+                                        .split(',')
+                                        .filter(function (v) {
+                                            return !!v;
+                                        })
+                            };
+                        });
+                
+                        return createTooltip_v1(title, data);
+                    }
+            """.trimIndent()
+            )
         }
 
         legend {
@@ -199,19 +256,8 @@ private fun configChartGrid(
     healthType: HealthType,
     chartData: ChartData,
 ) {
-    val dateRanges = mutableMapOf<String, MutableList<Long>>()
-    chartData.lines.map { it.value }.fold(mutableListOf<Long>()) { acc, items ->
-        acc.addAll(items.map { it.datetime })
-        acc
-    }.also {
-        it.sort()
-    }.forEach { datetime ->
-        val date = formatEpochMillis(datetime, "yyyy-MM-dd")
-
-        dateRanges.computeIfAbsent(date) {
-            mutableListOf()
-        }.add(datetime)
-    }
+    val dateRanges = chartData.dateRanges.keys
+    val dateRangeSize = dateRanges.size
 
     option.grid {
         showBorder(false)
@@ -221,38 +267,40 @@ private fun configChartGrid(
         }
 
         xAxis {
-            type { time() }
-            label {
-                rotate(-30f)
+            type { value {} }
+            minValue(0f)
+            maxValue(dateRangeSize.toFloat())
+
+            label { show(false) }
+            splitLine { show(false) }
+            tick {
+                // 在一天的中心位置显示刻度：最多只显示 7~14 个
+                val factor = dateRangeSize / 7f
+                values(
+                    dateRanges.mapIndexed { index, _ ->
+                        if (factor > 2f) {
+                            floor((index * factor).toDouble()).toInt()
+                        } else {
+                            index
+                        }
+                    }
+                        .filter { index -> index <= dateRangeSize }
+                        .map { it + 0.5f }
+                )
             }
 
             // 标记天的范围
-            dateRanges.entries.forEachIndexed { index, entry ->
-                val ranges = entry.value
+            for (index in 0 until dateRangeSize) {
                 val colors = listOf(
                     rgba(115, 192, 222, 0.03f),
                     rgba(0, 0, 0, 0f),
                 )
                 val c = colors[index % colors.size]
 
-                if (ranges.size == 1) {
-                    markLine {
-                        label { show(false) }
-                        style {
-                            type { solid }
-                            width(8)
-                            color(c)
-                        }
-
-                        value(ranges.first())
-                    }
-                } else {
-                    markArea {
-                        style {
-                            color(c)
-                        }
-
-                        value(ranges.first(), ranges.last())
+                markArea {
+                    value(index, index + 1)
+                    style {
+                        color(c)
                     }
                 }
             }
@@ -304,24 +352,28 @@ private fun configChartLineSeries(
             connectNulls(true)
 
             data {
-                dimension("x", "y") {
-                    x("x")
-                    y("y")
+                dimension(Dimension_x, Dimension_y, Dimension_x_label, Dimension_tags) {
+                    x(Dimension_x)
+                    y(Dimension_y)
                 }
 
                 measureData.forEach {
-                    item(it.datetime, it.value) {}
+                    // 将一天内的数据按比例均分（左右预留两个空位），确保每天的数据所占用的横轴宽度始终一致
+                    val total = chartData.dateRanges.getOrDefault(it.date, 0) + 2
+                    val index = it.indexInDateRange + ((it.indexInDate + 1f) / total)
+
+                    item(index, it.value, it.xLabel, it.tags.joinToString(",")) {}
                 }
             }
 
             markPoint {
                 byData {
-                    byDimension { max("y") }
+                    byDimension { max(Dimension_y) }
                 }
                 byData {
                     symbol { rotate(180) }
                     label { position { insideBottom } }
-                    byDimension { min("y") }
+                    byDimension { min(Dimension_y) }
                 }
             }
 
@@ -359,143 +411,6 @@ private fun configChartLineSeries(
                                 formatter("{b}")
                             }
                         }
-                    }
-                }
-            }
-        }
-    }
-}
-
-private fun configChartPointSeries(
-    option: ECharts.Option,
-    measureCode: String,
-    measureData: List<List<TimeItem>>,
-    chartData: ChartData,
-) {
-    option.series {
-        val seriesId = genCode(8)
-        val seriesName = chartData.measures[measureCode]!!
-        val seriesLimit = chartData.measureLimits[measureCode]!!
-
-        scatter {
-            id(seriesId)
-            name(seriesName)
-            colorBy { data }
-            symbol { size(4) }
-
-            data {
-                dimension("x", "y") {
-                    x("x")
-                    y("y")
-                }
-
-                measureData.onEachIndexed { index, list ->
-                    // 同一天的点，映射到相同的 x 坐标位置
-                    list.forEach { ti ->
-                        item(index, ti.value) {}
-                    }
-                }
-            }
-
-            markPoint {
-                byData {
-                    byDimension { max("y") }
-                }
-                byData {
-                    symbol { rotate(180) }
-                    label { position { insideBottom } }
-                    byDimension { min("y") }
-                }
-            }
-
-            markLine {
-                if (seriesLimit.lower == null || seriesLimit.upper == null) {
-                    seriesLimit.lower?.let { value ->
-                        byYAxis {
-                            value(value)
-                            name("$value ⤓")
-                            label {
-                                position { end }
-                                formatter("{b}")
-                            }
-                        }
-                    }
-                    seriesLimit.upper?.let { value ->
-                        byYAxis {
-                            value(value)
-                            name("$value ⤒")
-                            label {
-                                position { end }
-                                formatter("{b}")
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (seriesLimit.lower != null && seriesLimit.upper != null) {
-                markArea {
-                    style { opacity(0.1f) }
-
-                    byYAxis {
-                        value(seriesLimit.lower, seriesLimit.upper)
-                        name("${seriesLimit.upper}\n ~\n${seriesLimit.lower}")
-                        label {
-                            position { right }
-                            formatter("{b}")
-                        }
-                    }
-                }
-            }
-        }
-
-        val stackCode = "stack:$seriesId"
-        line {
-            id("line-stack-min:$seriesId")
-            name(seriesName)
-            smooth(true)
-            connectNulls(true)
-
-            symbol { shape { none } }
-            stack { name(stackCode) }
-            lineStyle { opacity(0.6f) }
-
-            data {
-                dimension("x", "y") {
-                    x("x")
-                    y("y")
-                }
-
-                measureData.onEachIndexed { index, list ->
-                    val min = list.minOfOrNull { it.value }
-                    item(index, min) {}
-                }
-            }
-        }
-        line {
-            id("line-stack-max:$seriesId")
-            name(seriesName)
-            smooth(true)
-            connectNulls(true)
-
-            symbol { shape { none } }
-            stack { name(stackCode) }
-            lineStyle { opacity(0.6f) }
-            areaStyle { opacity(0.6f) }
-
-            data {
-                dimension("x", "y") {
-                    x("x")
-                    y("y")
-                }
-
-                // Note: 这里为前面同名 stack 之间的差值
-                measureData.onEachIndexed { index, list ->
-                    val min = list.minOfOrNull { it.value }
-                    val max = list.maxOfOrNull { it.value }
-
-                    if (min != null && max != null) {
-                        item(index, max - min) {}
                     }
                 }
             }

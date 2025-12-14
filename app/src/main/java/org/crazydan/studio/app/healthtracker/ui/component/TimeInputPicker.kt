@@ -16,6 +16,7 @@ import androidx.compose.ui.res.stringResource
 import com.marosseleng.compose.material3.datetimepickers.time.domain.noSeconds
 import com.marosseleng.compose.material3.datetimepickers.time.ui.dialog.TimePickerDialog
 import org.crazydan.studio.app.healthtracker.R
+import org.crazydan.studio.app.healthtracker.util.Pattern_HH_mm
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -31,7 +32,7 @@ fun TimeInputPicker(
     modifier: Modifier = Modifier,
     value: LocalTime? = null,
     label: @Composable (() -> Unit)? = null,
-    format: String = "HH:mm",
+    format: String = Pattern_HH_mm,
     onValueChange: ((LocalTime) -> Unit)? = null,
 ) {
     var selectedTime by remember { mutableStateOf<LocalTime?>(null) }

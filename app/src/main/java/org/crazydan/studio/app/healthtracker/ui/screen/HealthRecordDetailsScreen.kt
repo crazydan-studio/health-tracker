@@ -27,6 +27,7 @@ import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCard
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataCardActions
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataListScreen
 import org.crazydan.studio.app.healthtracker.ui.component.HealthDataLoadingScreen
+import org.crazydan.studio.app.healthtracker.util.Pattern_yyyy_MM_dd_HH_mm
 import org.crazydan.studio.app.healthtracker.util.formatEpochMillis
 
 /**
@@ -134,7 +135,7 @@ fun HealthRecordCard(
 }
 
 private fun formatTimestamp(record: HealthRecord): String {
-    return formatEpochMillis(record.timestamp, "yyyy-MM-dd HH:mm")
+    return formatEpochMillis(record.timestamp, Pattern_yyyy_MM_dd_HH_mm)
 }
 
 @Preview
