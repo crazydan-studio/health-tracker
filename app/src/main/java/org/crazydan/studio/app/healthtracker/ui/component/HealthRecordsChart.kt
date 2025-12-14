@@ -12,7 +12,6 @@ import org.crazydan.studio.app.healthtracker.model.HealthRecord
 import org.crazydan.studio.app.healthtracker.model.HealthType
 import org.crazydan.studio.app.healthtracker.ui.component.ChartData.TimeItem
 import org.crazydan.studio.app.healthtracker.ui.theme.isInDarkTheme
-import org.crazydan.studio.app.healthtracker.util.Pattern_yyyy_MM_dd
 import org.crazydan.studio.app.healthtracker.util.Pattern_yyyy_MM_dd_HH_mm
 import org.crazydan.studio.app.healthtracker.util.formatEpochMillis
 import org.crazydan.studio.app.healthtracker.util.genCode
@@ -58,28 +57,28 @@ private fun createChartData(
     healthType: HealthType,
     records: List<HealthRecord>,
 ): ChartData {
-    val dateRanges = mutableMapOf<String, Int>()
+    val dateRanges = mutableMapOf<String, MutableSet<String>>()
     // <measure code, [item, ...]>
     val seriesMap = mutableMapOf<String, MutableList<TimeItem>>()
     // Note: records 是按 timestamp 降序排序的，这里需将其调整为升序
     records.asReversed().forEach { record ->
         val measure = record.measure
-        val date = formatEpochMillis(record.timestamp, Pattern_yyyy_MM_dd)
-        val dateCount = dateRanges.getOrDefault(date, 0)
-        dateRanges.put(date, dateCount + 1)
+        val datetime = formatEpochMillis(record.timestamp, Pattern_yyyy_MM_dd_HH_mm)
+        val date = datetime.substringBefore(" ")
 
-        val xLabel = formatEpochMillis(record.timestamp, Pattern_yyyy_MM_dd_HH_mm)
+        val datetimes = dateRanges.computeIfAbsent(date) { mutableSetOf() }
+        datetimes.add(datetime)
 
         seriesMap.computeIfAbsent(measure) {
             mutableListOf()
         }.add(
             TimeItem(
-                date = date,
-                indexInDate = dateCount,
-                indexInDateRange = dateRanges.size - 1,
-                xLabel = xLabel,
                 value = record.value,
                 tags = record.tags,
+                date = date,
+                datetime = datetime,
+                indexInDay = datetimes.size - 1,
+                indexInDateRanges = dateRanges.size - 1,
             )
         )
     }
@@ -118,22 +117,26 @@ private data class ChartData(
     val measures: Map<String, String>,
     // <measure code, limit>
     val measureLimits: Map<String, HealthLimit>,
-    // <'2025-01-02', 4>
-    val dateRanges: Map<String, Int>,
+    // <'2025-01-02', ['2025-01-02 08:20', ...]>
+    val dateRanges: Map<String, Set<String>>,
     // <measure code, [item, ...]>
     val lines: Map<String, List<TimeItem>>,
 ) {
 
     data class TimeItem(
-        /** 日期 */
-        val date: String,
-        /** 在同一天中的数据列表中的序号 */
-        val indexInDate: Int,
-        val indexInDateRange: Int,
-        /** 对应的 x 轴的标签 */
-        val xLabel: String,
         val value: Float,
         val tags: List<String>,
+        /** 日期 */
+        val date: String,
+        /** 时间 */
+        val datetime: String,
+        /**
+         * 当前记录在同一天 [date] 中的数据列表中所处的序号：
+         * 相同 [datetime] 的记录有相同的序号
+         */
+        val indexInDay: Int,
+        /** 当前记录的 [date] 在 dateRanges 中的序号 */
+        val indexInDateRanges: Int,
     )
 }
 
@@ -359,10 +362,10 @@ private fun configChartLineSeries(
 
                 measureData.forEach {
                     // 将一天内的数据按比例均分（左右预留两个空位），确保每天的数据所占用的横轴宽度始终一致
-                    val total = chartData.dateRanges.getOrDefault(it.date, 0) + 2
-                    val index = it.indexInDateRange + ((it.indexInDate + 1f) / total)
+                    val total = chartData.dateRanges.getOrDefault(it.date, setOf()).size + 2
+                    val index = it.indexInDateRanges + ((it.indexInDay + 1f) / total)
 
-                    item(index, it.value, it.xLabel, it.tags.joinToString(",")) {}
+                    item(index, it.value, it.datetime, it.tags.joinToString(",")) {}
                 }
             }
 
