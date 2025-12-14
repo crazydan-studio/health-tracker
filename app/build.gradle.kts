@@ -133,19 +133,19 @@ dependencies {
     //implementation("com.github.AAChartModel:AAChartCore-Kotlin:7.4.0")
     implementation(project(":echarts"))
 
-    // CameraX
-    implementation(libs.androidx.camera.core)
-    implementation(libs.androidx.camera.camera2)
-    implementation(libs.androidx.camera.lifecycle)
-    implementation(libs.androidx.camera.view)
-    // ML Kit 二维码扫描
-    implementation(libs.barcode.scanning)
-    // Coil 图片加载
-    implementation(libs.coil.compose)
-    // Accompanist 权限
-    implementation(libs.accompanist.permissions)
-    // 系统 UI 控制器
-    implementation(libs.accompanist.systemuicontroller)
+//    // CameraX
+//    implementation(libs.androidx.camera.core)
+//    implementation(libs.androidx.camera.camera2)
+//    implementation(libs.androidx.camera.lifecycle)
+//    implementation(libs.androidx.camera.view)
+//    // ML Kit 二维码扫描
+//    implementation(libs.barcode.scanning)
+//    // Coil 图片加载
+//    implementation(libs.coil.compose)
+//    // Accompanist 权限
+//    implementation(libs.accompanist.permissions)
+//    // 系统 UI 控制器
+//    implementation(libs.accompanist.systemuicontroller)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
